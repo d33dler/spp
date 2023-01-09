@@ -1,0 +1,23 @@
+INPUT_CHANNELS: int
+LAYER_NUMS: List[int]
+LAYER_STRIDES: List[int]
+LAYER_POOLS: List[list]
+LAYER_PADDINGS: List[int]
+NUM_FILTERS: List[int]
+MOMENTUM: List[float]
+
+UPSAMPLE_STRIDES: list  # []
+NUM_UPSAMPLE_FILTERS: list  # []
+
+ACTIVATION: str
+NORMALIZATION: str
+POOLING: str
+ACTIVATION_F: ArchM.ActivationFuncs.value
+NORMALIZATION_F: ArchM.NormalizationFuncs.value
+POOLING_F: ArchM.PoolingFuncs.value
+
+NORM_ARGS: dict = field(default_factory=dict)  # for now only one set of parameters
+POOL_ARGS: dict = field(default_factory=dict)
+DEBLOCK_ARGS: dict = field(default_factory=dict)
+FILE_PATH: Path = None
+FILE_TYPE: str = "YAML"
