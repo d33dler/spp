@@ -224,9 +224,9 @@ class CSVLoader(object):
         return len(self.data_list)
 
     def __getitem__(self, index):
-        '''
+        """
             Load an episode each time, including C-way K-shot and Q-query
-        '''
+        """
         image_size = self.image_size
         episode_files = self.data_list[index]
 

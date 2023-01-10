@@ -9,13 +9,12 @@ class DN4_DTA(ClassifierTemplate):
     def __init__(self, model_cfg, num_class, dataset: CSVLoader):
         super().__init__(model_cfg, num_class, dataset)
         self.build()
-        self.data.X = pd.DataFrame(None, columns=self.cfg.CLASS_NAMES)
-        self.data.y = pd.DataFrame(None)
+        self.data.X = pd.DataFrame(None, columns=[])
+        self.data.y = pd.DataFrame(None, columns=['y'])
 
     def forward(self):
         self.backbone_2d(self.data)
         self.knn(self.data)
-        self.data.X.append()
 
     def post_fit_learners(self):
         """
@@ -23,5 +22,5 @@ class DN4_DTA(ClassifierTemplate):
         :return:
         :rtype:
         """
-        self.dt.fit(self.data)
+        self.dt.fit(self.data.X, self.data.y) #eval_set + kwargs
 
