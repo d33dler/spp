@@ -1,5 +1,9 @@
-torch
-numpy
-Pillow
-scipy
-yamldataclassconfig
+torch~=1.13.1
+numpy~=1.23.5
+Pillow~=9.3.0
+scipy~=1.9.3
+yamldataclassconfig~=1.5.0
+EasyDict
+matplotlib
+xgboost~=1.7.3
+PyYAML~=6.0

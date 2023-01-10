@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 from torch.nn import init
@@ -6,11 +8,19 @@ import pdb
 import math
 import sys
 
+from models.architectures.classifier import DataHolder
+from models.model_utils.utils import load_config
 
-class ImgtoClass_Metric(nn.Module):
-    def __init__(self, neighbor_k=3):
-        super(ImgtoClass_Metric, self).__init__()
-        self.neighbor_k = neighbor_k
+
+class KNN_itc(nn.Module):
+    """
+    KNN-itc (Image to class) metric
+    """
+
+    def __init__(self):
+        super(KNN_itc, self).__init__()
+        self.neighbor_k = 0
+        self.cfg = load_config(Path(__file__).parent / 'config.yaml')  # not used currently
 
     # Calculate the k-Nearest Neighbor of each local descriptor
     def cal_cosinesimilarity(self, input1, input2):
@@ -45,8 +55,8 @@ class ImgtoClass_Metric(nn.Module):
 
         return Similarity_list
 
-    def forward(self, x1, x2):
+    def forward(self, data: DataHolder):
+        self.neighbor_k = len(data.cfg.CLASS_NAMES)
+        data.knn_list = self.cal_cosinesimilarity(data.q, data.S)
 
-        Similarity_list = self.cal_cosinesimilarity(x1, x2)
-
-        return Similarity_list
+        return data

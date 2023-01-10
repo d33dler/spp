@@ -1,11 +1,9 @@
-import dataclasses
 import json
-from abc import abstractmethod, ABC
+from abc import ABC
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Union
 
-import numpy as np
 from torch import nn
 from yamldataclassconfig import YamlDataClassConfig, create_file_path_field
 from dataclasses_json import DataClassJsonMixin
@@ -75,7 +73,7 @@ class BaseBackbone2d(ArchM):
     def _JsonCFG(self, config: RemoteJsonConfig, __file__):
         """Yaml mapping config object class using YamlDataClassConfig."""
         config.FILE_PATH = create_file_path_field(Path(__file__).parent.parent / 'config.json')
-        with open(self.FILE_PATH, 'r') as f:
+        with open(config.FILE_PATH, 'r') as f:
             return self.from_json(json.load(f))
 
     cfg: Union[RemoteJsonConfig, RemoteYamlConfig]
@@ -188,3 +186,5 @@ class BaseBackbone2d(ArchM):
 
     def forward(self, *args):
         raise NotImplementedError("forward() method not implemented")
+
+

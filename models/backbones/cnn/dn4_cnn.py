@@ -10,8 +10,9 @@ import sys
 from yamldataclassconfig import YamlDataClassConfig
 from dataclasses import dataclass, field
 from models.backbones.base import BaseBackbone2d
+from models.architectures.classifier import DataHolder
 from models.backbones.resnet.resnet_256 import ResNetLike
-from models.classifiers.knn import ImgtoClass_Metric
+from models.classifiers.knn import KNN_itc
 from models.model_utils.knn_utils import get_norm_layer, init_weights
 
 
@@ -69,24 +70,24 @@ class FourLayer_64F(BaseBackbone2d):
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
 
-        self.imgtoclass = ImgtoClass_Metric(neighbor_k=neighbor_k)  # 1*num_classes
+        # self.imgtoclass = ImgtoClass_Metric(neighbor_k=neighbor_k)  # 1*num_classes
 
-    def forward(self, input1, input2):
+    def forward(self, data: DataHolder):
         # extract features of input1--query image
-        q = self.features(input1)
+
+        data.q = self.features(data.q_in)
 
         # extract features of input2--support set
-        S = []
-        for i in range(len(input2)):
-            support_set_sam = self.features(input2[i])
+        for i in range(len(data.S_in)):
+            support_set_sam = self.features(data.S_in[i])
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
-            S.append(support_set_sam)
+            data.S.append(support_set_sam)
 
-        x = self.imgtoclass(q, S)  # get Batch*num_classes
+        # x = self.imgtoclass(q, S)  # get Batch*num_classes
 
-        return x
+        return data
 
 
 def define_DN4Net(pretrained=False, model_root=None, which_model='Conv64', norm='batch', init_type='normal',
@@ -97,9 +98,10 @@ def define_DN4Net(pretrained=False, model_root=None, which_model='Conv64', norm=
         assert (torch.cuda.is_available())
 
     if which_model == 'Conv64F':
-        DN4Net = FourLayer_64F(norm_layer=norm_layer, **kwargs)
+        DN4Net = FourLayer_64F()
     elif which_model == 'ResNet256F':
-        net_opt = {'userelu': False, 'in_planes': 3, 'dropout': 0.5, 'norm_layer': norm_layer}
+        net_opt = {'userelu': False, 'in_planes': 3, 'dropout': 0.5,
+                   'norm_layer': norm_layer}  # TODO move all to run model config
         DN4Net = ResNetLike(net_opt)
     else:
         raise NotImplementedError('Model name [%s] is not recognized' % which_model)

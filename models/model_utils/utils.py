@@ -1,6 +1,16 @@
 """
 General utilities
 """
+from pathlib import Path
+
+import yaml
+from easydict import EasyDict
+
+
+def load_config(config: Path):
+    with open(config, mode="r") as f:
+        cfg = yaml.load(f, Loader=yaml.SafeLoader)
+    return EasyDict(cfg)
 
 
 def print_network(net):

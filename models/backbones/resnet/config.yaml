@@ -1,0 +1,4 @@
+USE_RELU: False
+IN_PLANES: 3
+DROPOUT: 0.5
+NORM_LAYER: batch

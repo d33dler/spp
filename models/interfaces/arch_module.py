@@ -1,3 +1,4 @@
+import functools
 from enum import Enum, EnumMeta
 from dataclasses import dataclass
 from torch import nn
@@ -7,6 +8,7 @@ class ArchM(nn.Module):
     """
     Architecture Module - wraps around nn.Module and organizes necessary functions/values
     """
+
     class BaseConfig:
         __doc__ = "Base config class for yaml files. Override __doc__ for implementations."
 
@@ -16,8 +18,9 @@ class ArchM(nn.Module):
         Sigmoid = nn.Sigmoid
 
     class NormalizationFuncs(Enum):
-        BatchNorm2d = nn.BatchNorm2d
-        InstanceNorm2d = nn.InstanceNorm2d
+        BatchNorm2d = functools.partial(nn.BatchNorm2d, affine=True)
+        InstanceNorm2d = functools.partial(nn.InstanceNorm2d, affine=False)
+        none = None
 
     class PoolingFuncs(Enum):
         MaxPool2d = nn.MaxPool2d
@@ -26,4 +29,6 @@ class ArchM(nn.Module):
 
     @staticmethod
     def get_func(fset: EnumMeta, name: str):
+        if name not in fset:
+            raise NotImplementedError('Function [%s] not found' % str)
         return fset[name].value

@@ -1,3 +1,5 @@
+from dataclasses import field
+
 import torch
 import torch.nn as nn
 from torch.nn import init
@@ -5,6 +7,11 @@ import functools
 import pdb
 import math
 import sys
+
+from models.backbones.base import BaseBackbone2d
+from models.classifiers.knn import KNN_itc
+
+
 ##############################################################################
 # Classes: ResNetLike
 ##############################################################################
@@ -38,18 +45,30 @@ class ResBlock(nn.Module):
         return self.skip_layer(x) + self.conv_block(x)
 
 
-class ResNetLike(nn.Module):
-    def __init__(self, opt): #neighbor_k=3
-        super(ResNetLike, self).__init__()
+class ResNetLike(BaseBackbone2d):
+    class Config(BaseBackbone2d.RemoteYamlConfig):
+        FILE_PATH = __file__  # mandatory
+        FILE_TYPE: str = "YAML"  # mandatory
+        NUM_CLASSES: int = field(default_factory=int)  # 5 (commented out = default vals)
+        USE_RELU = True
+        DROPOUT = 0
+        IN_PLANES = None
+        # LAYER_PADDINGS: list  # [1]
+        # LAYER_STRIDES: list  # [1]
+        # NUM_FILTERS: list  # [64]
+        # LAYER_NUMS: list  # [4]
 
-        self.in_planes = opt['in_planes']
+    def __init__(self): #neighbor_k=3
+        super(ResNetLike, self).__init__(self.Config())
+
+        self.in_planes = self.cfg.IN_PLANES
         self.out_planes = [64, 96, 128, 256]
         self.num_stages = 4
 
-        if type(opt['norm_layer']) == functools.partial:
-            use_bias = opt['norm_layer'].func == nn.InstanceNorm2d
+        if type(self.cfg.NORMALIZATION_F) == functools.partial:
+            use_bias = self.cfg.NORMALIZATION_F.func == nn.InstanceNorm2d
         else:
-            use_bias = opt['norm_layer'] == nn.InstanceNorm2d
+            use_bias = self.cfg.NORMALIZATION_F == nn.InstanceNorm2d
 
         if type(self.out_planes) == int:
             self.out_planes = [self.out_planes for i in range(self.num_stages)]
@@ -57,8 +76,8 @@ class ResNetLike(nn.Module):
         assert (type(self.out_planes) == list)
         assert (len(self.out_planes) == self.num_stages)
         num_planes = [self.out_planes[0], ] + self.out_planes
-        userelu = opt['userelu'] if ('userelu' in opt) else False
-        dropout = opt['dropout'] if ('dropout' in opt) else 0
+        userelu = self.cfg.USE_RELU
+        dropout = self.cfg.DROPOUT
 
         self.feat_extractor = nn.Sequential()
         self.feat_extractor.add_module('ConvL0', nn.Conv2d(self.in_planes, num_planes[0], kernel_size=3, padding=1))
@@ -70,7 +89,7 @@ class ResNetLike(nn.Module):
 
         self.feat_extractor.add_module('ReluF1', nn.LeakyReLU(0.2, True))  # get Batch*256*21*21
 
-        # self.imgtoclass = ImgtoClass_Metric(neighbor_k=neighbor_k)  # Batch*num_classes
+        self.imgtoclass = KNN_itc(neighbor_k=self.cfg.NUM_CLASSES)  # Batch*num_classes
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
