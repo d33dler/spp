@@ -14,45 +14,32 @@ class BaseBackbone2d(ArchM):
     """
     Abstraction class for 2d backbones implementing using torch
     """
+    ACTIVATION_F: ArchM.ActivationFuncs
+    NORMALIZATION_F: ArchM.NormalizationFuncs
+    POOLING_F: ArchM.PoolingFuncs
 
     @dataclass
     class _CFG(ArchM.BaseConfig):
 
-        INPUT_CHANNELS: int
-        LAYER_NUMS: List[int]
-        LAYER_STRIDES: List[int]
-        LAYER_POOLS: List[list]
-        LAYER_PADDINGS: List[int]
-        NUM_FILTERS: List[int]
-        MOMENTUM: List[float]
+        INPUT_CHANNELS: int = 1
+        LAYER_NUMS: List[int] = field(default_factory=list)
+        LAYER_STRIDES: List[int] = field(default_factory=list)
+        LAYER_POOLS: List[int] = field(default_factory=list)
+        LAYER_PADDINGS: List[int] = field(default_factory=list)
+        NUM_FILTERS: List[int] = field(default_factory=list)
+        MOMENTUM: List[float] = field(default_factory=list)
 
-        UPSAMPLE_STRIDES: list  # []
-        NUM_UPSAMPLE_FILTERS: list  # []
+        UPSAMPLE_STRIDES: List[int] = field(default_factory=list)  # []
+        NUM_UPSAMPLE_FILTERS: List[int] = field(default_factory=list)  # []
 
-        ACTIVATION: str
-        NORMALIZATION: str
-        POOLING: str
-        ACTIVATION_F: ArchM.ActivationFuncs.value
-        NORMALIZATION_F: ArchM.NormalizationFuncs.value
-        POOLING_F: ArchM.PoolingFuncs.value
+        ACTIVATION: str = 'Relu'
+        NORMALIZATION: str = 'BatchNorm2d'
+        POOLING: str = 'MaxPool2d'
 
         NORM_ARGS: dict = field(default_factory=dict)  # for now only one set of parameters
         POOL_ARGS: dict = field(default_factory=dict)
         DEBLOCK_ARGS: dict = field(default_factory=dict)
-        FILE_PATH: Path = None
         FILE_TYPE: str = "YAML"
-
-        def __init__(self):
-            super().__init__()  # CFG is a mixin class
-
-        def collect_funcs(self):
-            self.ACTIVATION_F, \
-                self.NORMALIZATION_F, \
-                self.POOLING_F = \
-                [ArchM.get_func(fset, name)
-                 if name is not None else None for (fset, name) in [(ArchM.ActivationFuncs, self.ACTIVATION),
-                                                                    (ArchM.NormalizationFuncs, self.NORMALIZATION),
-                                                                    (ArchM.PoolingFuncs, self.POOLING)]]
 
         def load_cfg(self, *args, **kwargs):
             raise NotImplementedError("Using base class load(). Must call() implementation instance's function.")
@@ -67,7 +54,8 @@ class BaseBackbone2d(ArchM):
         """Yaml mapping config object class using YamlDataClassConfig."""
         config.FILE_PATH = create_file_path_field(Path(
             __file__).parent / 'config.yaml')  # os.path.join(os.path.dirname(os.path.realpath(__file__)), Path(load_cfg))
-        config.load(config.FILE_PATH)  # check!
+        print(Path(__file__).parent / 'config.yaml')
+        config.load(Path(__file__).parent / 'config.yaml')  # check!
         return config
 
     def _JsonCFG(self, config: RemoteJsonConfig, __file__):
@@ -79,6 +67,15 @@ class BaseBackbone2d(ArchM):
     cfg: Union[RemoteJsonConfig, RemoteYamlConfig]
     blocks: nn.ModuleList
     deblocks: nn.ModuleList
+
+    def collect_funcs(self):
+        self.ACTIVATION_F, \
+        self.NORMALIZATION_F, \
+        self.POOLING_F = \
+            [ArchM.get_func(fset, name)
+             for fset, name in [(ArchM.ActivationFuncs, self.cfg.ACTIVATION),
+                                  (ArchM.NormalizationFuncs, self.cfg.NORMALIZATION),
+                                  (ArchM.PoolingFuncs, self.cfg.POOLING)]]
 
     def __init__(self, remote_cfg: Union[RemoteJsonConfig, RemoteYamlConfig]):  # remove CFG and refer to self
         """
@@ -97,8 +94,8 @@ class BaseBackbone2d(ArchM):
             self.cfg = self._YamlCFG(remote_cfg, remote_cfg.FILE_PATH)
         else:
             raise AttributeError("Config file type not supported")
-
-        use_bias = self.cfg.ACTIVATION_F == nn.InstanceNorm2d
+        self.collect_funcs()
+        use_bias = self.ACTIVATION_F == nn.InstanceNorm2d
         # TODO finish abstraction
         # assert len(self.cfg.LAYER_NUMS) == len(self.cfg.LAYER_STRIDES) == len(self.cfg.NUM_FILTERS)
         # layer_nums = self.cfg.LAYER_NUMS
@@ -186,5 +183,3 @@ class BaseBackbone2d(ArchM):
 
     def forward(self, *args):
         raise NotImplementedError("forward() method not implemented")
-
-

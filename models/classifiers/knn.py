@@ -8,8 +8,7 @@ import pdb
 import math
 import sys
 
-from models.architectures.classifier import DataHolder
-from models.model_utils.utils import load_config
+from models.model_utils.utils import load_config, DataHolder
 
 
 class KNN_itc(nn.Module):
@@ -17,9 +16,9 @@ class KNN_itc(nn.Module):
     KNN-itc (Image to class) metric
     """
 
-    def __init__(self):
+    def __init__(self, k_neighbors):
         super(KNN_itc, self).__init__()
-        self.neighbor_k = 0
+        self.neighbor_k = k_neighbors
         self.cfg = load_config(Path(__file__).parent / 'config.yaml')  # not used currently
 
     # Calculate the k-Nearest Neighbor of each local descriptor
@@ -56,7 +55,5 @@ class KNN_itc(nn.Module):
         return Similarity_list
 
     def forward(self, data: DataHolder):
-        self.neighbor_k = len(data.cfg.CLASS_NAMES)
         data.knn_list = self.cal_cosinesimilarity(data.q, data.S)
-
-        return data
+        return data.knn_list

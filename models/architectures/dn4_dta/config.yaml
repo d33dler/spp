@@ -1,1 +1,6 @@
-CLASS_NAMES: ['dummy', 'dum', 'dum']
+NUM_CLASSES: 5
+BATCH_SIZE: 75
+K_NEIGHBORS: 3
+BACKBONE_2D: DN4_CNN2d # ResNet2d
+KNN: KNN_itc
+DT: XGB

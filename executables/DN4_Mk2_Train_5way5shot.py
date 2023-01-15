@@ -28,7 +28,8 @@ import torch.utils.data
 import torchvision.transforms as transforms
 from PIL import ImageFile
 
-from models.architectures.classifier import ClassifierTemplate
+from models.architectures.classifier import ClassifierModel
+from models.architectures.dn4_dta.dn4_mk2 import DN4_DTA
 from models.backbones.cnn.dn4_cnn import define_DN4Net
 
 sys.dont_write_bytecode = True
@@ -41,7 +42,7 @@ from dataset.datasets_csv import CSVLoader
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # TODO might be cause for issues?
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_dir', default='/Datasets/miniImageNet--ravi', help='/miniImageNet')
@@ -56,11 +57,11 @@ parser.add_argument('--imageSize', type=int, default=84)
 parser.add_argument('--episodeSize', type=int, default=1, help='the mini-batch size of training')
 parser.add_argument('--testepisodeSize', type=int, default=1, help='one episode is taken as a mini-batch')
 parser.add_argument('--epochs', type=int, default=30, help='the total number of training epoch')
-parser.add_argument('--episode_train_num', type=int, default=10000, help='the total number of training episodes')
+parser.add_argument('--episode_train_num', type=int, default=3000, help='the total number of training episodes')
 parser.add_argument('--episode_val_num', type=int, default=1000, help='the total number of evaluation episodes')
 parser.add_argument('--episode_test_num', type=int, default=1000, help='the total number of testing episodes')
 parser.add_argument('--way_num', type=int, default=5, help='the number of way/class')
-parser.add_argument('--shot_num', type=int, default=1, help='the number of shot')
+parser.add_argument('--shot_num', type=int, default=5, help='the number of shot')
 parser.add_argument('--query_num', type=int, default=15, help='the number of queries')
 parser.add_argument('--neighbor_k', type=int, default=3, help='the number of k-nearest neighbors')
 parser.add_argument('--lr', type=float, default=0.005, help='learning rate, default=0.005')
@@ -85,7 +86,7 @@ def adjust_learning_rate(optimizer, epoch_num):
         param_group['lr'] = lr
 
 
-def train(train_loader, model: ClassifierTemplate, criterion, optimizer, epoch_index, F_txt):
+def train(train_loader, model: ClassifierModel, criterion, optimizer, epoch_index, F_txt):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -150,45 +151,7 @@ def train(train_loader, model: ClassifierTemplate, criterion, optimizer, epoch_i
                 top1=top1), file=F_txt)
 
 
-def fit_tree(train_loader, model: ClassifierTemplate):
-    """
-
-    :param train_loader:
-    :type train_loader:
-    :param model:
-    :type model:
-    :return:
-    :rtype:
-    """
-    # create empty dataframe
-
-    for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_loader):
-
-        # Convert query and support images
-        query_images = torch.cat(query_images, 0)
-        input_var1 = query_images.cuda()
-
-        input_var2 = []
-        for i in range(len(support_images)):
-            temp_support = support_images[i]
-            temp_support = torch.cat(temp_support, 0)
-            temp_support = temp_support.cuda()
-            input_var2.append(temp_support)
-
-        # Deal with the targets
-        target = torch.cat(query_targets, 0)
-        target = target.cuda()
-        model.data.q_in , model.data.S_in = input_var1, input_var2
-        # Calculate the output
-        output = model.forward()
-        # add measurements and target value to dataframe
-
-    # fit dataframe
-
-
-
-
-def validate(val_loader, model: ClassifierTemplate, criterion, epoch_index, best_prec1, F_txt):
+def validate(val_loader, model: ClassifierModel, criterion, epoch_index, best_prec1, F_txt):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -218,7 +181,9 @@ def validate(val_loader, model: ClassifierTemplate, criterion, epoch_index, best
         model.data.q_in = input_var1
         model.data.S_in = input_var2
         # Calculate the output
+
         output = model.forward()
+
         loss = criterion(output, target)
 
         # measure accuracy and record loss
@@ -315,7 +280,9 @@ def run():
     best_prec1 = 0
     epoch_index = 0
 
-    model = define_DN4Net(which_model=opt.basemodel, num_classes=opt.way_num, neighbor_k=opt.neighbor_k,norm='batch', init_type='normal', use_gpu=opt.cuda)
+    model = DN4_DTA()
+    # define_DN4Net(which_model=opt.basemodel, num_classes=opt.way_num, neighbor_k=opt.neighbor_k, norm='batch',
+    #                   init_type='normal', use_gpu=opt.cuda)
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
@@ -440,9 +407,54 @@ def run():
         print('============ Testing on the test set ============')
         print('============ Testing on the test set ============', file=F_txt)
         prec1, _ = validate(test_loader, model, criterion, epoch_item, best_prec1, F_txt)
+    ###############################################################################
+    # Fitting tree, now forward will provide tree output
 
+    ImgTransform = transforms.Compose([
+        transforms.Resize((opt.imageSize, opt.imageSize)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
+    print('============ Validation on the val set ============')
+    print('============ validation on the val set ============', file=F_txt)
+
+    trainset = CSVLoader(
+        data_dir=opt.dataset_dir, mode=opt.mode, image_size=opt.imageSize, transform=ImgTransform,
+        episode_num=opt.episode_train_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
+    )
+    train_loader = torch.utils.data.DataLoader(
+        trainset, batch_size=opt.episodeSize, shuffle=True,
+        num_workers=int(opt.workers), drop_last=True, pin_memory=True
+    )
+
+    model.fit_tree_episodes(train_loader)
+
+    valset = CSVLoader(
+        data_dir=opt.dataset_dir, mode='val', image_size=opt.imageSize, transform=ImgTransform,
+        episode_num=opt.episode_val_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
+    )
+    val_loader = torch.utils.data.DataLoader(
+        valset, batch_size=opt.testepisodeSize, shuffle=True,
+        num_workers=int(opt.workers), drop_last=True, pin_memory=True
+    )
+    prec1, _ = validate(val_loader, model, criterion, opt.epochs, best_prec1, F_txt)
+
+    testset = CSVLoader(
+        data_dir=opt.dataset_dir, mode='test', image_size=opt.imageSize, transform=ImgTransform,
+        episode_num=opt.episode_test_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
+    )
+    test_loader = torch.utils.data.DataLoader(
+        testset, batch_size=opt.testepisodeSize, shuffle=True,
+        num_workers=int(opt.workers), drop_last=True, pin_memory=True
+    )
+    print('============ Testing on the test set ============')
+    print('============ Testing on the test set ============', file=F_txt)
+    prec1, _ = validate(test_loader, model, criterion, opt.epochs, best_prec1, F_txt)
+    # record the best prec@1 and save checkpoint
+    best_prec1 = max(prec1, best_prec1)
+    model.get_tree('dt_head').plot_tree()
     F_txt.close()
-    print('............Training is end............')
+    print('Training and evaluation completed')
 
 
 # ============================================ Training End ============================================================

@@ -10,7 +10,7 @@ import sys
 from yamldataclassconfig import YamlDataClassConfig
 from dataclasses import dataclass, field
 from models.backbones.base import BaseBackbone2d
-from models.architectures.classifier import DataHolder
+from models.model_utils.utils import DataHolder
 from models.backbones.resnet.resnet_256 import ResNetLike
 from models.classifiers.knn import KNN_itc
 from models.model_utils.knn_utils import get_norm_layer, init_weights
@@ -41,9 +41,9 @@ class FourLayer_64F(BaseBackbone2d):
     def __init__(self):
         super(FourLayer_64F, self).__init__(self.Config())
         # self.build()
-
         # super(FourLayer_64F, self).__init__()
-        norm_layer = self.cfg.NORMALIZATION_F
+
+        norm_layer = nn.BatchNorm2d
         neighbor_k = self.cfg.NUM_CLASSES
         if type(norm_layer) == functools.partial:
             use_bias = norm_layer.func == nn.InstanceNorm2d
@@ -70,13 +70,11 @@ class FourLayer_64F(BaseBackbone2d):
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
 
-        # self.imgtoclass = ImgtoClass_Metric(neighbor_k=neighbor_k)  # 1*num_classes
-
     def forward(self, data: DataHolder):
         # extract features of input1--query image
 
         data.q = self.features(data.q_in)
-
+        data.S = []
         # extract features of input2--support set
         for i in range(len(data.S_in)):
             support_set_sam = self.features(data.S_in[i])
@@ -84,8 +82,6 @@ class FourLayer_64F(BaseBackbone2d):
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
-
-        # x = self.imgtoclass(q, S)  # get Batch*num_classes
 
         return data
 

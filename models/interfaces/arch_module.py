@@ -29,6 +29,6 @@ class ArchM(nn.Module):
 
     @staticmethod
     def get_func(fset: EnumMeta, name: str):
-        if name not in fset:
+        if name not in fset.__members__.keys():
             raise NotImplementedError('Function [%s] not found' % str)
         return fset[name].value
