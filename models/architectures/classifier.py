@@ -129,11 +129,8 @@ class ClassifierModel(nn.Module):
                     output = np.array([dt_head.normalize(r) for r in output.cpu()])
                     tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output
                     tree_df.iloc[ix:ix + batch_sz, y_col_ix] = target.numpy()
-                    print(target.numpy())
                     queries_dld = normalizer(self.data.q.cpu()).numpy().reshape(batch_sz, 64 * 21 * 21)
-                    print(queries_dld)
                     tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q] = pca_n.fit_transform(queries_dld)
-                    print(tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q])
                     # tree_df.iloc[ix:ix + batch_sz, deep_local_ix_S] = self.data.S[].numpy().T
                     ix += batch_sz
                 # add measurements and target value to dataframe

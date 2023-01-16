@@ -63,6 +63,7 @@ class XGBHead(DTree):
         raise NotImplementedError
 
     def create_input(self, matrix: np.ndarray):
+        # TODO concatenate with PCAs
         return pd.DataFrame(matrix, columns=self.features)
 
     def forward(self, data: DataHolder):
