@@ -69,6 +69,7 @@ class FourLayer_64F(BaseBackbone2d):
             norm_layer(64),
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
+        self.output_shape = 64
 
     def forward(self, data: DataHolder):
         # extract features of input1--query image

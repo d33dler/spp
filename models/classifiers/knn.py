@@ -25,14 +25,12 @@ class KNN_itc(nn.Module):
     def cal_cosinesimilarity(self, input1, input2):
         B, C, h, w = input1.size()
         Similarity_list = []
-
         for i in range(B):
             query_sam = input1[i]
             query_sam = query_sam.reshape((C, -1))
             query_sam = torch.transpose(query_sam, 0, 1)
             query_sam_norm = torch.norm(query_sam, 2, 1, True)
             query_sam = query_sam / query_sam_norm
-
             if torch.cuda.is_available():
                 inner_sim = torch.zeros(1, len(input2)).cuda()
 

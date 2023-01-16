@@ -3,6 +3,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
+from torch import nn
+from torch.nn.functional import one_hot
 
 from dataset.datasets_csv import CSVLoader
 from models.architectures.classifier import ClassifierModel
@@ -30,5 +32,5 @@ class DN4_DTA(ClassifierModel):
         if dt_head.is_fit:
             input = [dt_head.normalize(r) for r in out.detach().cpu().numpy()]
             self.data.X = dt_head.create_input(input)
-            return torch.from_numpy(dt_head.forward(self.data)).cuda()
+            return one_hot(torch.from_numpy(dt_head.forward(self.data)), self.num_classes).float().cuda()
         return out

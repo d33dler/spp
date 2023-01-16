@@ -22,6 +22,7 @@ class BaseBackbone2d(ArchM):
     class _CFG(ArchM.BaseConfig):
 
         INPUT_CHANNELS: int = 1
+        OUTPUT_SHAPE: int = 1
         LAYER_NUMS: List[int] = field(default_factory=list)
         LAYER_STRIDES: List[int] = field(default_factory=list)
         LAYER_POOLS: List[int] = field(default_factory=list)

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 from pandas import DataFrame
+from sklearn.decomposition import KernelPCA, PCA
 from torch import nn, Tensor
 from torch.nn import Parameter
 from torch.utils.data import DataLoader
@@ -12,6 +13,7 @@ from torch.utils.data import DataLoader
 from models import backbones, classifiers, dt_heads
 from models.dt_heads.dtree import DTree
 from models.model_utils.utils import load_config, DataHolder
+import torch.nn.functional as F
 
 
 class ClassifierModel(nn.Module):
@@ -84,50 +86,69 @@ class ClassifierModel(nn.Module):
         batch_sz = self.model_cfg.BATCH_SIZE
         dt_head: DTree = self.dt_head
         X_len = len(train_set) * batch_sz
-        col_len = self.num_classes
+
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
-        tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float),
-                            columns=cls_labels)
-        tree_df["y"] = pd.Series(np.zeros(shape=X_len), dtype=int)
-        ix = 0
+        deep_local_lbs_Q = [f"fQ_{i}" for i in range(0, 12)]
+        col_len = len(cls_labels) + len(deep_local_lbs_Q)
+        if self.model_cfg.DATASET is None:
+            tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float),
+                                columns=cls_labels + deep_local_lbs_Q)
+            tree_df["y"] = pd.Series(np.zeros(shape=X_len), dtype=int)
+            ix = 0
 
-        print("--- Beginning inference step for tree fitting ---")
-        print(tree_df.info(verbose=True))
-        self.eval()
-        cls_col_ix = tree_df.columns.get_indexer(cls_labels)
-        y_col_ix = tree_df.columns.get_indexer(["y"])
-        with torch.no_grad():
-            for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_set):
+            print("--- Beginning inference step for tree fitting ---")
+            print(tree_df.info(verbose=True))
+            self.eval()
+            cls_col_ix = tree_df.columns.get_indexer(cls_labels)
+            deep_local_ix_Q = tree_df.columns.get_indexer(deep_local_lbs_Q)
+            # deep_local_ix_S = tree_df.columns.get_indexer(deep_local_lbs_S)
+            y_col_ix = tree_df.columns.get_indexer(["y"])
+            pca_n = PCA(n_components=12)
+            normalizer = torch.nn.BatchNorm2d(64)
+            with torch.no_grad():
+                for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
+                        train_set):
 
-                print("> Running episode: ", episode_index)
-                # Convert query and support images
-                query_images = torch.cat(query_images, 0)
-                input_var1 = query_images.cuda()
+                    print("> Running episode: ", episode_index)
+                    # Convert query and support images
+                    query_images = torch.cat(query_images, 0)
+                    input_var1 = query_images.cuda()
 
-                input_var2 = []
-                for i in range(len(support_images)):
-                    temp_support = support_images[i]
-                    temp_support = torch.cat(temp_support, 0)
-                    temp_support = temp_support.cuda()
-                    input_var2.append(temp_support)
-                target = torch.cat(query_targets, 0)
-                # target = target.cuda()
-                self.data.q_in, self.data.S_in = input_var1, input_var2
-                # Calculate the output
-                output = self.forward()
-                output = np.array([dt_head.normalize(r) for r in output.cpu()])
-                tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output
-                tree_df.iloc[ix:ix + batch_sz, y_col_ix] = target.numpy()
-                ix += batch_sz
-            # add measurements and target value to dataframe
+                    input_var2 = []
+                    for i in range(len(support_images)):
+                        temp_support = support_images[i]
+                        temp_support = torch.cat(temp_support, 0)
+                        temp_support = temp_support.cuda()
+                        input_var2.append(temp_support)
+                    target = torch.cat(query_targets, 0)
+                    # target = target.cuda()
+                    self.data.q_in, self.data.S_in = input_var1, input_var2
+                    # Calculate the output
+                    output = self.forward()
+
+                    output = np.array([dt_head.normalize(r) for r in output.cpu()])
+                    tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output
+                    tree_df.iloc[ix:ix + batch_sz, y_col_ix] = target.numpy()
+                    print(target.numpy())
+                    queries_dld = normalizer(self.data.q.cpu()).numpy().reshape(batch_sz, 64 * 21 * 21)
+                    print(queries_dld)
+                    tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q] = pca_n.fit_transform(queries_dld)
+                    print(tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q])
+                    # tree_df.iloc[ix:ix + batch_sz, deep_local_ix_S] = self.data.S[].numpy().T
+                    ix += batch_sz
+                # add measurements and target value to dataframe
+        else:
+            tree_df = pd.read_csv(self.model_cfg.DATASET, header=0)
         self.data.X = tree_df[cls_labels]
         self.data.y = tree_df[['y']]
         print("Finished inference, fitting tree...")
         print(tree_df.head(5))
         print(tree_df.tail(5))
+        if self.model_cfg.DATASET is None:
+            tree_df.to_csv("tree_dataset.csv", index=False)
         dt_head.fit(self.data.X, self.data.y, self.data.eval_set)
 
-    def get_tree(self, module_name)->DTree:
+    def get_tree(self, module_name) -> DTree:
         return self.dt_head
 
     @staticmethod

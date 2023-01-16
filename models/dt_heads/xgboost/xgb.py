@@ -71,7 +71,7 @@ class XGBHead(DTree):
         :return:
         :rtype:
         """
-        output = self.model.predict(X=data.X, output_margin=True)
+        output = self.model.predict(X=data.X)
         return output
 
     def plot_importance(self):
