@@ -57,7 +57,7 @@ parser.add_argument('--imageSize', type=int, default=84)
 parser.add_argument('--episodeSize', type=int, default=1, help='the mini-batch size of training')
 parser.add_argument('--testepisodeSize', type=int, default=1, help='one episode is taken as a mini-batch')
 parser.add_argument('--epochs', type=int, default=30, help='the total number of training epoch')
-parser.add_argument('--episode_train_num', type=int, default=3000, help='the total number of training episodes')
+parser.add_argument('--episode_train_num', type=int, default=100, help='the total number of training episodes')
 parser.add_argument('--episode_val_num', type=int, default=1000, help='the total number of evaluation episodes')
 parser.add_argument('--episode_test_num', type=int, default=1000, help='the total number of testing episodes')
 parser.add_argument('--way_num', type=int, default=5, help='the number of way/class')
@@ -423,7 +423,7 @@ def run():
         episode_num=opt.episode_train_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
     )
     train_loader = torch.utils.data.DataLoader(
-        trainset, batch_size=opt.episodeSize, shuffle=True,
+        trainset, batch_size=opt.episodeSize, shuffle=False,
         num_workers=int(opt.workers), drop_last=True, pin_memory=True
     )
 

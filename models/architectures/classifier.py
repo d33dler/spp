@@ -1,5 +1,6 @@
 from collections import OrderedDict
-from typing import Iterator
+from datetime import datetime
+from typing import Iterator, List
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,7 @@ import torch.nn.functional as F
 
 
 class ClassifierModel(nn.Module):
+
     def __init__(self, model_cfg):
         super().__init__()
         self.model_cfg = model_cfg  # main cfg! (architecture cfg)
@@ -24,6 +26,8 @@ class ClassifierModel(nn.Module):
         self.k_neighbors = model_cfg.K_NEIGHBORS
         self.module_topology = ['backbone2d', 'knn_head', 'dt_head']
         self.data = DataHolder(model_cfg)
+        self.normalizer = torch.nn.BatchNorm2d(64)
+        self.pca_n = PCA(n_components=16)
 
     @property
     def mode(self):
@@ -86,29 +90,51 @@ class ClassifierModel(nn.Module):
         batch_sz = self.model_cfg.BATCH_SIZE
         dt_head: DTree = self.dt_head
         X_len = len(train_set) * batch_sz
-
+        ft_engine = ['max', 'min', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
-        deep_local_lbs_Q = [f"fQ_{i}" for i in range(0, 12)]
-        col_len = len(cls_labels) + len(deep_local_lbs_Q)
+        ranks = [f"rank_{i}" for i in range(0, self.k_neighbors)]
+        deep_local_lbs_Q = [f"fQ_{i}" for i in range(0, 16)]
+        deep_local_lbs_S = []
+        for r in ranks:
+            deep_local_lbs_S += [f"{r}_fS{i}" for i in range(0, 16)]
+        all_columns = cls_labels + deep_local_lbs_Q + ft_engine + ranks
+        col_len = len(all_columns)
+        dt_head.all_features = all_columns
+        dt_head.base_features = cls_labels
+        dt_head.deep_features = deep_local_lbs_Q
+        dt_head.ranking_features = ranks
         if self.model_cfg.DATASET is None:
-            tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float),
-                                columns=cls_labels + deep_local_lbs_Q)
+            tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
             tree_df["y"] = pd.Series(np.zeros(shape=X_len), dtype=int)
             ix = 0
 
             print("--- Beginning inference step for tree fitting ---")
             print(tree_df.info(verbose=True))
+            print("TRAIN SET SIZE: ", len(train_set))
             self.eval()
             cls_col_ix = tree_df.columns.get_indexer(cls_labels)
             deep_local_ix_Q = tree_df.columns.get_indexer(deep_local_lbs_Q)
-            # deep_local_ix_S = tree_df.columns.get_indexer(deep_local_lbs_S)
+            deep_local_ix_S = tree_df.columns.get_indexer(deep_local_lbs_S)
+            ranks_ix = tree_df.columns.get_indexer(ranks)
+            max_ix = tree_df.columns.get_loc('max')
+            min_ix = tree_df.columns.get_loc('min')
+            std_ix = tree_df.columns.get_loc('std')
+            mean_ix = tree_df.columns.get_loc('mean')
+
+            dt_head.max_ix = max_ix
+            dt_head.min_ix = min_ix
+            dt_head.mean_ix = mean_ix
+            dt_head.std_ix = std_ix
+            dt_head.ranks_ix = ranks_ix
+
             y_col_ix = tree_df.columns.get_indexer(["y"])
-            pca_n = PCA(n_components=12)
+            pca_n = PCA(n_components=16)
+            self.pca_n = pca_n
             normalizer = torch.nn.BatchNorm2d(64)
+
             with torch.no_grad():
                 for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                         train_set):
-
                     print("> Running episode: ", episode_index)
                     # Convert query and support images
                     query_images = torch.cat(query_images, 0)
@@ -120,30 +146,56 @@ class ClassifierModel(nn.Module):
                         temp_support = torch.cat(temp_support, 0)
                         temp_support = temp_support.cuda()
                         input_var2.append(temp_support)
-                    target = torch.cat(query_targets, 0)
-                    # target = target.cuda()
-                    self.data.q_in, self.data.S_in = input_var1, input_var2
-                    # Calculate the output
-                    output = self.forward()
+                    target: Tensor = torch.cat(query_targets, 0)
 
+                    self.data.q_in, self.data.S_in = input_var1, input_var2
+                    # Obtain and normalize the output
+                    output = self.forward()
                     output = np.array([dt_head.normalize(r) for r in output.cpu()])
+                    target: np.ndarray = target.numpy()
+                    # add measurements and target value to dataframe
                     tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output
-                    tree_df.iloc[ix:ix + batch_sz, y_col_ix] = target.numpy()
-                    queries_dld = normalizer(self.data.q.cpu()).numpy().reshape(batch_sz, 64 * 21 * 21)
-                    tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q] = pca_n.fit_transform(queries_dld)
-                    # tree_df.iloc[ix:ix + batch_sz, deep_local_ix_S] = self.data.S[].numpy().T
+                    tree_df.iloc[ix:ix + batch_sz, y_col_ix] = target
+                    tree_df.iloc[ix:ix + batch_sz, max_ix] = output.max(axis=1, initial=0)
+                    tree_df.iloc[ix:ix + batch_sz, min_ix] = np.min(output, axis=1, initial=0)
+                    tree_df.iloc[ix:ix + batch_sz, mean_ix] = output.mean(axis=1)
+                    tree_df.iloc[ix:ix + batch_sz, std_ix] = output.std(axis=1)
+                    top_k = np.argpartition(-output, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
+                    tree_df.iloc[ix:ix + batch_sz, ranks_ix] = output[np.arange(output.shape[0])[:, None], top_k]
+                    queries_norm = normalizer(self.data.q.cpu()).numpy().reshape(batch_sz, 64 * 21 * 21)
+                    tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q] = pca_n.fit_transform(queries_norm)
                     ix += batch_sz
-                # add measurements and target value to dataframe
+
         else:
             tree_df = pd.read_csv(self.model_cfg.DATASET, header=0)
-        self.data.X = tree_df[cls_labels]
+        self.data.X = tree_df[all_columns]
         self.data.y = tree_df[['y']]
         print("Finished inference, fitting tree...")
         print(tree_df.head(5))
         print(tree_df.tail(5))
         if self.model_cfg.DATASET is None:
-            tree_df.to_csv("tree_dataset.csv", index=False)
+            tree_df.to_csv(f"tree_dataset{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv", index=False)
+
         dt_head.fit(self.data.X, self.data.y, self.data.eval_set)
+
+    def feature_engine(self, tree_df: DataFrame, base_features: List[str], deep_features_Q: List[str]):
+        base_features_ix = tree_df.index.get_indexer(base_features)
+
+        # DEEP LOCAL DESCRIPTORS
+        queries_dld = self.normalizer(self.data.q.cpu()).detach().numpy().reshape(len(tree_df), 64 * 21 * 21)
+        tree_df[deep_features_Q] = self.pca_n.fit_transform(queries_dld)
+
+        # MIN MAX MEAN STD
+        tree_df['min'] = tree_df.iloc[:, base_features_ix].min(axis=1)
+        tree_df['max'] = tree_df.iloc[:, base_features_ix].max(axis=1)
+        tree_df['mean'] = tree_df.iloc[:, base_features_ix].mean(axis=1)
+        tree_df['std'] = tree_df.iloc[:, base_features_ix].std(axis=1)
+
+        # RANKS
+        cls_vals = tree_df.iloc[:, base_features_ix].to_numpy()
+        top_k = np.argpartition(-cls_vals, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
+        tree_df[self.dt_head.ranking_features] = cls_vals[np.arange(cls_vals.shape[0])[:, None], top_k]
+        return tree_df
 
     def get_tree(self, module_name) -> DTree:
         return self.dt_head

@@ -1,8 +1,11 @@
 from pathlib import Path
+from typing import List
 
 import numpy as np
 import pandas as pd
 import torch
+from pandas import DataFrame
+from sklearn.decomposition import PCA
 from torch import nn
 from torch.nn.functional import one_hot
 
@@ -30,7 +33,9 @@ class DN4_DTA(ClassifierModel):
 
         dt_head: DTree = self.dt_head
         if dt_head.is_fit:
-            input = [dt_head.normalize(r) for r in out.detach().cpu().numpy()] # TODO experiment without normalization
-            self.data.X = dt_head.create_input(input)
-            return one_hot(torch.from_numpy(dt_head.forward(self.data)), self.num_classes).float().cuda()
+            _input = [dt_head.normalize(r) for r in out.detach().cpu().numpy()]  # TODO experiment without normalization
+            self.data.X = self.feature_engine(dt_head.create_input(_input), dt_head.base_features, dt_head.deep_features)
+            return torch.from_numpy(dt_head.forward(self.data)).float().cuda()
         return out
+
+

@@ -63,8 +63,11 @@ class XGBHead(DTree):
         raise NotImplementedError
 
     def create_input(self, matrix: np.ndarray):
-        # TODO concatenate with PCAs
-        return pd.DataFrame(matrix, columns=self.features)
+        matrix = self.feature_engineering(matrix)
+        return pd.DataFrame(matrix, columns=self.base_features)
+
+    def feature_engineering(self, matrix: np.ndarray):
+        return matrix
 
     def forward(self, data: DataHolder):
         """
@@ -72,7 +75,7 @@ class XGBHead(DTree):
         :return:
         :rtype:
         """
-        output = self.model.predict(X=data.X)
+        output = self.model.predict(X=data.X[self.all_features], output_margin=True)
         return output
 
     def plot_importance(self):
