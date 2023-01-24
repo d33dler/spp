@@ -6,19 +6,18 @@ LOAD_MODEL: False
 
 PARAMETERS: {
   tree_method: gpu_hist,
-  objective: 'multi:softprob',
-  eval_metric: 'auc',
+  objective: 'multi:softmax',
   enable_categorical: True,
-  max_depth: 9,
-  min_child_weight: 3,
-  gamma: 2.5,
+  max_depth: 11,
+  min_child_weight: 2.5,
+  gamma: 0.1,
   eta: 0.01,
   learning_rate: 0.04,
   subsample: 1,
   seed: 666,
-  lambda: 2,
+  lambda: 0.5,
   alpha: 0.1,
-  n_estimators: 1000,
+  n_estimators: 800,
   early_stopping_rounds: 50,
   colsample_bytree: 0.9
 }

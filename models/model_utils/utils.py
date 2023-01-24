@@ -40,6 +40,7 @@ class DataHolder:
     S: list
     # KNN-out
     knn_list: List[List]
+    knn_raw: List[List]
     q_N: Tensor
     # Tree fit input
     X: DataFrame

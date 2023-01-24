@@ -423,7 +423,7 @@ def run():
         episode_num=opt.episode_train_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
     )
     train_loader = torch.utils.data.DataLoader(
-        trainset, batch_size=opt.episodeSize, shuffle=False,
+        trainset, batch_size=opt.episodeSize, shuffle=True,
         num_workers=int(opt.workers), drop_last=True, pin_memory=True
     )
 

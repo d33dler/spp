@@ -53,5 +53,5 @@ class KNN_itc(nn.Module):
         return Similarity_list
 
     def forward(self, data: DataHolder):
-        data.knn_list = self.cal_cosinesimilarity(data.q, data.S)
-        return data.knn_list
+        data.knn_list, data.knn_raw = self.cal_cosinesimilarity(data.q, data.S)
+        return data.knn_raw

@@ -21,7 +21,8 @@ class DN4_DTA(ClassifierModel):
     Structure:
     Deep learning module => K-NN module => Decision Tree
     """
-
+    normalizer = torch.nn.BatchNorm2d(64)
+    pca_n = PCA(n_components=64)
     def __init__(self):
         model_cfg = self.load_config(Path(__file__).parent / 'config.yaml')
         super().__init__(model_cfg)
@@ -33,9 +34,9 @@ class DN4_DTA(ClassifierModel):
 
         dt_head: DTree = self.dt_head
         if dt_head.is_fit:
-            _input = [dt_head.normalize(r) for r in out.detach().cpu().numpy()]  # TODO experiment without normalization
+            _input = np.asarray([dt_head.normalize(x) for x in out.detach().cpu().numpy()])
             self.data.X = self.feature_engine(dt_head.create_input(_input), dt_head.base_features, dt_head.deep_features)
-            return torch.from_numpy(dt_head.forward(self.data)).float().cuda()
+            o = torch.from_numpy(dt_head.forward(self.data).astype(np.int64))
+            o = one_hot(o, self.num_classes).float().cuda()
+            return o
         return out
-
-

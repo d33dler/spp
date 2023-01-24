@@ -90,18 +90,18 @@ class ClassifierModel(nn.Module):
         batch_sz = self.model_cfg.BATCH_SIZE
         dt_head: DTree = self.dt_head
         X_len = len(train_set) * batch_sz
-        ft_engine = ['max', 'min', 'mean', 'std']
+        ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
         ranks = [f"rank_{i}" for i in range(0, self.k_neighbors)]
         deep_local_lbs_Q = [f"fQ_{i}" for i in range(0, 16)]
         deep_local_lbs_S = []
         for r in ranks:
             deep_local_lbs_S += [f"{r}_fS{i}" for i in range(0, 16)]
-        all_columns = cls_labels + deep_local_lbs_Q + ft_engine + ranks
+        all_columns = cls_labels + ft_engine + ranks
         col_len = len(all_columns)
         dt_head.all_features = all_columns
         dt_head.base_features = cls_labels
-        dt_head.deep_features = deep_local_lbs_Q
+        #dt_head.deep_features = deep_local_lbs_Q
         dt_head.ranking_features = ranks
         if self.model_cfg.DATASET is None:
             tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
@@ -117,12 +117,11 @@ class ClassifierModel(nn.Module):
             deep_local_ix_S = tree_df.columns.get_indexer(deep_local_lbs_S)
             ranks_ix = tree_df.columns.get_indexer(ranks)
             max_ix = tree_df.columns.get_loc('max')
-            min_ix = tree_df.columns.get_loc('min')
+            # min_ix = tree_df.columns.get_loc('min')
             std_ix = tree_df.columns.get_loc('std')
             mean_ix = tree_df.columns.get_loc('mean')
 
             dt_head.max_ix = max_ix
-            dt_head.min_ix = min_ix
             dt_head.mean_ix = mean_ix
             dt_head.std_ix = std_ix
             dt_head.ranks_ix = ranks_ix
@@ -151,19 +150,18 @@ class ClassifierModel(nn.Module):
                     self.data.q_in, self.data.S_in = input_var1, input_var2
                     # Obtain and normalize the output
                     output = self.forward()
-                    output = np.array([dt_head.normalize(r) for r in output.cpu()])
+                    output = np.asarray([dt_head.normalize(x) for x in  output.detach().cpu().numpy()])
                     target: np.ndarray = target.numpy()
                     # add measurements and target value to dataframe
                     tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output
                     tree_df.iloc[ix:ix + batch_sz, y_col_ix] = target
-                    tree_df.iloc[ix:ix + batch_sz, max_ix] = output.max(axis=1, initial=0)
-                    tree_df.iloc[ix:ix + batch_sz, min_ix] = np.min(output, axis=1, initial=0)
+                    tree_df.iloc[ix:ix + batch_sz, max_ix] = output.max(axis=1)
                     tree_df.iloc[ix:ix + batch_sz, mean_ix] = output.mean(axis=1)
                     tree_df.iloc[ix:ix + batch_sz, std_ix] = output.std(axis=1)
                     top_k = np.argpartition(-output, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
                     tree_df.iloc[ix:ix + batch_sz, ranks_ix] = output[np.arange(output.shape[0])[:, None], top_k]
-                    queries_norm = normalizer(self.data.q.cpu()).numpy().reshape(batch_sz, 64 * 21 * 21)
-                    tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q] = pca_n.fit_transform(queries_norm)
+                    # queries_norm = normalizer(self.data.q.cpu()).numpy().reshape(batch_sz, 64 * 21 * 21)
+                    # tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q] = pca_n.fit_transform(queries_norm)
                     ix += batch_sz
 
         else:
@@ -171,8 +169,8 @@ class ClassifierModel(nn.Module):
         self.data.X = tree_df[all_columns]
         self.data.y = tree_df[['y']]
         print("Finished inference, fitting tree...")
-        print(tree_df.head(5))
-        print(tree_df.tail(5))
+        print(self.data.X.head(5))
+        print(self.data.X.tail(5))
         if self.model_cfg.DATASET is None:
             tree_df.to_csv(f"tree_dataset{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv", index=False)
 
@@ -182,11 +180,11 @@ class ClassifierModel(nn.Module):
         base_features_ix = tree_df.index.get_indexer(base_features)
 
         # DEEP LOCAL DESCRIPTORS
-        queries_dld = self.normalizer(self.data.q.cpu()).detach().numpy().reshape(len(tree_df), 64 * 21 * 21)
-        tree_df[deep_features_Q] = self.pca_n.fit_transform(queries_dld)
+        # queries_dld = self.normalizer(self.data.q.cpu()).detach().numpy().reshape(len(tree_df), 64 * 21 * 21)
+        # tree_df[deep_features_Q] = self.pca_n.fit_transform(queries_dld)
 
         # MIN MAX MEAN STD
-        tree_df['min'] = tree_df.iloc[:, base_features_ix].min(axis=1)
+        # tree_df['min'] = tree_df.iloc[:, base_features_ix].min(axis=1)
         tree_df['max'] = tree_df.iloc[:, base_features_ix].max(axis=1)
         tree_df['mean'] = tree_df.iloc[:, base_features_ix].mean(axis=1)
         tree_df['std'] = tree_df.iloc[:, base_features_ix].std(axis=1)
