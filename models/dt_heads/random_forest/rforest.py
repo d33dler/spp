@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from xgboost import DMatrix
 
 from models.dt_heads.dtree import DTree
-from models.model_utils.utils import load_config, DataHolder
+from models.utilities.utils import load_config, DataHolder
 
 
 class RandomForestHead(DTree):
@@ -29,7 +29,7 @@ class RandomForestHead(DTree):
         t = self.cfg.TYPE
         self.params: dict = self.cfg.PARAMETERS
         if t == 'REGRESSOR':
-            self.model = xgb.XGBRegressor(**self.params)
+            self.model = xgb.XGBRFRegressor(**self.params)
         elif t == 'CLASSIFIER':
             self.params['num_classes'] = num_classes
             print(self.params)

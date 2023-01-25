@@ -9,7 +9,7 @@ import math
 import sys
 
 from models.backbones.base import BaseBackbone2d
-from models.classifiers.knn import KNN_itc
+from models.clustering.knn import KNN_itc
 
 
 ##############################################################################

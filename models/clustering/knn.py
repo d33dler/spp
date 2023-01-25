@@ -8,7 +8,7 @@ import pdb
 import math
 import sys
 
-from models.model_utils.utils import load_config, DataHolder
+from models.utilities.utils import load_config, DataHolder
 
 
 class KNN_itc(nn.Module):
@@ -19,7 +19,6 @@ class KNN_itc(nn.Module):
     def __init__(self, k_neighbors):
         super(KNN_itc, self).__init__()
         self.neighbor_k = k_neighbors
-        self.cfg = load_config(Path(__file__).parent / 'config.yaml')  # not used currently
 
     # Calculate the k-Nearest Neighbor of each local descriptor
     def cal_cosinesimilarity(self, input1, input2):

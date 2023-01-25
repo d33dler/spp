@@ -25,17 +25,15 @@ import torch.nn as nn
 import torch.nn.parallel
 import torch.optim as optim
 import torch.utils.data
-import torchvision.transforms as transforms
 from PIL import ImageFile
 
 from models.architectures.classifier import ClassifierModel
 from models.architectures.dn4_dta.dn4_mk2 import DN4_DTA
-from models.backbones.cnn.dn4_cnn import define_DN4Net
+from models.utilities.utils import AverageMeter, accuracy
 
 sys.dont_write_bytecode = True
 
 # ============================ Data & Networks =====================================
-from dataset.datasets_csv import CSVLoader
 
 # ==================================================================================
 
@@ -79,11 +77,7 @@ cudnn.benchmark = True
 
 # ======================================= Define functions =============================================
 
-def adjust_learning_rate(optimizer, epoch_num):
-    """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
-    lr = opt.lr * (0.05 ** (epoch_num // 10))
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+
 
 
 def train(train_loader, model: ClassifierModel, criterion, optimizer, epoch_index, F_txt):
@@ -220,42 +214,6 @@ def save_checkpoint(state, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
 
 
-class AverageMeter(object):
-    """Computes and stores the average and current value"""
-
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
-
-
-def accuracy(output, target, topk=(1,)):
-    """Computes the precision@k for the specified values of k"""
-    with torch.no_grad():
-        maxk = max(topk)
-        batch_size = target.size(0)
-
-        _, pred = output.topk(maxk, 1, True, True)
-        pred = pred.t()
-        correct = pred.eq(target.reshape((1, -1)).expand_as(pred))
-
-        res = []
-        for k in topk:
-            correct_k = correct[:k].reshape((-1,)).float().sum(0, keepdim=True)
-            res.append(correct_k.mul_(100.0 / batch_size))
-        return res
-
-
 def run():
     # ======================================== Settings of path ============================================
     # saving path
@@ -284,10 +242,6 @@ def run():
     # define_DN4Net(which_model=opt.basemodel, num_classes=opt.way_num, neighbor_k=opt.neighbor_k, norm='batch',
     #                   init_type='normal', use_gpu=opt.cuda)
 
-    # define loss function (criterion) and optimizer
-    criterion = nn.CrossEntropyLoss().cuda()
-    optimizer = optim.Adam(model.parameters(), lr=opt.lr, betas=(opt.beta1, 0.9))
-
     # optionally resume from a checkpoint
     if opt.resume:
         if os.path.isfile(opt.resume):
@@ -296,7 +250,7 @@ def run():
             epoch_index = checkpoint['epoch_index']
             best_prec1 = checkpoint['best_prec1']
             model.load_state_dict(checkpoint['state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer'])
+            model.optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})".format(opt.resume, checkpoint['epoch_index']))
             print("=> loaded checkpoint '{}' (epoch {})".format(opt.resume, checkpoint['epoch_index']), file=F_txt)
         else:
@@ -304,7 +258,7 @@ def run():
             print("=> no checkpoint found at '{}'".format(opt.resume), file=F_txt)
 
     if opt.ngpu > 1:
-        model:DN4_DTA = nn.DataParallel(model, range(opt.ngpu))
+        model: DN4_DTA = nn.DataParallel(model, range(opt.ngpu))
 
     # print the architecture of the network
     print(model)
@@ -313,30 +267,32 @@ def run():
     # ======================================== Training phase ===============================================
     print('\n............Start training............\n')
     start_time = time.time()
-
-    for epoch_item in range(opt.epochs):
-        print('===================================== Epoch %d =====================================' % epoch_item)
-        print('===================================== Epoch %d =====================================' % epoch_item,
+    optimizer = model.optimizer
+    criterion = model.criterion
+    for epoch_index in range(opt.epochs):
+        print('===================================== Epoch %d =====================================' % epoch_index)
+        print('===================================== Epoch %d =====================================' % epoch_index,
               file=F_txt)
-        adjust_learning_rate(optimizer, epoch_item)
+        model.adjust_learning_rate(epoch_index)
 
         # ======================================= Folder of Datasets =======================================
 
-        loaders = model.data_loader.load_data(opt.mode, F_txt)
+        model.load_data(opt.mode, F_txt)
+        loaders = model.loaders
         # ============================================ Training ===========================================
         # Fix the parameters of Batch Normalization after 10000 episodes (1 epoch)
-        if epoch_item < 1:
+        if epoch_index < 1:
             model.train()
         else:
             model.eval()
 
         # Train for 10000 episodes in each epoch
-        train(loaders.train_loader, model, criterion, optimizer, epoch_item, F_txt)
+        model.run_epoch(epoch_index, F_txt)
 
         # =========================================== Evaluation ==========================================
         print('============ Validation on the val set ============')
         print('============ validation on the val set ============', file=F_txt)
-        prec1, _ = validate(loaders.val_loader, model, criterion, epoch_item, best_prec1, F_txt)
+        prec1, _ = validate(loaders.val_loader, model, criterion, epoch_index, best_prec1, F_txt)
 
         # record the best prec@1 and save checkpoint
         is_best = prec1 > best_prec1
@@ -346,18 +302,18 @@ def run():
         if is_best:
             save_checkpoint(
                 {
-                    'epoch_index': epoch_item,
+                    'epoch_index': epoch_index,
                     'arch': opt.basemodel,
                     'state_dict': model.state_dict(),
                     'best_prec1': best_prec1,
                     'optimizer': optimizer.state_dict(),
                 }, os.path.join(opt.outf, 'model_best.pth.tar'))
 
-        if epoch_item % 10 == 0:
-            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % epoch_item)
+        if epoch_index % 10 == 0:
+            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % epoch_index)
             save_checkpoint(
                 {
-                    'epoch_index': epoch_item,
+                    'epoch_index': epoch_index,
                     'arch': opt.basemodel,
                     'state_dict': model.state_dict(),
                     'best_prec1': best_prec1,
@@ -367,7 +323,7 @@ def run():
         # Testing Prase
         print('============ Testing on the test set ============')
         print('============ Testing on the test set ============', file=F_txt)
-        prec1, _ = validate(loaders.test_loader, model, criterion, epoch_item, best_prec1, F_txt)
+        prec1, _ = validate(loaders.test_loader, model, criterion, epoch_index, best_prec1, F_txt)
     ###############################################################################
     # Fitting tree, now forward will provide tree output
 
@@ -379,7 +335,6 @@ def run():
     model.fit_tree_episodes(loaders.train_loader)
 
     prec1, _ = validate(loaders.val_loader, model, criterion, opt.epochs, best_prec1, F_txt)
-
 
     print('============ Testing on the test set ============')
     print('============ Testing on the test set ============', file=F_txt)

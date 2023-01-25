@@ -4,12 +4,17 @@ BATCH_SIZE: 75
 K_NEIGHBORS: 3
 
 #Model skeleton
-BACKBONE_2D: DN4_CNN2d # ResNet2d
+BACKBONE_2D: DN4_CNN2d # DN4_CNN2d | ResNet2d
 KNN: KNN_itc
-DT: XGB
+DT: XGB # XGB | RF
 
+
+#BACKBONE & ENCODER
+LEARNING_RATE: 0.04
+BETA_ONE: 1
 #Decision Tree
 DATASET:
+
 
 # Dataloader
 DATASET_DIR: '/Datasets/miniImageNet/'
@@ -27,3 +32,6 @@ EPISODE_TEST_NUM: 1000
 WAY_NUM: 5
 SHOT_NUM: 5
 QUERY_NUM: 15
+
+# Misc
+PRINT_FREQ: 100

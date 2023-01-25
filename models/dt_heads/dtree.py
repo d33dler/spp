@@ -5,7 +5,7 @@ from scipy.special import softmax
 from pandas import DataFrame
 from torch import nn
 
-from models.model_utils.utils import DataHolder
+from models.utilities.utils import DataHolder
 
 
 class DTree(nn.Module):

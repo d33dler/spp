@@ -12,9 +12,9 @@ from torch.nn import Parameter
 from torch.utils.data import DataLoader as TorchDataLoader
 
 from data_loader.data_load import Parameters, DatasetLoader
-from models import backbones, classifiers, dt_heads
+from models import backbones, clustering, dt_heads
 from models.dt_heads.dtree import DTree
-from models.model_utils.utils import load_config, DataHolder
+from models.utilities.utils import load_config, DataHolder
 import torch.nn.functional as F
 
 
@@ -22,6 +22,8 @@ class ClassifierModel(nn.Module):
 
     def __init__(self, model_cfg):
         super().__init__()
+        self.criterion = None
+        self.optimizer = None
         self.model_cfg = model_cfg  # main cfg! (architecture cfg)
         self.num_classes = model_cfg.NUM_CLASSES
         self.k_neighbors = model_cfg.K_NEIGHBORS
@@ -31,13 +33,16 @@ class ClassifierModel(nn.Module):
         self.pca_n = PCA(n_components=16)
         c = model_cfg
         p = Parameters(c.IMG_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
-                       c.EPISODE_TEST_NUM,c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
+                       c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE)
         self.data_loader = DatasetLoader(p)
 
     @property
     def mode(self):
         return 'TRAIN' if self.training else 'TEST'
+
+    def load_data(self, mode, output_file):
+        raise NotImplementedError
 
     def build(self):
         for module_name in self.module_topology:
@@ -58,7 +63,7 @@ class ClassifierModel(nn.Module):
     def _build_knn_head(self):
         if self.model_cfg.get("KNN", None) is None:
             return None
-        m = classifiers.__all__[self.model_cfg.KNN](self.k_neighbors)
+        m = clustering.__all__[self.model_cfg.KNN](self.k_neighbors)
         self.data.module_list.append(m)
         return m
 
@@ -79,9 +84,18 @@ class ClassifierModel(nn.Module):
         self.backbone2d.train(**kwargs)
         self.knn_head.train(**kwargs)
 
+    def run_epoch(self, epoch_index, output_file):
+        raise NotImplementedError
+
     def eval(self, **kwargs):
         self.backbone2d.eval(**kwargs)
         self.knn_head.eval(**kwargs)
+
+    def set_loss(self, criterion):
+        self.criterion = criterion
+
+    def set_optimizer(self, optimizer):
+        self.optimizer = optimizer
 
     def fit_tree_episodes(self, train_set: TorchDataLoader):
         """
@@ -207,3 +221,9 @@ class ClassifierModel(nn.Module):
     @staticmethod
     def load_config(path):
         return load_config(path)
+
+    def adjust_learning_rate(self, epoch_num):
+        """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
+        lr = self.model_cfg.LEARNING_RATE * (0.05 ** (epoch_num // 10))
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = lr

@@ -10,10 +10,10 @@ import sys
 from yamldataclassconfig import YamlDataClassConfig
 from dataclasses import dataclass, field
 from models.backbones.base import BaseBackbone2d
-from models.model_utils.utils import DataHolder
+from models.utilities.utils import DataHolder
 from models.backbones.resnet.resnet_256 import ResNetLike
-from models.classifiers.knn import KNN_itc
-from models.model_utils.knn_utils import get_norm_layer, init_weights
+from models.clustering.knn import KNN_itc
+from models.utilities.knn_utils import get_norm_layer, init_weights
 
 
 ##############################################################################

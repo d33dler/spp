@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from xgboost import DMatrix
 
 from models.dt_heads.dtree import DTree
-from models.model_utils.utils import load_config, DataHolder
+from models.utilities.utils import load_config, DataHolder
 
 
 class XGBHead(DTree):
