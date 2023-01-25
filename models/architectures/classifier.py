@@ -9,8 +9,9 @@ from pandas import DataFrame
 from sklearn.decomposition import KernelPCA, PCA
 from torch import nn, Tensor
 from torch.nn import Parameter
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader as TorchDataLoader
 
+from data_loader.data_load import Parameters, DatasetLoader
 from models import backbones, classifiers, dt_heads
 from models.dt_heads.dtree import DTree
 from models.model_utils.utils import load_config, DataHolder
@@ -28,6 +29,11 @@ class ClassifierModel(nn.Module):
         self.data = DataHolder(model_cfg)
         self.normalizer = torch.nn.BatchNorm2d(64)
         self.pca_n = PCA(n_components=16)
+        c = model_cfg
+        p = Parameters(c.IMG_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
+                       c.EPISODE_TEST_NUM,c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
+                       c.TEST_EPISODE_SIZE)
+        self.data_loader = DatasetLoader(p)
 
     @property
     def mode(self):
@@ -77,7 +83,7 @@ class ClassifierModel(nn.Module):
         self.backbone2d.eval(**kwargs)
         self.knn_head.eval(**kwargs)
 
-    def fit_tree_episodes(self, train_set: DataLoader):
+    def fit_tree_episodes(self, train_set: TorchDataLoader):
         """
 
         :param train_set:
@@ -101,7 +107,7 @@ class ClassifierModel(nn.Module):
         col_len = len(all_columns)
         dt_head.all_features = all_columns
         dt_head.base_features = cls_labels
-        #dt_head.deep_features = deep_local_lbs_Q
+        # dt_head.deep_features = deep_local_lbs_Q
         dt_head.ranking_features = ranks
         if self.model_cfg.DATASET is None:
             tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
@@ -150,7 +156,7 @@ class ClassifierModel(nn.Module):
                     self.data.q_in, self.data.S_in = input_var1, input_var2
                     # Obtain and normalize the output
                     output = self.forward()
-                    output = np.asarray([dt_head.normalize(x) for x in  output.detach().cpu().numpy()])
+                    output = np.asarray([dt_head.normalize(x) for x in output.detach().cpu().numpy()])
                     target: np.ndarray = target.numpy()
                     # add measurements and target value to dataframe
                     tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output

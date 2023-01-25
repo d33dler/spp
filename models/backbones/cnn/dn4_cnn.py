@@ -71,7 +71,7 @@ class FourLayer_64F(BaseBackbone2d):
         )
         self.output_shape = 64
 
-    def forward(self, data: DataHolder):
+    def forward(self, data: DataHolder): #TODO backpropagation here
         # extract features of input1--query image
 
         data.q = self.features(data.q_in)

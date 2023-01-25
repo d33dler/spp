@@ -42,6 +42,9 @@ class DataHolder:
     knn_list: List[List]
     knn_raw: List[List]
     q_N: Tensor
+    # Autoencoder
+    q_enc: Tensor
+    S_enc: List[Tensor]
     # Tree fit input
     X: DataFrame
     y: DataFrame

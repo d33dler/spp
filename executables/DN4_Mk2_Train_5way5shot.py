@@ -304,7 +304,7 @@ def run():
             print("=> no checkpoint found at '{}'".format(opt.resume), file=F_txt)
 
     if opt.ngpu > 1:
-        model = nn.DataParallel(model, range(opt.ngpu))
+        model:DN4_DTA = nn.DataParallel(model, range(opt.ngpu))
 
     # print the architecture of the network
     print(model)
@@ -321,47 +321,8 @@ def run():
         adjust_learning_rate(optimizer, epoch_item)
 
         # ======================================= Folder of Datasets =======================================
-        # image transform & normalization
-        ImgTransform = transforms.Compose([
-            transforms.Resize((opt.imageSize, opt.imageSize)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ])
 
-        trainset = CSVLoader(
-            data_dir=opt.dataset_dir, mode=opt.mode, image_size=opt.imageSize, transform=ImgTransform,
-            episode_num=opt.episode_train_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
-        )
-        valset = CSVLoader(
-            data_dir=opt.dataset_dir, mode='val', image_size=opt.imageSize, transform=ImgTransform,
-            episode_num=opt.episode_val_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
-        )
-        testset = CSVLoader(
-            data_dir=opt.dataset_dir, mode='test', image_size=opt.imageSize, transform=ImgTransform,
-            episode_num=opt.episode_test_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
-        )
-
-        print('Trainset: %d' % len(trainset))
-        print('Valset: %d' % len(valset))
-        print('Testset: %d' % len(testset))
-        print('Trainset: %d' % len(trainset), file=F_txt)
-        print('Valset: %d' % len(valset), file=F_txt)
-        print('Testset: %d' % len(testset), file=F_txt)
-
-        # ========================================== Load Datasets =========================================
-        train_loader = torch.utils.data.DataLoader(
-            trainset, batch_size=opt.episodeSize, shuffle=True,
-            num_workers=int(opt.workers), drop_last=True, pin_memory=True
-        )
-        val_loader = torch.utils.data.DataLoader(
-            valset, batch_size=opt.testepisodeSize, shuffle=True,
-            num_workers=int(opt.workers), drop_last=True, pin_memory=True
-        )
-        test_loader = torch.utils.data.DataLoader(
-            testset, batch_size=opt.testepisodeSize, shuffle=True,
-            num_workers=int(opt.workers), drop_last=True, pin_memory=True
-        )
-
+        loaders = model.data_loader.load_data(opt.mode, F_txt)
         # ============================================ Training ===========================================
         # Fix the parameters of Batch Normalization after 10000 episodes (1 epoch)
         if epoch_item < 1:
@@ -370,12 +331,12 @@ def run():
             model.eval()
 
         # Train for 10000 episodes in each epoch
-        train(train_loader, model, criterion, optimizer, epoch_item, F_txt)
+        train(loaders.train_loader, model, criterion, optimizer, epoch_item, F_txt)
 
         # =========================================== Evaluation ==========================================
         print('============ Validation on the val set ============')
         print('============ validation on the val set ============', file=F_txt)
-        prec1, _ = validate(val_loader, model, criterion, epoch_item, best_prec1, F_txt)
+        prec1, _ = validate(loaders.val_loader, model, criterion, epoch_item, best_prec1, F_txt)
 
         # record the best prec@1 and save checkpoint
         is_best = prec1 > best_prec1
@@ -406,50 +367,23 @@ def run():
         # Testing Prase
         print('============ Testing on the test set ============')
         print('============ Testing on the test set ============', file=F_txt)
-        prec1, _ = validate(test_loader, model, criterion, epoch_item, best_prec1, F_txt)
+        prec1, _ = validate(loaders.test_loader, model, criterion, epoch_item, best_prec1, F_txt)
     ###############################################################################
     # Fitting tree, now forward will provide tree output
 
-    ImgTransform = transforms.Compose([
-        transforms.Resize((opt.imageSize, opt.imageSize)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-    ])
     print('============ Validation on the val set ============')
     print('============ validation on the val set ============', file=F_txt)
 
-    trainset = CSVLoader(
-        data_dir=opt.dataset_dir, mode=opt.mode, image_size=opt.imageSize, transform=ImgTransform,
-        episode_num=opt.episode_train_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
-    )
-    train_loader = torch.utils.data.DataLoader(
-        trainset, batch_size=opt.episodeSize, shuffle=True,
-        num_workers=int(opt.workers), drop_last=True, pin_memory=True
-    )
+    loaders = model.data_loader.load_data(opt.mode, F_txt)
 
-    model.fit_tree_episodes(train_loader)
+    model.fit_tree_episodes(loaders.train_loader)
 
-    valset = CSVLoader(
-        data_dir=opt.dataset_dir, mode='val', image_size=opt.imageSize, transform=ImgTransform,
-        episode_num=opt.episode_val_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
-    )
-    val_loader = torch.utils.data.DataLoader(
-        valset, batch_size=opt.testepisodeSize, shuffle=True,
-        num_workers=int(opt.workers), drop_last=True, pin_memory=True
-    )
-    prec1, _ = validate(val_loader, model, criterion, opt.epochs, best_prec1, F_txt)
+    prec1, _ = validate(loaders.val_loader, model, criterion, opt.epochs, best_prec1, F_txt)
 
-    testset = CSVLoader(
-        data_dir=opt.dataset_dir, mode='test', image_size=opt.imageSize, transform=ImgTransform,
-        episode_num=opt.episode_test_num, way_num=opt.way_num, shot_num=opt.shot_num, query_num=opt.query_num
-    )
-    test_loader = torch.utils.data.DataLoader(
-        testset, batch_size=opt.testepisodeSize, shuffle=True,
-        num_workers=int(opt.workers), drop_last=True, pin_memory=True
-    )
+
     print('============ Testing on the test set ============')
     print('============ Testing on the test set ============', file=F_txt)
-    prec1, _ = validate(test_loader, model, criterion, opt.epochs, best_prec1, F_txt)
+    prec1, _ = validate(loaders.test_loader, model, criterion, opt.epochs, best_prec1, F_txt)
     # record the best prec@1 and save checkpoint
     best_prec1 = max(prec1, best_prec1)
     model.get_tree('dt_head').plot_tree()
