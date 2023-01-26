@@ -5,6 +5,7 @@ K_NEIGHBORS: 3
 
 #Model skeleton
 BACKBONE_2D: DN4_CNN2d # DN4_CNN2d | ResNet2d
+ENCODER: DN
 KNN: KNN_itc
 DT: XGB # XGB | RF
 

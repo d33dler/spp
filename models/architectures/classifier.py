@@ -27,7 +27,7 @@ class ClassifierModel(nn.Module):
         self.model_cfg = model_cfg  # main cfg! (architecture cfg)
         self.num_classes = model_cfg.NUM_CLASSES
         self.k_neighbors = model_cfg.K_NEIGHBORS
-        self.module_topology = ['backbone2d', 'knn_head', 'dt_head']
+        self.module_topology = ['backbone2d', 'neck', 'knn_head', 'dt_head']
         self.data = DataHolder(model_cfg)
         self.normalizer = torch.nn.BatchNorm2d(64)
         self.pca_n = PCA(n_components=16)
@@ -57,6 +57,13 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("BACKBONE_2D", None) is None:
             raise ValueError('Missing specification of backbone to use')
         m = backbones.__all__[self.model_cfg.BACKBONE_2D]()
+        self.data.module_list.append(m)
+        return m
+
+    def _build_neck(self):  # encoder | _
+        if self.model_cfg.get("ENCODER", None) is None:
+            raise ValueError('Missing specification of encoder to use')
+        m = backbones.__all__[self.model_cfg.ENCODER]()
         self.data.module_list.append(m)
         return m
 
