@@ -28,9 +28,9 @@ class ClassifierModel(nn.Module):
         self.num_classes = model_cfg.NUM_CLASSES
         self.k_neighbors = model_cfg.K_NEIGHBORS
         self.module_topology = ['backbone2d', 'neck', 'knn_head', 'dt_head']
+        self.module_map = {k: None for k in self.module_topology}
         self.data = DataHolder(model_cfg)
         self.normalizer = torch.nn.BatchNorm2d(64)
-        self.pca_n = PCA(n_components=16)
         c = model_cfg
         p = Parameters(c.IMG_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
@@ -57,6 +57,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("BACKBONE_2D", None) is None:
             raise ValueError('Missing specification of backbone to use')
         m = backbones.__all__[self.model_cfg.BACKBONE_2D]()
+        self.module_map['backbone_2d'] = m
         self.data.module_list.append(m)
         return m
 
@@ -64,6 +65,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("ENCODER", None) is None:
             raise ValueError('Missing specification of encoder to use')
         m = backbones.__all__[self.model_cfg.ENCODER]()
+        self.module_map['neck'] = m
         self.data.module_list.append(m)
         return m
 
@@ -71,6 +73,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("KNN", None) is None:
             return None
         m = clustering.__all__[self.model_cfg.KNN](self.k_neighbors)
+        self.module_map['knn_head'] = m
         self.data.module_list.append(m)
         return m
 
@@ -78,6 +81,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("DT", None) is None:
             return None
         m = dt_heads.__all__[self.model_cfg.DT](self.num_classes)
+        self.module_map['dt_head'] = m
         self.data.module_list.append(m)
         return m
 
