@@ -22,8 +22,8 @@ class XGBHead(DTree):
     output: np.ndarray = None
     config_id = 'config.yaml'
 
-    def __init__(self, num_classes: int):
-        super().__init__(num_classes)
+    def __init__(self, data: DataHolder):
+        super().__init__(data)
         self.features: List[str] = []
         self.cfg = load_config(Path(Path(__file__).parent / self.config_id))
         t = self.cfg.TYPE
@@ -31,7 +31,7 @@ class XGBHead(DTree):
         if t == 'REGRESSOR':
             self.model = xgb.XGBRegressor(**self.params)
         elif t == 'CLASSIFIER':
-            self.params['num_classes'] = num_classes
+            self.params['num_classes'] = self.num_classes
             print(self.params)
             self.model = xgb.XGBClassifier(**self.params)
         else:

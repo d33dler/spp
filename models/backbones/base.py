@@ -98,6 +98,7 @@ class BaseBackbone2d(ArchM):
         self.collect_funcs()
         use_bias = self.ACTIVATION_F == nn.InstanceNorm2d
         # TODO finish abstraction
+
         # assert len(self.cfg.LAYER_NUMS) == len(self.cfg.LAYER_STRIDES) == len(self.cfg.NUM_FILTERS)
         # layer_nums = self.cfg.LAYER_NUMS
         # layer_strides = self.cfg.LAYER_STRIDES

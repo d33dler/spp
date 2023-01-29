@@ -21,9 +21,9 @@ class DTree(nn.Module):
     mean_ix: int = 0
     ranks_ix: int = 0
 
-    def __init__(self, num_classes):
+    def __init__(self, data: DataHolder):
         super().__init__()
-        self.num_classes = num_classes
+        self.num_classes = data.num_classes
 
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         raise NotImplementedError

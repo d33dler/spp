@@ -78,8 +78,6 @@ cudnn.benchmark = True
 # ======================================= Define functions =============================================
 
 
-
-
 def train(train_loader, model: ClassifierModel, criterion, optimizer, epoch_index, F_txt):
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -300,7 +298,7 @@ def run():
 
         # save the checkpoint
         if is_best:
-            save_checkpoint(
+            save_checkpoint(  # TODO move to classifier
                 {
                     'epoch_index': epoch_index,
                     'arch': opt.basemodel,

@@ -4,7 +4,7 @@ import os
 import torch
 
 from dataset.datasets_csv import CSVLoader
-from torch.distributions import transforms
+import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 
@@ -51,7 +51,7 @@ class DatasetLoader:
         episode_train_num = self.params.episode_train_num
         episode_val_num = self.params.episode_val_num
         episode_test_num = self.params.episode_test_num
-        ImgTransform = transforms.Compose([
+        ImgTransform = transforms.Compose([  # TODO augmentation cfg
             transforms.Resize((img_sz, img_sz)),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),

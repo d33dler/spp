@@ -16,9 +16,10 @@ class KNN_itc(nn.Module):
     KNN-itc (Image to class) metric
     """
 
-    def __init__(self, k_neighbors):
+    def __init__(self, data: DataHolder):
         super(KNN_itc, self).__init__()
-        self.neighbor_k = k_neighbors
+
+        self.neighbor_k = data.k_neighbors
 
     # Calculate the k-Nearest Neighbor of each local descriptor
     def cal_cosinesimilarity(self, input1, input2):

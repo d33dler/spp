@@ -13,6 +13,7 @@ import yaml
 from easydict import EasyDict
 from pandas import DataFrame
 from torch import Tensor
+from torch.nn import BatchNorm2d
 
 
 def load_config(config: Path):
@@ -34,13 +35,20 @@ class DataHolder:
     """
     Module IO object
     """
+    k_neighbors: int  # 1 - num_classes
+    use_bias: bool
+    norm_layer: Any  # torch
+
+    # Classification
+    num_classes: int
 
     # Input
     q_in: Tensor
-    S_in: list
+    S_in: List[Tensor]
+    targets: Tensor  # TODO assign !
     # Backbone2d-out
-    q: Tensor  # TODO identify types
-    S: list
+    q: Tensor
+    S: List[Tensor]  # CUDA
     # KNN-out
     knn_list: List[List]
     knn_raw: List[List]
@@ -48,6 +56,8 @@ class DataHolder:
     # Encoder
     q_sm: Tensor
     q_enc: Tensor
+    loss_q_sm: Tensor
+    loss_q_enc: Tensor
     S_enc: List[Tensor]
     # Tree fit input
     X: DataFrame
@@ -61,6 +71,9 @@ class DataHolder:
         self.eval_set = None
         self.module_list: List = []
         self.cfg = cfg
+        self.k_neighbors = cfg.K_NEIGHBORS
+        self.use_bias = cfg.USE_BIAS
+        self.norm_layer = BatchNorm2d
 
 
 class AverageMeter(object):

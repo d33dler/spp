@@ -38,17 +38,13 @@ class FourLayer_64F(BaseBackbone2d):
         # LAYER_NUMS: list  # [4]
 
     #  norm_layer=nn.BatchNorm2d, num_classes=5, neighbor_k=3
-    def __init__(self):
+    def __init__(self, data: DataHolder):
         super(FourLayer_64F, self).__init__(self.Config())
         # self.build()
         # super(FourLayer_64F, self).__init__()
+        self.data = data
+        norm_layer, use_bias = get_norm_layer(data.cfg.BACKBONE_2D.NORM)
 
-        norm_layer = nn.BatchNorm2d
-        neighbor_k = self.cfg.NUM_CLASSES
-        if type(norm_layer) == functools.partial:
-            use_bias = norm_layer.func == nn.InstanceNorm2d
-        else:
-            use_bias = norm_layer == nn.InstanceNorm2d
 
         self.features = nn.Sequential(  # 3*84*84
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
@@ -89,7 +85,7 @@ class FourLayer_64F(BaseBackbone2d):
 
 def define_DN4Net(pretrained=False, model_root=None, which_model='Conv64', norm='batch', init_type='normal',
                   use_gpu=True, **kwargs):
-    norm_layer = get_norm_layer(norm_type=norm)
+    norm_layer, _ = get_norm_layer(norm_type=norm)
 
     if use_gpu:
         assert (torch.cuda.is_available())

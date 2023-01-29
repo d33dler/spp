@@ -77,7 +77,10 @@ def get_norm_layer(norm_type='instance'):
         norm_layer = None
     else:
         raise NotImplementedError('normalization layer [%s] is not found' % norm_type)
-    return norm_layer
+
+    use_bias = norm_layer.func == nn.InstanceNorm2d
+
+    return norm_layer, use_bias
 
 
 
