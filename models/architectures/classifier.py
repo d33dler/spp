@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime
-from typing import Iterator, List
+from typing import Iterator, List, Dict
 
 import numpy as np
 import pandas as pd
@@ -27,7 +27,7 @@ class ClassifierModel(nn.Module):
         self.model_cfg = model_cfg  # main cfg! (architecture cfg)
         self.num_classes = model_cfg.NUM_CLASSES
         self.k_neighbors = model_cfg.K_NEIGHBORS
-        self.module_topology = {_: None for _ in model_cfg.TOPOLOGY}
+        self.module_topology: Dict[str, nn.Module] = {_: None for _ in model_cfg.TOPOLOGY}
         self.data = DataHolder(model_cfg)
         self.normalizer = torch.nn.BatchNorm2d(64)
         c = model_cfg
@@ -35,6 +35,11 @@ class ClassifierModel(nn.Module):
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE)
         self.data_loader = DatasetLoader(p)
+        self._set_mode()
+
+    def _set_mode(self):
+        for k, m in self.module_topology.items():
+            m.train(self.model_cfg[k].MODE == 'TRAIN')
 
     @property
     def mode(self):
@@ -44,10 +49,9 @@ class ClassifierModel(nn.Module):
         raise NotImplementedError
 
     def build(self):
-        for module_name in self.module_topology:
+        for module_name in self.module_topology.keys():
             module = getattr(self, '_build_%s' % module_name)()
             self.add_module(module_name, module)
-        self.backbone2d.cuda()
 
     def forward(self):
         raise NotImplementedError
@@ -56,6 +60,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("BACKBONE_2D", None) is None:
             raise ValueError('Missing specification of backbone to use')
         m = backbones.__all__[self.model_cfg.BACKBONE_2D.NAME](self.data)
+        m.cuda() if self.model_cfg.BACKBONE_2D.CUDA else False  # TODO may yield err?
         self.module_topology['BACKBONE_2D'] = m
         self.data.module_list.append(m)
         return m
@@ -64,6 +69,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("ENCODER", None) is None:
             raise ValueError('Missing specification of encoder to use')
         m = backbones.__all__[self.model_cfg.ENCODER.NAME](self.data)
+        m.cuda() if self.model_cfg.ENCODER.CUDA else False
         self.module_topology['neck'] = m
         self.data.module_list.append(m)
         return m
@@ -72,6 +78,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("KNN", None) is None:
             return None
         m = clustering.__all__[self.model_cfg.KNN.NAME](self.data)
+        m.cuda() if self.model_cfg.KNN.CUDA else False
         self.module_topology['KNN'] = m
         self.data.module_list.append(m)
         return m
@@ -80,6 +87,7 @@ class ClassifierModel(nn.Module):
         if self.model_cfg.get("DT", None) is None:
             return None
         m = dt_heads.__all__[self.model_cfg.DT.NAME](self.data)
+        m.cuda() if self.model_cfg.DT.CUDA else False
         self.module_topology['DT'] = m
         self.data.module_list.append(m)
         return m
