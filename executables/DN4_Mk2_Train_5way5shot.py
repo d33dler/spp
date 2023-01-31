@@ -28,8 +28,8 @@ import torch.utils.data
 from PIL import ImageFile
 
 from models.architectures.classifier import ClassifierModel
-from models.architectures.dn4_dta.dn4_mk2 import DN4_DTA
-from models.utilities.utils import AverageMeter, accuracy
+from models.architectures.dn4_dta.dn4_mk2 import DN4_DTR
+from models.utilities.utils import AverageMeter, accuracy, save_checkpoint
 
 sys.dont_write_bytecode = True
 
@@ -46,24 +46,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_dir', default='/Datasets/miniImageNet--ravi', help='/miniImageNet')
 parser.add_argument('--data_name', default='miniImageNet', help='miniImageNet|StanfordDog|StanfordCar|CubBird')
 parser.add_argument('--mode', default='train', help='train|val|test|')
-parser.add_argument('--outf', default='./results/DN4')
 parser.add_argument('--resume', default='', type=str, help='path to the lastest checkpoint (default: none)')
-parser.add_argument('--basemodel', default='Conv64F', help='Conv64F|ResNet256F')
-parser.add_argument('--workers', type=int, default=8)
 #  Few-shot parameters  #
-parser.add_argument('--imageSize', type=int, default=84)
-parser.add_argument('--episodeSize', type=int, default=1, help='the mini-batch size of training')
-parser.add_argument('--testepisodeSize', type=int, default=1, help='one episode is taken as a mini-batch')
 parser.add_argument('--epochs', type=int, default=30, help='the total number of training epoch')
-parser.add_argument('--episode_train_num', type=int, default=100, help='the total number of training episodes')
-parser.add_argument('--episode_val_num', type=int, default=1000, help='the total number of evaluation episodes')
-parser.add_argument('--episode_test_num', type=int, default=1000, help='the total number of testing episodes')
-parser.add_argument('--way_num', type=int, default=5, help='the number of way/class')
-parser.add_argument('--shot_num', type=int, default=5, help='the number of shot')
-parser.add_argument('--query_num', type=int, default=15, help='the number of queries')
-parser.add_argument('--neighbor_k', type=int, default=3, help='the number of k-nearest neighbors')
-parser.add_argument('--lr', type=float, default=0.005, help='learning rate, default=0.005')
-parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--cuda', action='store_true', default=True, help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='the number of gpus')
 parser.add_argument('--nc', type=int, default=3, help='input image channels')
@@ -75,81 +60,17 @@ opt.cuda = True
 cudnn.benchmark = True
 
 
-# ======================================= Define functions =============================================
+# ======================================= Define functions ============================================
 
 
-def train(train_loader, model: ClassifierModel, criterion, optimizer, epoch_index, F_txt):
-    batch_time = AverageMeter()
-    data_time = AverageMeter()
-    losses = AverageMeter()
-    top1 = AverageMeter()
-
-    end = time.time()
-    for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_loader):
-
-        # Measure data loading time
-        data_time.update(time.time() - end)
-
-        # Convert query and support images
-        query_images = torch.cat(query_images, 0)
-        input_var1 = query_images.cuda()
-
-        input_var2 = []
-        for i in range(len(support_images)):
-            temp_support = support_images[i]
-            temp_support = torch.cat(temp_support, 0)
-            temp_support = temp_support.cuda()
-            input_var2.append(temp_support)
-
-        # Deal with the targets
-        target = torch.cat(query_targets, 0)
-        target = target.cuda()
-        model.data.q_in = input_var1
-        model.data.S_in = input_var2
-        # Calculate the output
-        output = model.forward()
-        loss = criterion(output, target)
-
-        # Compute gradients and do SGD step
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # Measure accuracy and record loss
-        prec1, _ = accuracy(output, target, topk=(1, 3))
-        losses.update(loss.item(), query_images.size(0))
-        top1.update(prec1[0], query_images.size(0))
-
-        # Measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        # ============== print the intermediate results ==============#
-        if episode_index % opt.print_freq == 0 and episode_index != 0:
-            print('Eposide-({0}): [{1}/{2}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                  'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                epoch_index, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time, loss=losses,
-                top1=top1))
-
-            print('Eposide-({0}): [{1}/{2}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                  'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                epoch_index, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time, loss=losses,
-                top1=top1), file=F_txt)
-
-
-def validate(val_loader, model: ClassifierModel, criterion, epoch_index, best_prec1, F_txt):
+def validate(val_loader, model: ClassifierModel, epoch_index, best_prec1, F_txt):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
 
     # switch to evaluate mode
-    model.eval()
+    model.train(False)
+    data = model.data
     accuracies = []
 
     end = time.time()
@@ -172,15 +93,19 @@ def validate(val_loader, model: ClassifierModel, criterion, epoch_index, best_pr
 
         model.data.q_in = input_var1
         model.data.S_in = input_var2
-        # Calculate the output
+        model.data.targets = target
 
-        output = model.forward()
+        model.forward()
 
-        loss = criterion(output, target)
+        loss = model.module_topology['ENCODER'].calculate_loss([data.q_smax, data.sim_list_REDUCED], target)
 
         # measure accuracy and record loss
-        prec1, _ = accuracy(output, target, topk=(1, 3))
+        prec1_smax = accuracy(model.data.q_smax, target)[0]
+        prec1_red, _ = accuracy(model.data.sim_list_REDUCED, target, topk=(1, 3))
+        loss = min(loss) if isinstance(loss, list) else loss
         losses.update(loss.item(), query_images.size(0))
+
+        prec1 = max(prec1_smax, prec1_red)
         top1.update(prec1[0], query_images.size(0))
         accuracies.append(prec1)
 
@@ -190,11 +115,12 @@ def validate(val_loader, model: ClassifierModel, criterion, epoch_index, best_pr
 
         # ============== print the intermediate results ==============#
         if episode_index % opt.print_freq == 0 and episode_index != 0:
-            print('Test-({0}): [{1}/{2}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                epoch_index, episode_index, len(val_loader), batch_time=batch_time, loss=losses, top1=top1))
+            print(f'Test-({epoch_index}): [{episode_index}/{len(val_loader)}]\t'
+                  f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
+                  f'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+                  f'Prec@RED {prec1_red.item():.3f}\t'
+                  f'Prec@SMAX {prec1_smax.item():.3f}\t')
 
             print('Test-({0}): [{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -208,16 +134,14 @@ def validate(val_loader, model: ClassifierModel, criterion, epoch_index, best_pr
     return top1.avg, accuracies
 
 
-def save_checkpoint(state, filename='checkpoint.pth.tar'):
-    torch.save(state, filename)
-
-
 def run():
     # ======================================== Settings of path ============================================
     # saving path
-    opt.outf = opt.outf + '_' + opt.data_name + '_' + str(opt.basemodel) + '_' + str(opt.way_num) + 'Way_' + str(
-        opt.shot_num) + 'Shot' + '_K' + str(opt.neighbor_k)
-
+    model = DN4_DTR()
+    p = model.data_loader.params
+    opt.outf = p.outf + '_' + opt.data_name + '_' + str(model.arch) + '_' + str(p.way_num) + 'Way_' + str(
+        p.shot_num) + 'Shot' + '_K' + str(model.model_cfg.K_NEIGHBORS)
+    p.outf = opt.outf
     if not os.path.exists(opt.outf):
         os.makedirs(opt.outf)
 
@@ -226,71 +150,52 @@ def run():
 
     # save the opt and results to a txt file
     txt_save_path = os.path.join(opt.outf, 'opt_resutls.txt')
-    F_txt = open(txt_save_path, 'a+')
+    txt_file = open(txt_save_path, 'a+')
     print(opt)
-    print(opt, file=F_txt)
+    print(opt, file=txt_file)
 
     # ========================================== Model Config ===============================================
-    ngpu = int(opt.ngpu)
-    global best_prec1, epoch_index
-    best_prec1 = 0
-    epoch_index = 0
 
-    model = DN4_DTA()
+    best_prec1 = 0
+
     # define_DN4Net(which_model=opt.basemodel, num_classes=opt.way_num, neighbor_k=opt.neighbor_k, norm='batch',
     #                   init_type='normal', use_gpu=opt.cuda)
 
     # optionally resume from a checkpoint
     if opt.resume:
-        if os.path.isfile(opt.resume):
-            print("=> loading checkpoint '{}'".format(opt.resume))
-            checkpoint = torch.load(opt.resume)
-            epoch_index = checkpoint['epoch_index']
-            best_prec1 = checkpoint['best_prec1']
-            model.load_state_dict(checkpoint['state_dict'])
-            model.optimizer.load_state_dict(checkpoint['optimizer'])
-            print("=> loaded checkpoint '{}' (epoch {})".format(opt.resume, checkpoint['epoch_index']))
-            print("=> loaded checkpoint '{}' (epoch {})".format(opt.resume, checkpoint['epoch_index']), file=F_txt)
-        else:
-            print("=> no checkpoint found at '{}'".format(opt.resume))
-            print("=> no checkpoint found at '{}'".format(opt.resume), file=F_txt)
+        model.load_model(opt.resume, txt_file)
 
     if opt.ngpu > 1:
-        model: DN4_DTA = nn.DataParallel(model, range(opt.ngpu))
+        model: DN4_DTR = nn.DataParallel(model, range(opt.ngpu))
 
     # print the architecture of the network
     print(model)
-    print(model, file=F_txt)
-
+    print(model, file=txt_file)
     # ======================================== Training phase ===============================================
     print('\n............Start training............\n')
     start_time = time.time()
-    optimizer = model.optimizer
-    criterion = model.criterion
+
     for epoch_index in range(opt.epochs):
         print('===================================== Epoch %d =====================================' % epoch_index)
         print('===================================== Epoch %d =====================================' % epoch_index,
-              file=F_txt)
+              file=txt_file)
         model.adjust_learning_rate(epoch_index)
 
         # ======================================= Folder of Datasets =======================================
-
-        model.load_data(opt.mode, F_txt)
+        model.load_data(opt.mode, txt_file)
         loaders = model.loaders
         # ============================================ Training ===========================================
         # Fix the parameters of Batch Normalization after 10000 episodes (1 epoch)
-        if epoch_index < 1:
-            model.train()
-        else:
-            model.eval()
+        # model.ENCODER.train(epoch_index < 1)
 
         # Train for 10000 episodes in each epoch
-        model.run_epoch(epoch_index, F_txt)
+        model.run_epoch(txt_file)
 
+        # torch.cuda.empty_cache()
         # =========================================== Evaluation ==========================================
         print('============ Validation on the val set ============')
-        print('============ validation on the val set ============', file=F_txt)
-        prec1, _ = validate(loaders.val_loader, model, criterion, epoch_index, best_prec1, F_txt)
+        print('============ validation on the val set ============', file=txt_file)
+        prec1, _ = validate(loaders.val_loader, model, epoch_index, best_prec1, txt_file)
 
         # record the best prec@1 and save checkpoint
         is_best = prec1 > best_prec1
@@ -298,49 +203,37 @@ def run():
 
         # save the checkpoint
         if is_best:
-            save_checkpoint(  # TODO move to classifier
-                {
-                    'epoch_index': epoch_index,
-                    'arch': opt.basemodel,
-                    'state_dict': model.state_dict(),
-                    'best_prec1': best_prec1,
-                    'optimizer': optimizer.state_dict(),
-                }, os.path.join(opt.outf, 'model_best.pth.tar'))
+            filename = os.path.join(opt.outf, 'epoch_%d_best.pth.tar' % epoch_index)
+            model.save_model(filename)
 
         if epoch_index % 10 == 0:
             filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % epoch_index)
-            save_checkpoint(
-                {
-                    'epoch_index': epoch_index,
-                    'arch': opt.basemodel,
-                    'state_dict': model.state_dict(),
-                    'best_prec1': best_prec1,
-                    'optimizer': optimizer.state_dict(),
-                }, filename)
+            model.save_model(filename)
 
         # Testing Prase
         print('============ Testing on the test set ============')
-        print('============ Testing on the test set ============', file=F_txt)
-        prec1, _ = validate(loaders.test_loader, model, criterion, epoch_index, best_prec1, F_txt)
+        print('============ Testing on the test set ============', file=txt_file)
+        prec1, _ = validate(loaders.test_loader, model, epoch_index, best_prec1, txt_file)
+        model.ENCODER.train(True)
     ###############################################################################
     # Fitting tree, now forward will provide tree output
 
     print('============ Validation on the val set ============')
-    print('============ validation on the val set ============', file=F_txt)
+    print('============ validation on the val set ============', file=txt_file)
 
-    loaders = model.data_loader.load_data(opt.mode, F_txt)
+    loaders = model.data_loader.load_data(opt.mode, txt_file)
 
     model.fit_tree_episodes(loaders.train_loader)
 
-    prec1, _ = validate(loaders.val_loader, model, criterion, opt.epochs, best_prec1, F_txt)
+    prec1, _ = validate(loaders.val_loader, model, opt.epochs, best_prec1, txt_file)
 
     print('============ Testing on the test set ============')
-    print('============ Testing on the test set ============', file=F_txt)
-    prec1, _ = validate(loaders.test_loader, model, criterion, opt.epochs, best_prec1, F_txt)
+    print('============ Testing on the test set ============', file=txt_file)
+    prec1, _ = validate(loaders.test_loader, model, opt.epochs, best_prec1, txt_file)
     # record the best prec@1 and save checkpoint
     best_prec1 = max(prec1, best_prec1)
     model.get_tree('dt_head').plot_tree()
-    F_txt.close()
+    txt_file.close()
     print('Training and evaluation completed')
 
 

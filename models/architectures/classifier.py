@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from datetime import datetime
 from typing import Iterator, List, Dict
@@ -12,41 +13,35 @@ from torch.nn import Parameter
 from torch.utils.data import DataLoader as TorchDataLoader
 
 from data_loader.data_load import Parameters, DatasetLoader
-from models import backbones, clustering, dt_heads
+from models import backbones, clustering, dt_heads, necks
 from models.dt_heads.dtree import DTree
-from models.utilities.utils import load_config, DataHolder
+from models.interfaces.arch_module import ArchM
+from models.utilities.utils import load_config, DataHolder, save_checkpoint
 import torch.nn.functional as F
 
 
-class ClassifierModel(nn.Module):
+class ClassifierModel(ArchM):
+    arch = 'Missing'
 
-    def __init__(self, model_cfg):
-        super().__init__()
+    def __init__(self, cfg_path):
+        super().__init__(cfg_path)
+        self.loaders = None
         self.criterion = None
         self.optimizer = None
-        self.model_cfg = model_cfg  # main cfg! (architecture cfg)
+        self.epochix = 0
+        model_cfg = self.model_cfg
         self.num_classes = model_cfg.NUM_CLASSES
         self.k_neighbors = model_cfg.K_NEIGHBORS
-        self.module_topology: Dict[str, nn.Module] = {_: None for _ in model_cfg.TOPOLOGY}
         self.data = DataHolder(model_cfg)
-        self.normalizer = torch.nn.BatchNorm2d(64)
-        c = model_cfg
-        p = Parameters(c.IMG_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
-                       c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
-                       c.TEST_EPISODE_SIZE)
-        self.data_loader = DatasetLoader(model_cfg.AUGMENTOR, p)
-        self._set_mode()
-
-    def _set_mode(self):
-        for k, m in self.module_topology.items():
-            m.train(self.model_cfg[k].MODE == 'TRAIN')
+        self.build()
+        self._set_modules_mode()
 
     @property
     def mode(self):
         return 'TRAIN' if self.training else 'TEST'
 
     def load_data(self, mode, output_file):
-        raise NotImplementedError
+        self.loaders = self.data_loader.load_data(mode, output_file)
 
     def build(self):
         for module_name in self.module_topology.keys():
@@ -65,21 +60,12 @@ class ClassifierModel(nn.Module):
         self.data.module_list.append(m)
         return m
 
-    def _build_ENCODER(self):  # encoder | _
+    def _build_ENCODER(self):  # ENCODER | _
         if self.model_cfg.get("ENCODER", None) is None:
             raise ValueError('Missing specification of encoder to use')
-        m = backbones.__all__[self.model_cfg.ENCODER.NAME](self.data)
+        m = necks.__all__[self.model_cfg.ENCODER.NAME](self.data)
         m.cuda() if self.model_cfg.ENCODER.CUDA else False
-        self.module_topology['neck'] = m
-        self.data.module_list.append(m)
-        return m
-
-    def _build_KNN(self):
-        if self.model_cfg.get("KNN", None) is None:
-            return None
-        m = clustering.__all__[self.model_cfg.KNN.NAME](self.data)
-        m.cuda() if self.model_cfg.KNN.CUDA else False
-        self.module_topology['KNN'] = m
+        self.module_topology['ENCODER'] = m
         self.data.module_list.append(m)
         return m
 
@@ -92,22 +78,15 @@ class ClassifierModel(nn.Module):
         self.data.module_list.append(m)
         return m
 
-    def load_state_dict(self, state_dict: 'OrderedDict[str, Tensor]', strict: bool = True):
-        self.backbone2d.load_state_dict(state_dict=state_dict)  # TODO add load_state dict neck
+    def sub_parameters(self, network: str, recurse: bool = True) -> Iterator[Parameter]:
+        sub_net = getattr(self, network, None)
+        return sub_net.parameters(recurse)  # TODO handle encoder's subnets
 
-    def parameters(self, recurse: bool = True) -> Iterator[Parameter]:
-        return self.backbone2d.parameters(recurse)
+    def train(self, training: bool = True) -> ArchM:
+        [sub_mod.train(training) for sub_mod in self.module_topology.values() if isinstance(sub_mod, ArchM.Child)]
 
-    def train(self, **kwargs):
-        self.backbone2d.train(**kwargs)
-        self.knn_head.train(**kwargs)
-
-    def run_epoch(self, epoch_index, output_file):
+    def run_epoch(self, output_file):
         raise NotImplementedError
-
-    def eval(self, **kwargs):
-        self.backbone2d.eval(**kwargs)
-        self.knn_head.eval(**kwargs)
 
     def set_loss(self, criterion):
         self.criterion = criterion
@@ -234,12 +213,4 @@ class ClassifierModel(nn.Module):
     def get_tree(self, module_name) -> DTree:
         return self.dt_head
 
-    @staticmethod
-    def load_config(path):
-        return load_config(path)
 
-    def adjust_learning_rate(self, epoch_num):
-        """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
-        lr = self.model_cfg.LEARNING_RATE * (0.05 ** (epoch_num // 10))
-        for param_group in self.optimizer.param_groups:
-            param_group['lr'] = lr

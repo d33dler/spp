@@ -15,47 +15,41 @@ from models.dt_heads.dtree import DTree
 from models.utilities.utils import AverageMeter, accuracy
 
 
-class DN4_DTA(ClassifierModel):
+class DN4_DTR(ClassifierModel):
     """
-    DN4 MK2 Model
+    DN4 DTR Model
 
     Structure:
     [Deep learning module] ⟶ [K-NN module] ⟶ [Decision Tree]
                           ↘  [Encoder-NN]  ↗
     """
-    normalizer = torch.nn.BatchNorm2d(64)
+    arch = 'DN4_DTR'
 
     def __init__(self):
-        self.loaders = None
-        model_cfg = self.load_config(Path(__file__).parent / 'config.yaml')
-        super().__init__(model_cfg)
-        self.build()
-        self.criterion = nn.CrossEntropyLoss().cuda()
-        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=(model_cfg.BETA_ONE, 0.9))
+        super().__init__(Path(__file__).parent / 'config.yaml')
+        # self.criterion = nn.CrossEntropyLoss().cuda()
 
     def forward(self):
-        self.backbone2d(self.data)
-        out = self.knn_head(self.data)
+        self.BACKBONE_2D.forward()
+        self.ENCODER.forward()
 
-        dt_head: DTree = self.dt_head
+        dt_head: DTree = self.DT
         if dt_head.is_fit:
-            _input = np.asarray([dt_head.normalize(x) for x in out.detach().cpu().numpy()])
+            _input = np.asarray([dt_head.normalize(x) for x in self.data.sim_list_REDUCED.detach().cpu().numpy()])
             self.data.X = self.feature_engine(dt_head.create_input(_input), dt_head.base_features,
                                               dt_head.deep_features)
             o = torch.from_numpy(dt_head.forward(self.data).astype(np.int64))
             o = one_hot(o, self.num_classes).float().cuda()
-            return o
-        return out
+            self.data.tree_pred = o
 
-    def run_epoch(self, epoch_index, output_file):
+    def run_epoch(self, output_file):
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
         top1 = AverageMeter()
         train_loader = self.loaders.train_loader
         end = time.time()
-        criterion = self.criterion
-        optimizer = self.optimizer
+        epochix = self.epochix
         for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_loader):
 
             # Measure data loading time
@@ -75,21 +69,22 @@ class DN4_DTA(ClassifierModel):
             # Deal with the targets
             target = torch.cat(query_targets, 0)
             target = target.cuda()
+            self.data.targets = target
             self.data.q_in = input_var1
             self.data.S_in = input_var2
+
             # Calculate the output
-            output = self.forward()
-            loss = criterion(output, target)
+            self.forward()
 
-            # Compute gradients and do SGD step
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
+            loss = self.get_loss('ENCODER')
             # Measure accuracy and record loss
-            prec1, _ = accuracy(output, target, topk=(1, 3))
-            losses.update(loss.item(), query_images.size(0))
+            prec1_smax = accuracy(self.data.q_smax, target)[0]
+            prec1_red, _ = accuracy(self.data.sim_list_REDUCED, target, topk=(1, 3))
+
+            losses.update(min(loss).item(), query_images.size(0))
+            prec1 = max(prec1_red, prec1_smax)
             top1.update(prec1[0], query_images.size(0))
+            [l.detach_().detach().cpu() for l in loss]
 
             # Measure elapsed time
             batch_time.update(time.time() - end)
@@ -97,23 +92,23 @@ class DN4_DTA(ClassifierModel):
 
             # ============== print the intermediate results ==============#
             if episode_index % self.model_cfg.PRINT_FREQ == 0 and episode_index != 0:
-                print('Eposide-({0}): [{1}/{2}]\t'
-                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                      'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
-                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                    epoch_index, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time,
-                    loss=losses,
-                    top1=top1))
+                print(f'Eposide-({epochix}): [{episode_index}/{len(train_loader)}]\t'
+                      f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                      f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
+                      f'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+                      f'Prec@RED {prec1_red.item():.3f}\t'
+                      f'Prec@SMAX {prec1_smax.item():.3f}\t')
 
                 print('Eposide-({0}): [{1}/{2}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                       'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
                       'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                    epoch_index, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time,
+                    epochix, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time,
                     loss=losses,
-                    top1=top1), file=self.F_txt)
+                    top1=top1), file=output_file)
+            self.epochix += 1
+        del losses
+        self.data.clear()
 
-    def load_data(self, mode, f_txt):
-        self.loaders = self.data_loader.load_data(mode, f_txt)
+

@@ -10,7 +10,7 @@ from dataclasses_json import DataClassJsonMixin
 from models.interfaces.arch_module import ArchM
 
 
-class BaseBackbone2d(ArchM):
+class BaseBackbone2d(ArchM.Child):
     """
     Abstraction class for 2d backbones implementing using torch
     """
@@ -21,10 +21,10 @@ class BaseBackbone2d(ArchM):
     @dataclass
     class _CFG(ArchM.BaseConfig):
 
-        INPUT_CHANNELS: int = 1
-        OUTPUT_SHAPE: int = 1
-        LAYER_NUMS: List[int] = field(default_factory=list)
+        INP_CHANNELS: List[int] = field(default_factory=list)
+        OUT_CHANNELS: List[int] = field(default_factory=list)
         LAYER_STRIDES: List[int] = field(default_factory=list)
+        KERNEL_SIZES: List[int] = field(default_factory=list)
         LAYER_POOLS: List[int] = field(default_factory=list)
         LAYER_PADDINGS: List[int] = field(default_factory=list)
         NUM_FILTERS: List[int] = field(default_factory=list)
@@ -75,8 +75,8 @@ class BaseBackbone2d(ArchM):
         self.POOLING_F = \
             [ArchM.get_func(fset, name)
              for fset, name in [(ArchM.ActivationFuncs, self.cfg.ACTIVATION),
-                                  (ArchM.NormalizationFuncs, self.cfg.NORMALIZATION),
-                                  (ArchM.PoolingFuncs, self.cfg.POOLING)]]
+                                (ArchM.NormalizationFuncs, self.cfg.NORMALIZATION),
+                                (ArchM.PoolingFuncs, self.cfg.POOLING)]]
 
     def __init__(self, remote_cfg: Union[RemoteJsonConfig, RemoteYamlConfig]):  # remove CFG and refer to self
         """
@@ -86,7 +86,7 @@ class BaseBackbone2d(ArchM):
         :param args:
         :type args:
         """
-        super(BaseBackbone2d, self).__init__()
+        super().__init__()
 
         config: Union[BaseBackbone2d._YamlCFG, BaseBackbone2d._JsonCFG]  # TODO refactor this
         if remote_cfg.FILE_TYPE == "JSON":

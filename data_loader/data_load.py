@@ -2,6 +2,7 @@ import dataclasses
 import os
 
 import torch
+from torch import nn
 
 from dataset.datasets_csv import CSVLoader
 import torchvision.transforms as transforms
@@ -22,6 +23,8 @@ class Parameters:
     workers: int
     episodeSize: int
     test_ep_size: int
+    batch_sz: int
+
 
 
 @dataclasses.dataclass
@@ -34,11 +37,12 @@ class Loaders:
 class DatasetLoader:
 
     def __init__(self, cfg, params: Parameters) -> None:
+        self.transforms_ls = []
         self.params = params
         self.cfg = cfg
 
-    def augment(self):  # TODO add augments
-        pass
+    def augment(self, transform: nn.Module):
+        self.transforms_ls = [transform] + self.transforms_ls
 
     def load_data(self, mode, F_txt):
         # ======================================= Folder of Datasets =======================================
@@ -52,18 +56,20 @@ class DatasetLoader:
         episode_train_num = self.params.episode_train_num
         episode_val_num = self.params.episode_val_num
         episode_test_num = self.params.episode_test_num
-        transform_ls = []
+        transform_ls = self.transforms_ls
         for TF in self.cfg.TRANSFORMS:
+            if not TF.ENABLE:
+                continue
             t = getattr(transforms, TF.NAME)
             if TF.ARGS:
-                t = t(tuple(TF.ARGS))
+                if isinstance(TF.ARGS, dict):
+                    t = t(**TF.ARGS)
+                else:
+                    t = t(*tuple(TF.ARGS))
             transform_ls.append(t)
-
-        ImgTransform = transforms.Compose([  # TODO augmentation cfg
-            transforms.Resize((img_sz, img_sz)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ])
+        transform_ls += [transforms.ToTensor(),
+                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        ImgTransform = transforms.Compose(transform_ls)
 
         trainset = CSVLoader(
             data_dir=dataset_dir, mode=mode, image_size=img_sz, transform=ImgTransform,

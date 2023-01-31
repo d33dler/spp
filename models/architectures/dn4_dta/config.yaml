@@ -3,26 +3,36 @@ NUM_CLASSES: 5
 BATCH_SIZE: 75
 K_NEIGHBORS: 3
 USE_BIAS: True
-#TODO remote config overwrite from main cfg
+#TODO remote config overwrite from main cfg (low priority)
 #Model skeleton
-TOPOLOGY: [ 'BACKBONE_2D', 'ENCODER', 'KNN', 'DT' ] # listing here includes module (BACKBONE & KNN are enforced)
+TOPOLOGY: [ 'BACKBONE_2D', 'ENCODER', 'DT' ] # listing here includes module (BACKBONE & KNN are enforced)
+
 BACKBONE_2D:
   NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
   MODE: TEST
   NORM: batch
   CUDA: True
+  LEARNING_RATE: 0.005
+  BETA_ONE: [ 0.5,0.9 ]
+  INIT_WEIGHTS: kaiming
+
 ENCODER:
-  NAME: DN
+  NAME: DefaultDual
   MODE: TRAIN
   NORM: batch
   CUDA: True
-KNN:
-  NAME: KNN_itc
-  MODE: None # = TEST, no grad calculations required
+  FLATTENED_INPUT: 40000
+  INPUT_SIZE: 64
+  SMAX_LR: 0.1
+  RED_LR: 0.005
+  BETA_ONE: [ 0.5,0.9 ]
+  INIT_WEIGHTS: kaiming
+
 DT:
   NAME: XGB # XGB | RF
   MODE: TRAIN
   CUDA: True
+  PARAMETERS: { } # add parameters here to override default settings
 
 
 AUGMENTOR:
@@ -38,7 +48,7 @@ AUGMENTOR:
     },
     { NAME: ColorJitter,
       ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
-      ENABLE: True
+      ENABLE: False
     },
     { NAME: RandomHorizontalFlip,
       ARGS: [ ],
@@ -48,25 +58,24 @@ AUGMENTOR:
 
 
 #BACKBONE & ENCODER
-LEARNING_RATE: 0.04
-BETA_ONE: 1
+
 #Decision Tree
 DATASET:
 
 
 # Dataloader
-DATASET_DIR: '/Datasets/miniImageNet/'
+DATASET_DIR: '../dataset/miniImageNet/'
 DATA_NAME: 'miniImageNet'
-OUTF: './results/DN4'
+OUTF: '../results/DN4'
 BASEMODEL: 'Conv64F'
 WORKERS: 8
 IMAGE_SIZE: 84
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 EPOCHS: 30
-EPISODE_TRAIN_NUM: 100
-EPISODE_VAL_NUM: 1000
-EPISODE_TEST_NUM: 1000
+EPISODE_TRAIN_NUM: 1
+EPISODE_VAL_NUM: 1
+EPISODE_TEST_NUM: 300
 WAY_NUM: 5
 SHOT_NUM: 5
 QUERY_NUM: 15

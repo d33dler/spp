@@ -5,10 +5,11 @@ from scipy.special import softmax
 from pandas import DataFrame
 from torch import nn
 
+from models.interfaces.arch_module import ArchM
 from models.utilities.utils import DataHolder
 
 
-class DTree(nn.Module):
+class DTree(ArchM.Child):
     is_fit = False
     features: List[str] = []
     base_features: List[str] = []
@@ -23,6 +24,8 @@ class DTree(nn.Module):
 
     def __init__(self, data: DataHolder):
         super().__init__()
+        self.set_optimize(False)
+        self.optimizer = None
         self.num_classes = data.num_classes
 
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):

@@ -3,6 +3,8 @@ General utilities
 """
 from __future__ import print_function
 
+import functools
+import gc
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Any
@@ -12,8 +14,12 @@ import torch
 import yaml
 from easydict import EasyDict
 from pandas import DataFrame
-from torch import Tensor
-from torch.nn import BatchNorm2d
+from torch import Tensor, nn, nn as nn
+from torch.nn import BatchNorm2d, init
+
+
+def save_checkpoint(state, filename='checkpoint.pth.tar'):
+    torch.save(state, filename)
 
 
 def load_config(config: Path):
@@ -31,34 +37,39 @@ def print_network(net):
 
 
 @dataclass
-class DataHolder:
+class DataHolderBase:
     """
-    Module IO object
-    """
+     Module IO object
+     """
+
+    cfg: Any
+    module_list: List[nn.Module]
     k_neighbors: int  # 1 - num_classes
     use_bias: bool
     norm_layer: Any  # torch
 
+
+@dataclass
+class DataHolder(DataHolderBase):
+    """
+    Module IO specification object
+    """
     # Classification
     num_classes: int
-
     # Input
     q_in: Tensor
     S_in: List[Tensor]
-    targets: Tensor  # TODO assign !
-    # Backbone2d-out
+    targets: Tensor
+    # Backbone2d OUTPUT
     q: Tensor
+    S_raw: Tensor
     S: List[Tensor]  # CUDA
-    # KNN-out
-    knn_list: List[List]
-    knn_raw: List[List]
-    q_N: Tensor
-    # Encoder
-    q_sm: Tensor
-    q_enc: Tensor
-    loss_q_sm: Tensor
-    loss_q_enc: Tensor
-    S_enc: List[Tensor]
+    sim_list_BACKBONE2D: Tensor  # CUDA
+    # Encoder OUTPUT
+    q_smax: Tensor
+    q_reduced: Tensor
+    S_reduced: List[Tensor]
+    sim_list_REDUCED: Tensor
     # Tree fit input
     X: DataFrame
     y: DataFrame
@@ -74,6 +85,17 @@ class DataHolder:
         self.k_neighbors = cfg.K_NEIGHBORS
         self.use_bias = cfg.USE_BIAS
         self.norm_layer = BatchNorm2d
+        self.num_classes = cfg.NUM_CLASSES
+
+    def clear(self):
+        del self.q_in
+        del self.S_in
+        del self.q
+        del self.S
+        del self.S_reduced
+        del self.q_reduced
+        del self.S_raw
+        gc.collect()
 
 
 class AverageMeter(object):
@@ -110,3 +132,80 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].reshape((-1,)).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
+
+
+def weights_init_normal(m):
+    classname = m.__class__.__name__
+    # print(classname)
+    if classname.find('Conv') != -1:
+        init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('Linear') != -1:
+        init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm2d') != -1:
+        init.normal_(m.weight.data, 1.0, 0.02)
+        init.constant_(m.bias.data, 0.0)
+
+
+def weights_init_xavier(m):
+    classname = m.__class__.__name__
+    # print(classname)
+    if classname.find('Conv') != -1:
+        init.xavier_normal_(m.weight.data, gain=0.02)
+    elif classname.find('Linear') != -1:
+        init.xavier_normal_(m.weight.data, gain=0.02)
+    elif classname.find('BatchNorm2d') != -1:
+        init.normal_(m.weight.data, 1.0, 0.02)
+        init.constant_(m.bias.data, 0.0)
+
+
+def weights_init_kaiming(m):
+    classname = m.__class__.__name__
+    # print(classname)
+    if classname.find('Conv') != -1:
+        init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
+    elif classname.find('Linear') != -1:
+        init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
+    elif classname.find('BatchNorm2d') != -1:
+        init.normal_(m.weight.data, 1.0, 0.02)
+        init.constant_(m.bias.data, 0.0)
+
+
+def weights_init_orthogonal(m):
+    classname = m.__class__.__name__
+    print(classname)
+    if classname.find('Conv') != -1:
+        init.orthogonal_(m.weight.data, gain=1)
+    elif classname.find('Linear') != -1:
+        init.orthogonal_(m.weight.data, gain=1)
+    elif classname.find('BatchNorm2d') != -1:
+        init.normal_(m.weight.data, 1.0, 0.02)
+        init.constant_(m.bias.data, 0.0)
+
+
+def init_weights(net, init_type='normal'):
+    print('initialization method [%s]' % init_type)
+    if init_type == 'normal':
+        net.apply(weights_init_normal)
+    elif init_type == 'xavier':
+        net.apply(weights_init_xavier)
+    elif init_type == 'kaiming':
+        net.apply(weights_init_kaiming)
+    elif init_type == 'orthogonal':
+        net.apply(weights_init_orthogonal)
+    else:
+        raise NotImplementedError('initialization method [%s] is not implemented' % init_type)
+
+
+def get_norm_layer(norm_type='instance'):
+    if norm_type == 'batch':
+        norm_layer = functools.partial(nn.BatchNorm2d, affine=True)
+    elif norm_type == 'instance':
+        norm_layer = functools.partial(nn.InstanceNorm2d, affine=False)
+    elif norm_type == 'none':
+        norm_layer = None
+    else:
+        raise NotImplementedError('normalization layer [%s] is not found' % norm_type)
+
+    use_bias = norm_layer.func == nn.InstanceNorm2d
+
+    return norm_layer, use_bias
