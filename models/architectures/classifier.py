@@ -34,7 +34,7 @@ class ClassifierModel(nn.Module):
         p = Parameters(c.IMG_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE)
-        self.data_loader = DatasetLoader(p)
+        self.data_loader = DatasetLoader(model_cfg.AUGMENTOR, p)
         self._set_mode()
 
     def _set_mode(self):
@@ -165,8 +165,6 @@ class ClassifierModel(nn.Module):
             dt_head.ranks_ix = ranks_ix
 
             y_col_ix = tree_df.columns.get_indexer(["y"])
-            pca_n = PCA(n_components=16)
-            self.pca_n = pca_n
             normalizer = torch.nn.BatchNorm2d(64)
 
             with torch.no_grad():

@@ -44,7 +44,7 @@ class Encoder(nn.Module):
     def forward(self):
         # Extract the encoder part of the autoencoder
         data = self.data
-        C, h, w = self.data.q.size()
+        B, C, h, w = self.data.q.size()
         encoder_sm = self.encoder_smax
         encoder_conv = self.encoder_conv
 
@@ -58,12 +58,6 @@ class Encoder(nn.Module):
             S_enc.append(encoder_conv(s))
         data.S_enc = S_enc
         return data
-
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        loss = self.criterion(y_hat, y)
-        return loss
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         return super().predict_step(batch, batch_idx, dataloader_idx)

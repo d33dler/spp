@@ -25,6 +25,28 @@ DT:
   CUDA: True
 
 
+AUGMENTOR:
+  TRANSFORMS: [
+    {
+      NAME: Resize,
+      ARGS: [ [ 100,100 ] ],
+      ENABLE: True,
+    },
+    { NAME: RandomCrop,
+      ARGS: [ 48 ],
+      ENABLE: False
+    },
+    { NAME: ColorJitter,
+      ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
+      ENABLE: True
+    },
+    { NAME: RandomHorizontalFlip,
+      ARGS: [ ],
+      ENABLE: False
+    }
+  ]
+
+
 #BACKBONE & ENCODER
 LEARNING_RATE: 0.04
 BETA_ONE: 1

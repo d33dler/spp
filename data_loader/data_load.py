@@ -33,8 +33,9 @@ class Loaders:
 
 class DatasetLoader:
 
-    def __init__(self, params: Parameters) -> None:
+    def __init__(self, cfg, params: Parameters) -> None:
         self.params = params
+        self.cfg = cfg
 
     def augment(self):  # TODO add augments
         pass
@@ -51,6 +52,13 @@ class DatasetLoader:
         episode_train_num = self.params.episode_train_num
         episode_val_num = self.params.episode_val_num
         episode_test_num = self.params.episode_test_num
+        transform_ls = []
+        for TF in self.cfg.TRANSFORMS:
+            t = getattr(transforms, TF.NAME)
+            if TF.ARGS:
+                t = t(tuple(TF.ARGS))
+            transform_ls.append(t)
+
         ImgTransform = transforms.Compose([  # TODO augmentation cfg
             transforms.Resize((img_sz, img_sz)),
             transforms.ToTensor(),

@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import torch
 from pandas import DataFrame
-from sklearn.decomposition import PCA
 from torch import nn, optim
 from torch.nn.functional import one_hot
 
@@ -25,7 +24,6 @@ class DN4_DTA(ClassifierModel):
                           ↘  [Encoder-NN]  ↗
     """
     normalizer = torch.nn.BatchNorm2d(64)
-    pca_n = PCA(n_components=64)
 
     def __init__(self):
         self.loaders = None
