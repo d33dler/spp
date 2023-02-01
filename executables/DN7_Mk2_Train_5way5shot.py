@@ -29,7 +29,7 @@ from PIL import ImageFile
 
 from models.architectures.classifier import ClassifierModel
 from models.architectures.dn4_dta.dn4_mk2 import DN4_DTR
-from models.architectures.dn7_dta.dn4_mk2 import DN7_DTR
+from models.architectures.dn7_dta.dn7_mk2 import DN7_DTR
 from models.utilities.utils import AverageMeter, accuracy, save_checkpoint
 
 sys.dont_write_bytecode = True

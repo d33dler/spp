@@ -1,4 +1,4 @@
-from .autoencoder.encoder import Encoder
+from .encoders.encoder import Encoder
 
 __all__ = {
     'DefaultDual': Encoder

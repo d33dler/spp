@@ -2,7 +2,6 @@ from typing import Any, OrderedDict
 
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
 from lightning_fabric.wrappers import T_destination
 from torch import optim, Tensor
 
@@ -56,7 +55,7 @@ class Encoder(ArchM.Child):
         self.knn = KNN_itc(data.k_neighbors)
 
     def forward(self):
-        # Extract the encoder part of the autoencoder
+        # Extract the encoder part of the encoders
         data = self.data
         B, C, h, w = self.data.q.size()
         encoder_sm = self.encoder_smax
@@ -78,7 +77,7 @@ class Encoder(ArchM.Child):
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         return super().predict_step(batch, batch_idx, dataloader_idx)
 
-    def state_dict(self, destination: T_destination = None, prefix: str = '', keep_vars: bool = False) -> T_destination:
+    def state_dict(self, destination = None, prefix: str = '', keep_vars: bool = False) :
         return {
             'ENCODER_CONV': self.encoder_conv.state_dict(destination, prefix, keep_vars),
             'ENCODER_SMAX': self.encoder_smax.state_dict(destination, prefix, keep_vars)

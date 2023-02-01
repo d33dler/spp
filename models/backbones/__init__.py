@@ -4,7 +4,7 @@ from models.backbones.resnet.resnet_256 import ResNetLike
 
 __all__ = {
     'DN4_CNN2d': FourLayer_64F,
-    'DN7_CNN2d': FourLayer_64F,
+    'DN7_CNN2d': SevenLayer_64F,
     'ResNet2d': ResNetLike
 }
 
