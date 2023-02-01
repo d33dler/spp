@@ -3786,3 +3786,618 @@ Trainset: 1
 Valset: 1
 Testset: 300
 ============ validation on the val set ============
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=40000, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.1, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.1, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): LogSoftmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 2
+Valset: 2
+Testset: 300
+============ validation on the val set ============
+ * Prec@1 20.000 Best_prec1 0.000
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=40000, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.1, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.1, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): LogSoftmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 2
+Valset: 2
+Testset: 300
+============ validation on the val set ============
+ * Prec@1 20.000 Best_prec1 0.000
+============ Testing on the test set ============
+Test-(0): [100/300]	Time 0.256 (0.283)	Loss 172.936 (145.310)	Prec@1 20.000 (20.449)
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=40000, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.1, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.1, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): LogSoftmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 2
+Valset: 2
+Testset: 2
+============ validation on the val set ============
+ * Prec@1 20.000 Best_prec1 0.000
+============ Testing on the test set ============
+ * Prec@1 20.000 Best_prec1 20.000
+===================================== Epoch 1 =====================================
+Trainset: 2
+Valset: 2
+Testset: 2
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar' (epoch 2)
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=40000, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.1, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.1, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): LogSoftmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 2
+Valset: 2
+Testset: 2
+============ validation on the val set ============
+ * Prec@1 20.000 Best_prec1 0.000
+============ Testing on the test set ============
+ * Prec@1 20.000 Best_prec1 20.000
+===================================== Epoch 1 =====================================
+Trainset: 2
+Valset: 2
+Testset: 2
+============ validation on the val set ============
+ * Prec@1 20.000 Best_prec1 20.000
+============ Testing on the test set ============
+ * Prec@1 20.000 Best_prec1 20.000
+===================================== Epoch 2 =====================================
+Trainset: 2
+Valset: 2
+Testset: 2
+============ validation on the val set ============
+ * Prec@1 21.333 Best_prec1 20.000
+============ Testing on the test set ============
+ * Prec@1 20.000 Best_prec1 21.333
+============ validation on the val set ============
+Trainset: 2
+Valset: 2
+Testset: 2
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar', epochs=10, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar' (epoch 2)
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=40000, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.1, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.1, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): LogSoftmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 5000
+Valset: 500
+Testset: 500
+Eposide-(0): [100/5000]	Time 0.441 (0.473)	Data 0.000 (0.008)	Loss 81.983 (135.194)	Prec@1 20.000 (20.911)
+Eposide-(0): [200/5000]	Time 0.431 (0.459)	Data 0.000 (0.004)	Loss 73.709 (99.658)	Prec@1 24.000 (20.935)
+Eposide-(0): [300/5000]	Time 0.418 (0.451)	Data 0.000 (0.003)	Loss 36.338 (79.412)	Prec@1 20.000 (20.811)
+Eposide-(0): [400/5000]	Time 0.432 (0.448)	Data 0.000 (0.002)	Loss 29.605 (66.618)	Prec@1 20.000 (20.838)
+Eposide-(0): [500/5000]	Time 0.446 (0.447)	Data 0.001 (0.002)	Loss 5.407 (56.979)	Prec@1 20.000 (20.884)
+Eposide-(0): [600/5000]	Time 0.437 (0.445)	Data 0.000 (0.002)	Loss 17.188 (49.604)	Prec@1 26.667 (20.936)
+Eposide-(0): [700/5000]	Time 0.436 (0.444)	Data 0.000 (0.001)	Loss 7.923 (45.284)	Prec@1 20.000 (20.909)
+Eposide-(0): [800/5000]	Time 0.434 (0.444)	Data 0.000 (0.001)	Loss 13.143 (41.126)	Prec@1 20.000 (20.884)
+Eposide-(0): [900/5000]	Time 0.420 (0.442)	Data 0.000 (0.001)	Loss 5.900 (37.383)	Prec@1 20.000 (20.904)
+Eposide-(0): [1000/5000]	Time 0.433 (0.442)	Data 0.000 (0.001)	Loss 8.316 (34.254)	Prec@1 20.000 (20.900)
+Eposide-(0): [1100/5000]	Time 0.469 (0.442)	Data 0.000 (0.001)	Loss 4.623 (31.579)	Prec@1 20.000 (20.908)
+Eposide-(0): [1200/5000]	Time 0.439 (0.444)	Data 0.000 (0.001)	Loss 2.670 (29.293)	Prec@1 22.667 (20.924)
+Eposide-(0): [1300/5000]	Time 0.434 (0.444)	Data 0.000 (0.001)	Loss 1.859 (27.333)	Prec@1 20.000 (20.935)
+Eposide-(0): [1400/5000]	Time 0.435 (0.444)	Data 0.000 (0.001)	Loss 4.763 (25.639)	Prec@1 20.000 (20.921)
+Eposide-(0): [1500/5000]	Time 0.436 (0.443)	Data 0.000 (0.001)	Loss 4.075 (24.132)	Prec@1 20.000 (20.924)
+Eposide-(0): [1600/5000]	Time 0.432 (0.443)	Data 0.000 (0.001)	Loss 2.052 (22.794)	Prec@1 21.333 (20.934)
+Eposide-(0): [1700/5000]	Time 0.430 (0.443)	Data 0.000 (0.001)	Loss 2.236 (21.598)	Prec@1 20.000 (20.916)
+Eposide-(0): [1800/5000]	Time 0.433 (0.443)	Data 0.000 (0.001)	Loss 2.558 (20.540)	Prec@1 20.000 (20.907)
+Eposide-(0): [1900/5000]	Time 0.443 (0.443)	Data 0.000 (0.001)	Loss 1.727 (19.591)	Prec@1 20.000 (20.906)
+Eposide-(0): [2000/5000]	Time 0.449 (0.443)	Data 0.001 (0.001)	Loss 1.916 (18.729)	Prec@1 20.000 (20.923)
+Eposide-(0): [2100/5000]	Time 0.440 (0.443)	Data 0.000 (0.001)	Loss 2.416 (17.945)	Prec@1 21.333 (20.926)
+Eposide-(0): [2200/5000]	Time 0.446 (0.443)	Data 0.000 (0.001)	Loss 1.933 (17.230)	Prec@1 22.667 (20.917)
+Eposide-(0): [2300/5000]	Time 0.428 (0.442)	Data 0.000 (0.001)	Loss 1.971 (16.569)	Prec@1 20.000 (20.909)
+Eposide-(0): [2400/5000]	Time 0.455 (0.442)	Data 0.001 (0.001)	Loss 1.687 (15.962)	Prec@1 20.000 (20.906)
+Eposide-(0): [2500/5000]	Time 0.441 (0.442)	Data 0.000 (0.001)	Loss 2.033 (15.403)	Prec@1 20.000 (20.921)
+Eposide-(0): [2600/5000]	Time 0.429 (0.442)	Data 0.000 (0.001)	Loss 2.226 (14.890)	Prec@1 21.333 (20.905)
+Eposide-(0): [2700/5000]	Time 0.537 (0.442)	Data 0.000 (0.001)	Loss 1.673 (14.411)	Prec@1 20.000 (20.901)
+Eposide-(0): [2800/5000]	Time 0.446 (0.444)	Data 0.000 (0.001)	Loss 2.401 (13.964)	Prec@1 20.000 (20.911)
+Eposide-(0): [2900/5000]	Time 0.466 (0.444)	Data 0.000 (0.001)	Loss 3.420 (13.548)	Prec@1 22.667 (20.923)
+Eposide-(0): [3000/5000]	Time 0.441 (0.444)	Data 0.000 (0.001)	Loss 1.702 (13.159)	Prec@1 20.000 (20.917)
+Eposide-(0): [3100/5000]	Time 0.427 (0.445)	Data 0.001 (0.001)	Loss 1.664 (12.794)	Prec@1 20.000 (20.916)
+Eposide-(0): [3200/5000]	Time 0.440 (0.445)	Data 0.000 (0.001)	Loss 1.772 (12.450)	Prec@1 20.000 (20.928)
+Eposide-(0): [3300/5000]	Time 0.437 (0.445)	Data 0.000 (0.001)	Loss 1.688 (12.128)	Prec@1 21.333 (20.921)
+Eposide-(0): [3400/5000]	Time 0.419 (0.445)	Data 0.000 (0.001)	Loss 1.619 (11.823)	Prec@1 21.333 (20.926)
+Eposide-(0): [3500/5000]	Time 0.440 (0.445)	Data 0.000 (0.001)	Loss 1.682 (11.535)	Prec@1 20.000 (20.931)
+Eposide-(0): [3600/5000]	Time 0.463 (0.445)	Data 0.000 (0.001)	Loss 1.839 (11.264)	Prec@1 20.000 (20.942)
+Eposide-(0): [3700/5000]	Time 0.545 (0.445)	Data 0.000 (0.001)	Loss 1.748 (11.007)	Prec@1 20.000 (20.944)
+Eposide-(0): [3800/5000]	Time 0.462 (0.445)	Data 0.000 (0.001)	Loss 1.690 (10.763)	Prec@1 21.333 (20.944)
+Eposide-(0): [3900/5000]	Time 0.451 (0.445)	Data 0.000 (0.001)	Loss 1.663 (10.531)	Prec@1 25.333 (20.944)
+Eposide-(0): [4000/5000]	Time 0.450 (0.445)	Data 0.000 (0.001)	Loss 1.740 (10.310)	Prec@1 20.000 (20.944)
+Eposide-(0): [4100/5000]	Time 0.444 (0.445)	Data 0.000 (0.001)	Loss 1.636 (10.100)	Prec@1 20.000 (20.944)
+Eposide-(0): [4200/5000]	Time 0.445 (0.445)	Data 0.000 (0.001)	Loss 1.619 (9.899)	Prec@1 20.000 (20.941)
+Eposide-(0): [4300/5000]	Time 0.441 (0.445)	Data 0.000 (0.001)	Loss 1.653 (9.708)	Prec@1 20.000 (20.939)
+Eposide-(0): [4400/5000]	Time 0.430 (0.445)	Data 0.000 (0.001)	Loss 1.755 (9.526)	Prec@1 20.000 (20.945)
+Eposide-(0): [4500/5000]	Time 0.428 (0.445)	Data 0.000 (0.001)	Loss 1.627 (9.351)	Prec@1 20.000 (20.948)
+Eposide-(0): [4600/5000]	Time 0.426 (0.445)	Data 0.000 (0.001)	Loss 1.655 (9.184)	Prec@1 20.000 (20.951)
+Eposide-(0): [4700/5000]	Time 0.445 (0.446)	Data 0.000 (0.001)	Loss 1.624 (9.024)	Prec@1 21.333 (20.948)
+Eposide-(0): [4800/5000]	Time 0.443 (0.446)	Data 0.000 (0.001)	Loss 1.623 (8.870)	Prec@1 20.000 (20.950)
+Eposide-(0): [4900/5000]	Time 0.449 (0.445)	Data 0.000 (0.000)	Loss 1.702 (8.723)	Prec@1 20.000 (20.946)
+============ validation on the val set ============
+Test-(0): [100/500]	Time 0.267 (0.282)	Loss 1.635 (1.646)	Prec@1 20.000 (20.000)
+Test-(0): [200/500]	Time 0.272 (0.276)	Loss 1.621 (1.647)	Prec@1 20.000 (20.000)
+Test-(0): [300/500]	Time 0.271 (0.274)	Loss 1.646 (1.648)	Prec@1 20.000 (20.000)
+Test-(0): [400/500]	Time 0.251 (0.273)	Loss 1.626 (1.648)	Prec@1 20.000 (20.003)
+ * Prec@1 20.003 Best_prec1 0.000
+============ Testing on the test set ============
+Test-(0): [100/500]	Time 0.258 (0.284)	Loss 1.636 (1.641)	Prec@1 20.000 (20.000)
+Test-(0): [200/500]	Time 0.259 (0.277)	Loss 1.651 (1.645)	Prec@1 20.000 (20.000)
+Test-(0): [300/500]	Time 0.295 (0.276)	Loss 1.614 (1.645)	Prec@1 20.000 (20.000)
+Test-(0): [400/500]	Time 0.263 (0.274)	Loss 1.620 (1.646)	Prec@1 20.000 (20.000)
+ * Prec@1 20.016 Best_prec1 20.003
+===================================== Epoch 1 =====================================
+Trainset: 5000
+Valset: 500
+Testset: 500
+Eposide-(5000): [100/5000]	Time 0.496 (0.454)	Data 0.000 (0.006)	Loss 1.611 (1.637)	Prec@1 20.000 (21.069)
+Eposide-(5000): [200/5000]	Time 0.443 (0.451)	Data 0.000 (0.003)	Loss 1.641 (1.639)	Prec@1 22.667 (21.075)
+Eposide-(5000): [300/5000]	Time 0.437 (0.449)	Data 0.000 (0.002)	Loss 1.631 (1.636)	Prec@1 20.000 (21.045)
+Eposide-(5000): [400/5000]	Time 0.456 (0.448)	Data 0.001 (0.002)	Loss 1.610 (1.634)	Prec@1 25.333 (21.104)
+Eposide-(5000): [500/5000]	Time 0.427 (0.448)	Data 0.000 (0.001)	Loss 1.620 (1.632)	Prec@1 20.000 (21.078)
+Eposide-(5000): [600/5000]	Time 0.445 (0.448)	Data 0.000 (0.001)	Loss 1.619 (1.630)	Prec@1 22.667 (21.032)
+Eposide-(5000): [700/5000]	Time 0.461 (0.447)	Data 0.000 (0.001)	Loss 1.610 (1.629)	Prec@1 20.000 (20.993)
+Eposide-(5000): [800/5000]	Time 0.429 (0.447)	Data 0.000 (0.001)	Loss 1.617 (1.627)	Prec@1 20.000 (20.960)
+Eposide-(5000): [900/5000]	Time 0.455 (0.446)	Data 0.000 (0.001)	Loss 1.617 (1.626)	Prec@1 21.333 (20.959)
+Eposide-(5000): [1000/5000]	Time 0.436 (0.447)	Data 0.000 (0.001)	Loss 1.611 (1.625)	Prec@1 22.667 (20.963)
+Eposide-(5000): [1100/5000]	Time 0.442 (0.447)	Data 0.000 (0.001)	Loss 1.610 (1.624)	Prec@1 20.000 (20.964)
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=10, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 5000
+Valset: 500
+Testset: 500
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=10, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+DN7_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 5000
+Valset: 500
+Testset: 500
+Eposide-(0): [100/5000]	Time 0.335 (0.352)	Data 0.000 (0.011)	Loss 1.598 (2.343)	Prec@1 29.333 (29.729)
+Eposide-(0): [200/5000]	Time 0.329 (0.346)	Data 0.001 (0.006)	Loss 1.497 (1.975)	Prec@1 32.000 (29.831)
+Eposide-(0): [300/5000]	Time 0.355 (0.353)	Data 0.000 (0.004)	Loss 1.398 (1.844)	Prec@1 42.667 (30.100)
+Eposide-(0): [400/5000]	Time 0.343 (0.352)	Data 0.001 (0.003)	Loss 1.679 (1.765)	Prec@1 28.000 (31.026)
+Eposide-(0): [500/5000]	Time 0.337 (0.351)	Data 0.001 (0.003)	Loss 1.404 (1.718)	Prec@1 44.000 (31.705)
+Eposide-(0): [600/5000]	Time 0.332 (0.350)	Data 0.001 (0.003)	Loss 1.577 (1.684)	Prec@1 28.000 (32.288)
+Eposide-(0): [700/5000]	Time 0.348 (0.349)	Data 0.000 (0.002)	Loss 1.618 (1.656)	Prec@1 28.000 (32.850)
+Eposide-(0): [800/5000]	Time 0.332 (0.349)	Data 0.001 (0.002)	Loss 1.455 (1.632)	Prec@1 38.667 (33.635)
+Eposide-(0): [900/5000]	Time 0.357 (0.348)	Data 0.001 (0.002)	Loss 1.409 (1.612)	Prec@1 49.333 (34.306)
+Eposide-(0): [1000/5000]	Time 0.317 (0.347)	Data 0.001 (0.002)	Loss 1.384 (1.597)	Prec@1 37.333 (34.740)
+Eposide-(0): [1100/5000]	Time 0.329 (0.347)	Data 0.001 (0.002)	Loss 1.484 (1.582)	Prec@1 36.000 (35.355)
+Eposide-(0): [1200/5000]	Time 0.337 (0.348)	Data 0.001 (0.002)	Loss 1.501 (1.568)	Prec@1 42.667 (35.811)
+Eposide-(0): [1300/5000]	Time 0.349 (0.348)	Data 0.001 (0.002)	Loss 1.508 (1.560)	Prec@1 33.333 (35.976)
+Eposide-(0): [1400/5000]	Time 0.340 (0.349)	Data 0.001 (0.002)	Loss 1.389 (1.551)	Prec@1 40.000 (36.248)
+Eposide-(0): [1500/5000]	Time 0.327 (0.349)	Data 0.001 (0.002)	Loss 1.268 (1.543)	Prec@1 53.333 (36.589)
+Eposide-(0): [1600/5000]	Time 0.321 (0.348)	Data 0.001 (0.002)	Loss 1.412 (1.535)	Prec@1 54.667 (36.924)
+Eposide-(0): [1700/5000]	Time 0.342 (0.347)	Data 0.001 (0.002)	Loss 1.301 (1.526)	Prec@1 50.667 (37.367)
+Eposide-(0): [1800/5000]	Time 0.369 (0.347)	Data 0.001 (0.002)	Loss 1.410 (1.518)	Prec@1 49.333 (37.675)
+Eposide-(0): [1900/5000]	Time 0.349 (0.347)	Data 0.001 (0.002)	Loss 1.233 (1.512)	Prec@1 49.333 (37.941)
+Eposide-(0): [2000/5000]	Time 0.343 (0.347)	Data 0.001 (0.002)	Loss 1.320 (1.505)	Prec@1 38.667 (38.234)
+Eposide-(0): [2100/5000]	Time 0.348 (0.347)	Data 0.001 (0.002)	Loss 1.350 (1.499)	Prec@1 38.667 (38.518)
+Eposide-(0): [2200/5000]	Time 0.336 (0.347)	Data 0.001 (0.002)	Loss 1.656 (1.493)	Prec@1 28.000 (38.828)
+Eposide-(0): [2300/5000]	Time 0.356 (0.347)	Data 0.001 (0.002)	Loss 1.102 (1.488)	Prec@1 62.667 (39.053)
+Eposide-(0): [2400/5000]	Time 0.374 (0.347)	Data 0.002 (0.001)	Loss 1.013 (1.480)	Prec@1 61.333 (39.386)
+Eposide-(0): [2500/5000]	Time 0.331 (0.348)	Data 0.001 (0.001)	Loss 1.537 (1.475)	Prec@1 30.667 (39.607)
+Eposide-(0): [2600/5000]	Time 0.328 (0.347)	Data 0.001 (0.001)	Loss 1.369 (1.470)	Prec@1 41.333 (39.845)
+Eposide-(0): [2700/5000]	Time 0.337 (0.347)	Data 0.001 (0.001)	Loss 1.482 (1.465)	Prec@1 33.333 (40.048)
+Eposide-(0): [2800/5000]	Time 0.337 (0.347)	Data 0.001 (0.001)	Loss 1.499 (1.460)	Prec@1 36.000 (40.282)
+Eposide-(0): [2900/5000]	Time 0.331 (0.347)	Data 0.001 (0.001)	Loss 1.404 (1.454)	Prec@1 50.667 (40.541)
+Eposide-(0): [3000/5000]	Time 0.334 (0.347)	Data 0.001 (0.001)	Loss 1.183 (1.450)	Prec@1 57.333 (40.758)
+Eposide-(0): [3100/5000]	Time 0.353 (0.347)	Data 0.001 (0.001)	Loss 0.992 (1.444)	Prec@1 60.000 (41.048)
+Eposide-(0): [3200/5000]	Time 0.347 (0.347)	Data 0.001 (0.001)	Loss 1.996 (1.440)	Prec@1 24.000 (41.233)
+Eposide-(0): [3300/5000]	Time 0.345 (0.346)	Data 0.001 (0.001)	Loss 1.528 (1.435)	Prec@1 46.667 (41.431)
+Eposide-(0): [3400/5000]	Time 0.341 (0.346)	Data 0.001 (0.001)	Loss 1.312 (1.432)	Prec@1 50.667 (41.579)
+Eposide-(0): [3500/5000]	Time 0.341 (0.346)	Data 0.000 (0.001)	Loss 1.256 (1.427)	Prec@1 41.333 (41.763)
+Eposide-(0): [3600/5000]	Time 0.335 (0.346)	Data 0.001 (0.001)	Loss 0.985 (1.424)	Prec@1 62.667 (41.927)
+Eposide-(0): [3700/5000]	Time 0.334 (0.346)	Data 0.001 (0.001)	Loss 1.204 (1.420)	Prec@1 50.667 (42.103)
+Eposide-(0): [3800/5000]	Time 0.337 (0.346)	Data 0.001 (0.001)	Loss 1.437 (1.416)	Prec@1 37.333 (42.304)
+Eposide-(0): [3900/5000]	Time 0.334 (0.346)	Data 0.001 (0.001)	Loss 1.082 (1.411)	Prec@1 60.000 (42.568)
+Eposide-(0): [4000/5000]	Time 0.329 (0.346)	Data 0.001 (0.001)	Loss 1.571 (1.407)	Prec@1 38.667 (42.737)
+Eposide-(0): [4100/5000]	Time 0.330 (0.346)	Data 0.001 (0.001)	Loss 1.195 (1.403)	Prec@1 52.000 (42.927)
+Eposide-(0): [4200/5000]	Time 0.325 (0.346)	Data 0.001 (0.001)	Loss 1.097 (1.399)	Prec@1 54.667 (43.119)
+Eposide-(0): [4300/5000]	Time 0.326 (0.346)	Data 0.001 (0.001)	Loss 1.399 (1.395)	Prec@1 33.333 (43.329)
+Eposide-(0): [4400/5000]	Time 0.337 (0.345)	Data 0.001 (0.001)	Loss 1.030 (1.392)	Prec@1 60.000 (43.473)
+Eposide-(0): [4500/5000]	Time 0.329 (0.345)	Data 0.001 (0.001)	Loss 1.258 (1.388)	Prec@1 50.667 (43.659)
+Eposide-(0): [4600/5000]	Time 0.330 (0.345)	Data 0.002 (0.001)	Loss 1.059 (1.384)	Prec@1 56.000 (43.863)
+Eposide-(0): [4700/5000]	Time 0.364 (0.345)	Data 0.001 (0.001)	Loss 1.104 (1.380)	Prec@1 60.000 (44.018)
+Eposide-(0): [4800/5000]	Time 0.326 (0.345)	Data 0.001 (0.001)	Loss 1.196 (1.376)	Prec@1 54.667 (44.219)
+Eposide-(0): [4900/5000]	Time 0.336 (0.345)	Data 0.001 (0.001)	Loss 0.908 (1.373)	Prec@1 69.333 (44.407)
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+DN7_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 1
+Valset: 5
+Testset: 5
+============ validation on the val set ============
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=40000, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.1, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.1, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): LogSoftmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 5000
+Valset: 500
+Testset: 500
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+DN4_DTR(
+  (BACKBONE_2D): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=40000, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.1, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.1, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): LogSoftmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 5000
+Valset: 500
+Testset: 500

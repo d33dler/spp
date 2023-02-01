@@ -92,9 +92,6 @@ class DataHolder(DataHolderBase):
         del self.S_in
         del self.q
         del self.S
-        del self.S_reduced
-        del self.q_reduced
-        del self.S_raw
         gc.collect()
 
 

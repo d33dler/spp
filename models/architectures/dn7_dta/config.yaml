@@ -5,11 +5,11 @@ K_NEIGHBORS: 3
 USE_BIAS: True
 #TODO remote config overwrite from main cfg (low priority)
 #Model skeleton
-TOPOLOGY: [ 'BACKBONE_2D', 'ENCODER', 'DT' ] # listing here includes module (BACKBONE & KNN are enforced)
+TOPOLOGY: [ 'BACKBONE_2D', 'DT' ] # listing here includes module (BACKBONE & KNN are enforced)
 
 BACKBONE_2D:
-  NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
-  MODE: TEST
+  NAME: DN7_CNN2d # DN4_CNN2d |DN7_CNN2d |ResNet2d
+  MODE: TRAIN
   NORM: batch
   CUDA: True
   LEARNING_RATE: 0.005
@@ -66,7 +66,7 @@ DATASET:
 # Dataloader
 DATASET_DIR: '../dataset/miniImageNet/'
 DATA_NAME: 'miniImageNet'
-OUTF: '../results/DN4'
+OUTF: '../results/DN7'
 BASEMODEL: 'Conv64F'
 WORKERS: 8
 IMAGE_SIZE: 84

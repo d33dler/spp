@@ -56,7 +56,8 @@ class DatasetLoader:
         episode_train_num = self.params.episode_train_num
         episode_val_num = self.params.episode_val_num
         episode_test_num = self.params.episode_test_num
-        transform_ls = self.transforms_ls
+        transform_ls = []
+
         for TF in self.cfg.TRANSFORMS:
             if not TF.ENABLE:
                 continue
@@ -70,7 +71,7 @@ class DatasetLoader:
         transform_ls += [transforms.ToTensor(),
                          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         ImgTransform = transforms.Compose(transform_ls)
-
+        self.transforms_ls = transform_ls
         trainset = CSVLoader(
             data_dir=dataset_dir, mode=mode, image_size=img_sz, transform=ImgTransform,
             episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num

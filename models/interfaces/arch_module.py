@@ -131,7 +131,7 @@ class ArchM(nn.Module):
         }
         optimizers = {
             f"{k}_optim": v.optimizer.state_dict() if not isinstance(v.optimizer, list) else
-            [o.state_dict for o in v.optimizer] for k, v in self.module_topology.items()}
+            [o.state_dict() for o in v.optimizer] for k, v in self.module_topology.items() if v.optimizer is not None}
         state_dicts = {f"{k}_state_dict": v.state_dict() for k, v in self.module_topology.items()}
         state.update(optimizers)
         state.update(state_dicts)

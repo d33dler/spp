@@ -105,7 +105,7 @@ class ClassifierModel(ArchM):
         """
         # create empty dataframe
         batch_sz = self.model_cfg.BATCH_SIZE
-        dt_head: DTree = self.dt_head
+        dt_head: DTree = self.DT
         X_len = len(train_set) * batch_sz
         ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
@@ -164,8 +164,9 @@ class ClassifierModel(ArchM):
 
                     self.data.q_in, self.data.S_in = input_var1, input_var2
                     # Obtain and normalize the output
-                    output = self.forward()
-                    output = np.asarray([dt_head.normalize(x) for x in output.detach().cpu().numpy()])
+                    self.forward()
+                    output = np.asarray(
+                        [dt_head.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
                     target: np.ndarray = target.numpy()
                     # add measurements and target value to dataframe
                     tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output
@@ -211,6 +212,4 @@ class ClassifierModel(ArchM):
         return tree_df
 
     def get_tree(self, module_name) -> DTree:
-        return self.dt_head
-
-
+        return self.DT
