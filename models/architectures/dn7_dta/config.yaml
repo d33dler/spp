@@ -39,7 +39,7 @@ AUGMENTOR:
   TRANSFORMS: [
     {
       NAME: Resize,
-      ARGS: [ [ 100,100 ] ],
+      ARGS: [ [ 84,84 ] ],
       ENABLE: True,
     },
     { NAME: RandomCrop,

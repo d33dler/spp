@@ -55,22 +55,24 @@ class SevenLayer_64F(BaseBackbone2d):
 
             nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(64),
-            nn.LeakyReLU(0.2, True),  # 64*25*25
+            nn.LeakyReLU(0.2, True),  # 64*21*21
 
             nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(64),
-            nn.LeakyReLU(0.2, True),  # 64*25*25 (padding incl)
+            nn.LeakyReLU(0.2, True),  # 64*21*21
 
             nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(32),
-            nn.LeakyReLU(0.2, True),  # 32 x 25 x 21
+            nn.LeakyReLU(0.2, True),  # 32 * 21 * 21
+
             nn.Conv2d(32, 16, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(16),
-            nn.LeakyReLU(0.2, True),  # 16 x 25 x 25
+            nn.LeakyReLU(0.2, True),  # 16 * 21 * 21
+
             nn.Conv2d(16, 8, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(8),
-            nn.LeakyReLU(0.2, True),  # 8 x 25 x 25
-            nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=False)  # 8 x 12 x 12
+            nn.LeakyReLU(0.2, True),  # 8 * 21 * 21
+            nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=False)  # 8 * 10 * 10
         )
 
         self.lr = model_cfg.LEARNING_RATE

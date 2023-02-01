@@ -16,8 +16,8 @@ class Encoder(ArchM.Child):
         self.data = data
         num_classes = data.num_classes
         norm_layer, use_bias = get_norm_layer(data.cfg.ENCODER.NORM)
-        # Define the loss function and optimizer
-        # encoder
+
+        # FC blocks + log-softmax output
         self.encoder_smax = nn.Sequential(
             nn.Flatten(),
             nn.Linear(data.cfg.ENCODER.FLATTENED_INPUT, 512, bias=use_bias),
@@ -29,18 +29,18 @@ class Encoder(ArchM.Child):
             nn.Linear(128, num_classes, bias=use_bias),
             nn.LogSoftmax(dim=1)
         )
-
+        # Convolutional blocks for dimensionality reduction
         self.encoder_conv = nn.Sequential(
             nn.Conv2d(data.cfg.ENCODER.INPUT_SIZE, 32, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(32),
-            nn.LeakyReLU(0.2, True),  # 32 x 21 x 21
+            nn.LeakyReLU(0.2, True),  # 32 x 25 x 25
             nn.Conv2d(32, 16, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(16),
-            nn.LeakyReLU(0.2, True),  # 16 x 21 x 21
+            nn.LeakyReLU(0.2, True),  # 16 x 25 x 25
             nn.Conv2d(16, 8, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(8),
-            nn.LeakyReLU(0.2, True),  # 8 x 21 x 21
-            nn.MaxPool2d(kernel_size=3, stride=3)  # 8 x 7 x 7
+            nn.LeakyReLU(0.2, True),  # 8 x 25 x 25
+            nn.MaxPool2d(kernel_size=3, stride=3)  # 8 x 8 x 8
         )
 
         cfg = data.cfg.ENCODER

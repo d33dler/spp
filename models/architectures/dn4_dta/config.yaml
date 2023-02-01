@@ -1,6 +1,6 @@
 # Main params
 NUM_CLASSES: 5
-BATCH_SIZE: 75
+BATCH_SIZE: 50
 K_NEIGHBORS: 3
 USE_BIAS: True
 #TODO remote config overwrite from main cfg (low priority)
@@ -78,7 +78,7 @@ EPISODE_VAL_NUM: 500
 EPISODE_TEST_NUM: 500
 WAY_NUM: 5
 SHOT_NUM: 5
-QUERY_NUM: 15
+QUERY_NUM: 10
 
 # Misc
 PRINT_FREQ: 100
