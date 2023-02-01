@@ -2,7 +2,6 @@ from typing import Any, OrderedDict
 
 import torch
 import torch.nn as nn
-from lightning_fabric.wrappers import T_destination
 from torch import optim, Tensor
 
 from models.clustering import KNN_itc
