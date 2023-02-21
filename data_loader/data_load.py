@@ -26,7 +26,6 @@ class Parameters:
     batch_sz: int
 
 
-
 @dataclasses.dataclass
 class Loaders:
     train_loader: DataLoader
@@ -44,12 +43,11 @@ class DatasetLoader:
     def augment(self, transform: nn.Module):
         self.transforms_ls = [transform] + self.transforms_ls
 
-    def load_data(self, mode, F_txt):
+    def load_data(self, mode, F_txt, dataset_directory=None):
         # ======================================= Folder of Datasets =======================================
         # image transform & normalization
-        dataset_dir = self.params.dataset_dir
+        dataset_dir = dataset_directory or self.params.dataset_dir
         img_sz = self.params.img_sz
-        dataset_dir = dataset_dir
         shot_num = self.params.shot_num
         way_num = self.params.way_num
         query_num = self.params.query_num
@@ -67,6 +65,8 @@ class DatasetLoader:
                     t = t(**TF.ARGS)
                 else:
                     t = t(*tuple(TF.ARGS))
+            else:
+                t = t()
             transform_ls.append(t)
         transform_ls += [transforms.ToTensor(),
                          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]

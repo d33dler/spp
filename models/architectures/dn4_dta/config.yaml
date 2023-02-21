@@ -21,7 +21,7 @@ ENCODER:
   MODE: TRAIN
   NORM: batch
   CUDA: True
-  FLATTENED_INPUT: 40000
+  FLATTENED_INPUT: 28224
   INPUT_SIZE: 64
   SMAX_LR: 0.1
   RED_LR: 0.005
@@ -39,11 +39,11 @@ AUGMENTOR:
   TRANSFORMS: [
     {
       NAME: Resize,
-      ARGS: [ [ 100,100 ] ],
+      ARGS:  [[ 84,84 ]],
       ENABLE: True,
     },
     { NAME: RandomCrop,
-      ARGS: [ 48 ],
+      ARGS: [84] ,
       ENABLE: False
     },
     { NAME: ColorJitter,
@@ -66,16 +66,16 @@ DATASET:
 # Dataloader
 DATASET_DIR: '../dataset/miniImageNet/'
 DATA_NAME: 'miniImageNet'
-OUTF: '../results/DN4'
+OUTF: '../results/'
 BASEMODEL: 'Conv64F'
 WORKERS: 8
 IMAGE_SIZE: 84
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 EPOCHS: 30
-EPISODE_TRAIN_NUM: 5000
-EPISODE_VAL_NUM: 500
-EPISODE_TEST_NUM: 500
+EPISODE_TRAIN_NUM: 10000
+EPISODE_VAL_NUM: 600
+EPISODE_TEST_NUM: 600
 WAY_NUM: 5
 SHOT_NUM: 5
 QUERY_NUM: 10

@@ -1,12 +1,11 @@
 import functools
 import os
 from enum import Enum, EnumMeta
-from dataclasses import dataclass
 from typing import Dict, List
 
 import torch
 from easydict import EasyDict
-from torch import nn, optim, Tensor
+from torch import nn, Tensor
 from torch.nn.modules.loss import _Loss
 from torch.optim import Optimizer
 
@@ -48,7 +47,6 @@ class ArchM(nn.Module):
                     optimizer.step()
                 torch.cuda.empty_cache()
                 self.loss = loss_ls
-
                 return
 
             self.loss = self.criterion(pred, gt)
@@ -141,7 +139,7 @@ class ArchM(nn.Module):
         if os.path.isfile(path):
             print("=> loading checkpoint '{}'".format(path))
             checkpoint = torch.load(path)
-            # self.epochix = checkpoint['epoch_index'] #TODO epoch per subnetwork
+            self.epochix = checkpoint['epoch_index'] #TODO epoch per subnetwork
             self.best_prec1 = checkpoint['best_prec1']
             [v.load_state_dict(checkpoint[f"{k}_state_dict"]) for k, v in self.module_topology.items()
              if f"{k}_state_dict" in checkpoint]

@@ -27,20 +27,20 @@ AUGMENTOR:
   TRANSFORMS: [
     {
       NAME: Resize,
-      ARGS: [ [ 84,84 ] ],
+      ARGS: [ [ 100,100 ] ],
       ENABLE: True,
     },
     { NAME: RandomCrop,
       ARGS: [ 84 ],
-      ENABLE: False
+      ENABLE: True
     },
     { NAME: ColorJitter,
       ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
-      ENABLE: False
+      ENABLE: True
     },
     { NAME: RandomHorizontalFlip,
       ARGS: [ ],
-      ENABLE: False
+      ENABLE: True
     }
   ]
 

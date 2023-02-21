@@ -40,7 +40,7 @@ class Encoder(ArchM.Child):
             nn.Conv2d(16, 8, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(8),
             nn.LeakyReLU(0.2, True),  # 8 x 25 x 25
-            nn.MaxPool2d(kernel_size=3, stride=3)  # 8 x 8 x 8
+            nn.MaxPool2d(kernel_size=2, stride=2)  # 8 x 8 x 8
         )
 
         cfg = data.cfg.ENCODER
@@ -66,7 +66,12 @@ class Encoder(ArchM.Child):
         S_red = []
         data.S_reduced = S_red
         for s in data.S_raw:
-            S_red.append(encoder_conv(s))
+            support_set_sam = encoder_conv(s)
+            B, C, h, w = support_set_sam.size()
+            support_set_sam = support_set_sam.permute(1, 0, 2, 3)
+            support_set_sam = support_set_sam.contiguous().reshape((C, -1))
+            data.S.append(support_set_sam)
+            S_red.append(support_set_sam)
         data.sim_list_REDUCED = self.knn.forward(data.q_reduced, data.S_reduced)
 
         if self.training:

@@ -1,19 +1,11 @@
-from typing import Tuple
+from dataclasses import field
 
-import torch
 import torch.nn as nn
 from torch import optim
-from torch.nn import init
-import functools
-import pdb
-import math
-import sys
-from yamldataclassconfig import YamlDataClassConfig
-from dataclasses import dataclass, field
+
 from models.backbones.base import BaseBackbone2d
-from models.utilities.utils import DataHolder, init_weights, get_norm_layer
-from models.backbones.resnet.resnet_256 import ResNetLike
 from models.clustering.knn import KNN_itc
+from models.utilities.utils import DataHolder, init_weights, get_norm_layer
 
 
 ##############################################################################
@@ -59,8 +51,9 @@ class FourLayer_64F(BaseBackbone2d):
 
             nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(64),
-            nn.LeakyReLU(0.2, True),  # 64*25*25 (padding incl)
+            nn.LeakyReLU(0.2, True),  # 64*21*21
         )
+        self.norm_layers = [1, 5, 9, 12]
         self.lr = model_cfg.LEARNING_RATE
         self.criterion = nn.CrossEntropyLoss().cuda()
         init_weights(self, model_cfg.INIT_WEIGHTS)
@@ -77,7 +70,7 @@ class FourLayer_64F(BaseBackbone2d):
         # extract features of input2--support set
         for i in range(len(data.S_in)):
             support_set_sam = self.features(data.S_in[i])
-            data.S_raw.append(support_set_sam)
+            data.S_raw.append(support_set_sam.clone())
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))

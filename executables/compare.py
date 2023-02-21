@@ -1,17 +1,3 @@
-"""
-Author: Wenbin Li (liwenbin.nju@gmail.com)
-Date: April 9, 2019
-Version: V0
-
-Citation: 
-@inproceedings{li2019DN4,
-  title={Revisiting Local Descriptor based Image-to-Class Measure for Few-shot Learning},
-  author={Li, Wenbin and Wang, Lei and Xu, Jinglin and Huo, Jing and Gao Yang and Luo, Jiebo},
-  booktitle={CVPR},
-  year={2019}
-}
-"""
-
 from __future__ import print_function
 
 import argparse
@@ -28,9 +14,8 @@ import torch.utils.data
 from PIL import ImageFile
 
 from models.architectures.classifier import ClassifierModel
+from models.architectures.dn4.dn4_original import DN4
 from models.architectures.dn4_dta.dn4_mk2 import DN4_DTR
-from models.architectures.dn7_dta.dn7_mk2 import DN7_DTR
-from models.architectures.dn7da_dta.dn7da_mk2 import DN7DA_DTR
 from models.utilities.utils import AverageMeter, accuracy, save_checkpoint
 
 sys.dont_write_bytecode = True
@@ -135,7 +120,7 @@ def validate(val_loader, model: ClassifierModel, epoch_index, best_prec1, F_txt)
 def run():
     # ======================================== Settings of path ============================================
     # saving path
-    model = DN7_DTR() if opt.id == "DN7Vanilla" else DN7DA_DTR()
+    model = DN4_DTR() if opt.id == "DN4_DTR" else DN4()
     p = model.data_loader.params
     opt.outf = '_'.join([p.outf, opt.id, opt.data_name, str(model.arch), str(p.way_num), 'Way', str(
         p.shot_num), 'Shot', 'K' + str(model.model_cfg.K_NEIGHBORS)])
@@ -161,7 +146,7 @@ def run():
         model.load_model(opt.resume, txt_file)
 
     if opt.ngpu > 1:
-        model: DN7_DTR = nn.DataParallel(model, range(opt.ngpu))
+        model: DN4_DTR = nn.DataParallel(model, range(opt.ngpu))
 
     # print the architecture of the network
     print(model)
@@ -181,8 +166,7 @@ def run():
         loaders = model.loaders
         # ============================================ Training ===========================================
         # Fix the parameters of Batch Normalization after 10000 episodes (1 epoch)
-        model.train(epoch_index < 1)
-
+        if model.epochix > 1: model.BACKBONE_2D.freeze_layers()
         # Train for 10000 episodes in each epoch
         model.run_epoch(txt_file)
 
@@ -195,14 +179,14 @@ def run():
         # record the best prec@1 and save checkpoint
         is_best = prec1 > best_prec1
         best_prec1 = max(prec1, best_prec1)
-
+        model.best_prec1 = best_prec1
         # save the checkpoint
         if is_best:
-            filename = os.path.join(opt.outf, 'epoch_%d_best.pth.tar' % epoch_index)
+            filename = os.path.join(opt.outf, 'epoch_%d_best.pth.tar' % model.epochix)
             model.save_model(filename)
 
         if epoch_index % 10 == 0:
-            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % epoch_index)
+            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % model.epochix)
             model.save_model(filename)
 
         # Testing Prase
@@ -237,3 +221,4 @@ def run():
 
 if __name__ == '__main__':
     run()
+

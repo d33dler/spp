@@ -1,17 +1,3 @@
-"""
-Author: Wenbin Li (liwenbin.nju@gmail.com)
-Date: April 9, 2019
-Version: V0
-
-Citation: 
-@inproceedings{li2019DN4,
-  title={Revisiting Local Descriptor based Image-to-Class Measure for Few-shot Learning},
-  author={Li, Wenbin and Wang, Lei and Xu, Jinglin and Huo, Jing and Gao Yang and Luo, Jiebo},
-  booktitle={CVPR},
-  year={2019}
-}
-"""
-
 from __future__ import print_function
 
 import argparse
@@ -30,6 +16,7 @@ from PIL import ImageFile
 from models.architectures.classifier import ClassifierModel
 from models.architectures.dn4_dta.dn4_mk2 import DN4_DTR
 from models.architectures.dn7_dta.dn7_mk2 import DN7_DTR
+from models.architectures.dn7da_dta.dn7da_mk2 import DN7DA_DTR
 from models.utilities.utils import AverageMeter, accuracy, save_checkpoint
 
 sys.dont_write_bytecode = True
@@ -44,7 +31,8 @@ os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # TODO might be cause for issues?
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_dir', default='/Datasets/miniImageNet--ravi', help='/miniImageNet')
+parser.add_argument('--id', default='', type=str, help='Run ID')
+parser.add_argument('--dataset_dir', default=None, help='/miniImageNet')
 parser.add_argument('--data_name', default='miniImageNet', help='miniImageNet|StanfordDog|StanfordCar|CubBird')
 parser.add_argument('--mode', default='train', help='train|val|test|')
 parser.add_argument('--resume', default='', type=str, help='path to the lastest checkpoint (default: none)')
@@ -133,10 +121,10 @@ def validate(val_loader, model: ClassifierModel, epoch_index, best_prec1, F_txt)
 def run():
     # ======================================== Settings of path ============================================
     # saving path
-    model = DN7_DTR()
+    model = DN7_DTR() if opt.id == "DN7Vanilla" else DN7DA_DTR()
     p = model.data_loader.params
-    opt.outf = p.outf + '_' + opt.data_name + '_' + str(model.arch) + '_' + str(p.way_num) + 'Way_' + str(
-        p.shot_num) + 'Shot' + '_K' + str(model.model_cfg.K_NEIGHBORS)
+    opt.outf = '_'.join([p.outf, opt.id, opt.data_name, str(model.arch), str(p.way_num), 'Way', str(
+        p.shot_num), 'Shot', 'K' + str(model.model_cfg.K_NEIGHBORS)])
     p.outf = opt.outf
     if not os.path.exists(opt.outf):
         os.makedirs(opt.outf)
@@ -175,12 +163,11 @@ def run():
         model.adjust_learning_rate(epoch_index)
 
         # ======================================= Folder of Datasets =======================================
-        model.load_data(opt.mode, txt_file)
+        model.load_data(opt.mode, txt_file, opt.dataset_dir)
         loaders = model.loaders
         # ============================================ Training ===========================================
         # Fix the parameters of Batch Normalization after 10000 episodes (1 epoch)
-        # model.ENCODER.train(epoch_index < 1)
-
+        if model.epochix > 1: model.BACKBONE_2D.freeze_layers()
         # Train for 10000 episodes in each epoch
         model.run_epoch(txt_file)
 
@@ -193,14 +180,14 @@ def run():
         # record the best prec@1 and save checkpoint
         is_best = prec1 > best_prec1
         best_prec1 = max(prec1, best_prec1)
-
+        model.best_prec1 = best_prec1
         # save the checkpoint
         if is_best:
-            filename = os.path.join(opt.outf, 'epoch_%d_best.pth.tar' % epoch_index)
+            filename = os.path.join(opt.outf, 'epoch_%d_best.pth.tar' % model.epochix)
             model.save_model(filename)
 
         if epoch_index % 10 == 0:
-            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % epoch_index)
+            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % model.epochix)
             model.save_model(filename)
 
         # Testing Prase
@@ -214,7 +201,7 @@ def run():
     print('============ Validation on the val set ============')
     print('============ validation on the val set ============', file=txt_file)
 
-    loaders = model.data_loader.load_data(opt.mode, txt_file)
+    loaders = model.data_loader.load_data(opt.mode, txt_file, opt.dataset_dir)
 
     model.fit_tree_episodes(loaders.train_loader)
 
@@ -235,3 +222,4 @@ def run():
 
 if __name__ == '__main__':
     run()
+

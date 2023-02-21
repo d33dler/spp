@@ -14,6 +14,8 @@ class BaseBackbone2d(ArchM.Child):
     """
     Abstraction class for 2d backbones implementing using torch
     """
+    features: nn.Sequential
+    norm_layers: List[int] = []
     ACTIVATION_F: ArchM.ActivationFuncs
     NORMALIZATION_F: ArchM.NormalizationFuncs
     POOLING_F: ArchM.PoolingFuncs
@@ -71,8 +73,8 @@ class BaseBackbone2d(ArchM.Child):
 
     def collect_funcs(self):
         self.ACTIVATION_F, \
-        self.NORMALIZATION_F, \
-        self.POOLING_F = \
+            self.NORMALIZATION_F, \
+            self.POOLING_F = \
             [ArchM.get_func(fset, name)
              for fset, name in [(ArchM.ActivationFuncs, self.cfg.ACTIVATION),
                                 (ArchM.NormalizationFuncs, self.cfg.NORMALIZATION),
@@ -185,3 +187,7 @@ class BaseBackbone2d(ArchM.Child):
 
     def forward(self, *args):
         raise NotImplementedError("forward() method not implemented")
+
+    def freeze_layers(self):
+        for layer_ix in self.norm_layers:
+            self.features[layer_ix] = self.features[layer_ix].requires_grad_(False)

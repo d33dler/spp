@@ -22,7 +22,7 @@ class DN7_DTR(ClassifierModel):
 
     Structure:
     [Deep learning module] ⟶ [K-NN module] ⟶ [Decision Tree]
-                          ↘  [Encoder-NN]  ↗
+
     """
     arch = 'DN4_DTR'
 
@@ -123,8 +123,8 @@ class DN7_DTR(ClassifierModel):
         ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
         ranks = [f"rank_{i}" for i in range(0, self.k_neighbors)]
-        deep_local_lbs_Q = [f"fQ_{i}" for i in range(0, 8 * 9 * 9)]
-        deep_local_lbs_S = [f"fS_{i}" for i in range(0, 8 * 9 * 9 * 5)]
+        deep_local_lbs_Q = [f"fQ_{i}" for i in range(0, 8 * 10 * 10)]
+        deep_local_lbs_S = [f"fS_{i}" for i in range(0, 8 * 10 * 10 * 5)]
         all_columns = cls_labels + ft_engine + ranks + deep_local_lbs_S + deep_local_lbs_Q
         col_len = len(all_columns)
         dt_head.all_features = all_columns

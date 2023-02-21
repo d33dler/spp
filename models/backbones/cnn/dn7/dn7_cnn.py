@@ -1,31 +1,19 @@
-from typing import Tuple
+from dataclasses import field
 
-import torch
 import torch.nn as nn
 from torch import optim
-from torch.nn import init
-import functools
-import pdb
-import math
-import sys
-from yamldataclassconfig import YamlDataClassConfig
-from dataclasses import dataclass, field
+
 from models.backbones.base import BaseBackbone2d
-from models.utilities.utils import DataHolder, init_weights, get_norm_layer
-from models.backbones.resnet.resnet_256 import ResNetLike
 from models.clustering.knn import KNN_itc
+from models.utilities.utils import DataHolder, init_weights, get_norm_layer
 
 
-##############################################################################
-# Classes: FourLayer_64F
-##############################################################################
-
-# Model: FourLayer_64F
+# Model: SevenLayer_64F
 # Input: One query image and a support set
 # Base_model: 4 Convolutional layers --> Image-to-Class layer
 # Dataset: 3 x 84 x 84, for miniImageNet
 # Filters: 64->64->64->64
-# Mapping Sizes: 84->42->21->21->21
+# Mapping Sizes: 84->42->21->21->21->21->21->10
 
 class SevenLayer_64F(BaseBackbone2d):
     class Config(BaseBackbone2d.RemoteYamlConfig):
@@ -74,7 +62,7 @@ class SevenLayer_64F(BaseBackbone2d):
             nn.LeakyReLU(0.2, True),  # 8 * 21 * 21
             nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=False)  # 8 * 10 * 10
         )
-
+        self.norm_layers = [1, 5, 9, 12, 15, 18, 21, 24]
         self.lr = model_cfg.LEARNING_RATE
         self.criterion = nn.CrossEntropyLoss().cuda()
         init_weights(self, model_cfg.INIT_WEIGHTS)
@@ -100,7 +88,6 @@ class SevenLayer_64F(BaseBackbone2d):
         if self.training:
             self.backward(data.sim_list_BACKBONE2D, data.targets)
         return data
-
 
 # def define_DN4Net(pretrained=False, model_root=None, which_model='Conv64', norm='batch', init_type='normal',
 #                   use_gpu=True, **kwargs):

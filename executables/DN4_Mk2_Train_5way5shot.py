@@ -43,7 +43,8 @@ os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # TODO might be cause for issues?
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_dir', default='/Datasets/miniImageNet--ravi', help='/miniImageNet')
+parser.add_argument('--id', default='', type=str, help='Run ID')
+parser.add_argument('--dataset_dir', default=None, type=str, help='/miniImageNet')
 parser.add_argument('--data_name', default='miniImageNet', help='miniImageNet|StanfordDog|StanfordCar|CubBird')
 parser.add_argument('--mode', default='train', help='train|val|test|')
 parser.add_argument('--resume', default='', type=str, help='path to the lastest checkpoint (default: none)')
@@ -139,8 +140,8 @@ def run():
     # saving path
     model = DN4_DTR()
     p = model.data_loader.params
-    opt.outf = p.outf + '_' + opt.data_name + '_' + str(model.arch) + '_' + str(p.way_num) + 'Way_' + str(
-        p.shot_num) + 'Shot' + '_K' + str(model.model_cfg.K_NEIGHBORS)
+    opt.outf = '_'.join([p.outf, opt.id, opt.data_name, str(model.arch), str(p.way_num), 'Way', str(
+        p.shot_num), 'Shot', 'K' + str(model.model_cfg.K_NEIGHBORS)])
     p.outf = opt.outf
     if not os.path.exists(opt.outf):
         os.makedirs(opt.outf)
@@ -182,7 +183,7 @@ def run():
         model.adjust_learning_rate(epoch_index)
 
         # ======================================= Folder of Datasets =======================================
-        model.load_data(opt.mode, txt_file)
+        model.load_data(opt.mode, txt_file, opt.dataset_dir)
         loaders = model.loaders
         # ============================================ Training ===========================================
         # Fix the parameters of Batch Normalization after 10000 episodes (1 epoch)
@@ -221,7 +222,7 @@ def run():
     print('============ Validation on the val set ============')
     print('============ validation on the val set ============', file=txt_file)
 
-    loaders = model.data_loader.load_data(opt.mode, txt_file)
+    loaders = model.data_loader.load_data(opt.mode, txt_file, opt.dataset_dir)
 
     model.fit_tree_episodes(loaders.train_loader)
 

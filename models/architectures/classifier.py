@@ -28,7 +28,6 @@ class ClassifierModel(ArchM):
         self.loaders = None
         self.criterion = None
         self.optimizer = None
-        self.epochix = 0
         model_cfg = self.model_cfg
         self.num_classes = model_cfg.NUM_CLASSES
         self.k_neighbors = model_cfg.K_NEIGHBORS
@@ -40,8 +39,8 @@ class ClassifierModel(ArchM):
     def mode(self):
         return 'TRAIN' if self.training else 'TEST'
 
-    def load_data(self, mode, output_file):
-        self.loaders = self.data_loader.load_data(mode, output_file)
+    def load_data(self, mode, output_file, dataset_dir=None):
+        self.loaders = self.data_loader.load_data(mode, output_file, dataset_dir)
 
     def build(self):
         for module_name in self.module_topology.keys():
@@ -82,7 +81,7 @@ class ClassifierModel(ArchM):
         sub_net = getattr(self, network, None)
         return sub_net.parameters(recurse)  # TODO handle encoder's subnets
 
-    def train(self, training: bool = True) -> ArchM:
+    def train(self, training: bool = True) -> None:
         [sub_mod.train(training) for sub_mod in self.module_topology.values() if isinstance(sub_mod, ArchM.Child)]
 
     def run_epoch(self, output_file):

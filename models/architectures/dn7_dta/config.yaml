@@ -3,6 +3,7 @@ NUM_CLASSES: 5
 BATCH_SIZE: 75
 K_NEIGHBORS: 3
 USE_BIAS: True
+RESUME: ../DN7Vanilla/
 #TODO remote config overwrite from main cfg (low priority)
 #Model skeleton
 TOPOLOGY: [ 'BACKBONE_2D', 'DT' ] # listing here includes module (BACKBONE & KNN are enforced)
@@ -13,18 +14,6 @@ BACKBONE_2D:
   NORM: batch
   CUDA: True
   LEARNING_RATE: 0.005
-  BETA_ONE: [ 0.5,0.9 ]
-  INIT_WEIGHTS: kaiming
-
-ENCODER:
-  NAME: DefaultDual
-  MODE: TRAIN
-  NORM: batch
-  CUDA: True
-  FLATTENED_INPUT: 40000
-  INPUT_SIZE: 64
-  SMAX_LR: 0.1
-  RED_LR: 0.005
   BETA_ONE: [ 0.5,0.9 ]
   INIT_WEIGHTS: kaiming
 
@@ -43,7 +32,7 @@ AUGMENTOR:
       ENABLE: True,
     },
     { NAME: RandomCrop,
-      ARGS: [ 48 ],
+      ARGS: [ 84 ],
       ENABLE: False
     },
     { NAME: ColorJitter,
@@ -56,8 +45,6 @@ AUGMENTOR:
     }
   ]
 
-
-#BACKBONE & ENCODER
 
 #Decision Tree
 DATASET:
@@ -73,12 +60,12 @@ IMAGE_SIZE: 84
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 EPOCHS: 30
-EPISODE_TRAIN_NUM: 8000
+EPISODE_TRAIN_NUM: 10000
 EPISODE_VAL_NUM: 600
 EPISODE_TEST_NUM: 600
 WAY_NUM: 5
 SHOT_NUM: 5
-QUERY_NUM: 15
+QUERY_NUM: 10
 
 # Misc
 PRINT_FREQ: 100

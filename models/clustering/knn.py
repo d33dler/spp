@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import torch
 import torch.nn as nn
@@ -23,7 +24,7 @@ class KNN_itc:
         self.neighbor_k = k_neighbors
 
     # Calculate the k-Nearest Neighbor of each local descriptor
-    def cal_cosinesimilarity(self, q: Tensor, S: Tensor):
+    def cal_cosinesimilarity(self, q: Tensor, S: List[Tensor]):
         B, C, h, w = q.size()
         Similarity_list = []
         for i in range(B):
