@@ -14,9 +14,9 @@ import torch.utils.data
 from PIL import ImageFile
 
 from models.architectures.classifier import ClassifierModel
-from models.architectures.dn4_dta.dn4_mk2 import DN4_DTR
-from models.architectures.dn7_dta.dn7_mk2 import DN7_DTR
-from models.architectures.dn7da_dta.dn7da_mk2 import DN7DA_DTR
+from models.architectures.dn4_dtr.dn4_dtr import DN4_DTR
+from models.architectures.dn7_dtr.dn7_dtr import DN7_DTR
+from models.architectures.dn7da_dtr.dn7_dtr import DN7DA_DTR
 from models.utilities.utils import AverageMeter, accuracy, save_checkpoint
 
 sys.dont_write_bytecode = True

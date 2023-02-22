@@ -32,6 +32,7 @@ DT:
   NAME: XGB # XGB | RF
   MODE: TRAIN
   CUDA: True
+  EPISODE_TRAIN_NUM: 100
   PARAMETERS: { } # add parameters here to override default settings
 
 

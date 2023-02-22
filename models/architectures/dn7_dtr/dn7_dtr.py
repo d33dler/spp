@@ -1,23 +1,30 @@
 import time
+from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import numpy as np
+import pandas as pd
 import torch
+from pandas import DataFrame
+from torch import Tensor
 from torch.nn.functional import one_hot
+from torch.utils.data import DataLoader as TorchDataLoader
 
 from models.architectures.classifier import ClassifierModel
 from models.dt_heads.dtree import DTree
 from models.utilities.utils import AverageMeter, accuracy
 
 
-class DN4(ClassifierModel):
+class DN7_DTR(ClassifierModel):
     """
-    DN4 Original Model
+    DN4 DTR Model
 
     Structure:
     [Deep learning module] ⟶ [K-NN module] ⟶ [Decision Tree]
+                          ↘  [Encoder-NN]  ↗
     """
-    arch = 'DN4'
+    arch = 'DN4_DTR'
 
     def __init__(self):
         super().__init__(Path(__file__).parent / 'config.yaml')
@@ -25,6 +32,7 @@ class DN4(ClassifierModel):
 
     def forward(self):
         self.BACKBONE_2D.forward()
+
         dt_head: DTree = self.DT
         if dt_head.is_fit:
             _input = np.asarray([dt_head.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
@@ -95,7 +103,6 @@ class DN4(ClassifierModel):
                     epochix, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time,
                     loss=losses,
                     top1=top1), file=output_file)
-        self.epochix += 1
+            self.epochix += 1
         del losses
         self.data.clear()
-

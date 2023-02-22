@@ -62,7 +62,7 @@ class DataHolder(DataHolderBase):
     targets: Tensor
     # Backbone2d OUTPUT
     q: Tensor
-    S_raw: Tensor
+    DLD_topk: Tensor
     S: List[Tensor]  # CUDA
     sim_list_BACKBONE2D: Tensor  # CUDA
     # Encoder OUTPUT

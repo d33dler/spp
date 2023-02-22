@@ -86,12 +86,12 @@ class SevenLayer_64F(BaseBackbone2d):
         # extract features of input1--query image
         data = self.data
         data.q = self.features(data.q_in)
-        data.S, data.S_raw = [], []
+        data.S = []
 
         # extract features of input2--support set
         for i in range(len(data.S_in)):
             support_set_sam = self.features(data.S_in[i])
-            data.S_raw.append(support_set_sam)
+            data.DLD_topk.append(support_set_sam)
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))

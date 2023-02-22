@@ -1,23 +1,31 @@
 import time
+from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import numpy as np
+import pandas as pd
 import torch
+from pandas import DataFrame
+from torch import nn, optim, Tensor
 from torch.nn.functional import one_hot
 
+from dataset.datasets_csv import CSVLoader
 from models.architectures.classifier import ClassifierModel
 from models.dt_heads.dtree import DTree
 from models.utilities.utils import AverageMeter, accuracy
+from torch.utils.data import DataLoader as TorchDataLoader
 
 
-class DN4(ClassifierModel):
+class DN4_DTR(ClassifierModel):
     """
-    DN4 Original Model
+    DN4 DTR Model
 
     Structure:
     [Deep learning module] ⟶ [K-NN module] ⟶ [Decision Tree]
+                          ↘  [Encoder-NN]  ↗
     """
-    arch = 'DN4'
+    arch = 'DN4_DTR'
 
     def __init__(self):
         super().__init__(Path(__file__).parent / 'config.yaml')
@@ -25,9 +33,11 @@ class DN4(ClassifierModel):
 
     def forward(self):
         self.BACKBONE_2D.forward()
+        self.ENCODER.forward()
+
         dt_head: DTree = self.DT
         if dt_head.is_fit:
-            _input = np.asarray([dt_head.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
+            _input = np.asarray([dt_head.normalize(x) for x in self.data.sim_list_REDUCED.detach().cpu().numpy()])
             self.data.X = self.feature_engine(dt_head.create_input(_input), dt_head.base_features,
                                               dt_head.deep_features)
             o = torch.from_numpy(dt_head.forward(self.data).astype(np.int64))
@@ -68,12 +78,15 @@ class DN4(ClassifierModel):
             # Calculate the output
             self.forward()
 
-            loss = self.get_loss('BACKBONE_2D')
+            loss = self.get_loss('ENCODER')
             # Measure accuracy and record loss
-            prec1, _ = accuracy(self.data.sim_list_BACKBONE2D, target, topk=(1, 3))
+            prec1_smax = accuracy(self.data.q_smax, target)[0]
+            prec1_red, _ = accuracy(self.data.sim_list_REDUCED, target, topk=(1, 3))
 
-            losses.update(loss.item(), query_images.size(0))
+            losses.update(min(loss).item(), query_images.size(0))
+            prec1 = max(prec1_red, prec1_smax)
             top1.update(prec1[0], query_images.size(0))
+            [l.detach_().detach().cpu() for l in loss]
 
             # Measure elapsed time
             batch_time.update(time.time() - end)
@@ -85,7 +98,8 @@ class DN4(ClassifierModel):
                       f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
                       f'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                      )
+                      f'Prec@RED {prec1_red.item():.3f}\t'
+                      f'Prec@SMAX {prec1_smax.item():.3f}\t')
 
                 print('Eposide-({0}): [{1}/{2}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -95,7 +109,6 @@ class DN4(ClassifierModel):
                     epochix, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time,
                     loss=losses,
                     top1=top1), file=output_file)
-        self.epochix += 1
+            self.epochix += 1
         del losses
         self.data.clear()
-

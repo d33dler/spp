@@ -1,9 +1,8 @@
 # Main params
 NUM_CLASSES: 5
-BATCH_SIZE: 75
+BATCH_SIZE: 50
 K_NEIGHBORS: 3
 USE_BIAS: True
-RESUME: ../DN7Vanilla/
 #TODO remote config overwrite from main cfg (low priority)
 #Model skeleton
 TOPOLOGY: [ 'BACKBONE_2D', 'DT' ] # listing here includes module (BACKBONE & KNN are enforced)
@@ -21,6 +20,7 @@ DT:
   NAME: XGB # XGB | RF
   MODE: TRAIN
   CUDA: True
+  EPISODE_TRAIN_NUM: 1000
   PARAMETERS: { } # add parameters here to override default settings
 
 
@@ -28,23 +28,25 @@ AUGMENTOR:
   TRANSFORMS: [
     {
       NAME: Resize,
-      ARGS: [ [ 84,84 ] ],
+      ARGS: [ [ 100,100 ] ],
       ENABLE: True,
     },
     { NAME: RandomCrop,
       ARGS: [ 84 ],
-      ENABLE: False
+      ENABLE: True
     },
     { NAME: ColorJitter,
       ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
-      ENABLE: False
+      ENABLE: True
     },
     { NAME: RandomHorizontalFlip,
       ARGS: [ ],
-      ENABLE: False
+      ENABLE: True
     }
   ]
 
+
+#BACKBONE & ENCODER
 
 #Decision Tree
 DATASET:

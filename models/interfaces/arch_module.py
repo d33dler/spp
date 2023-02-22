@@ -139,7 +139,7 @@ class ArchM(nn.Module):
         if os.path.isfile(path):
             print("=> loading checkpoint '{}'".format(path))
             checkpoint = torch.load(path)
-            self.epochix = checkpoint['epoch_index'] #TODO epoch per subnetwork
+            self.epochix = checkpoint['epoch_index']
             self.best_prec1 = checkpoint['best_prec1']
             [v.load_state_dict(checkpoint[f"{k}_state_dict"]) for k, v in self.module_topology.items()
              if f"{k}_state_dict" in checkpoint]

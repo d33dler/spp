@@ -15,7 +15,7 @@ from PIL import ImageFile
 
 from models.architectures.classifier import ClassifierModel
 from models.architectures.dn4.dn4_original import DN4
-from models.architectures.dn4_dta.dn4_mk2 import DN4_DTR
+from models.architectures.dn4_dtr.dn4_dtr import DN4_DTR
 from models.utilities.utils import AverageMeter, accuracy, save_checkpoint
 
 sys.dont_write_bytecode = True

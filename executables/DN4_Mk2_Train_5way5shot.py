@@ -1,17 +1,3 @@
-"""
-Author: Wenbin Li (liwenbin.nju@gmail.com)
-Date: April 9, 2019
-Version: V0
-
-Citation: 
-@inproceedings{li2019DN4,
-  title={Revisiting Local Descriptor based Image-to-Class Measure for Few-shot Learning},
-  author={Li, Wenbin and Wang, Lei and Xu, Jinglin and Huo, Jing and Gao Yang and Luo, Jiebo},
-  booktitle={CVPR},
-  year={2019}
-}
-"""
-
 from __future__ import print_function
 
 import argparse
@@ -28,7 +14,8 @@ import torch.utils.data
 from PIL import ImageFile
 
 from models.architectures.classifier import ClassifierModel
-from models.architectures.dn4_dta.dn4_mk2 import DN4_DTR
+from models.architectures.dn4.dn4_original import DN4
+from models.architectures.dn4_dtr.dn4_dtr import DN4_DTR
 from models.utilities.utils import AverageMeter, accuracy, save_checkpoint
 
 sys.dont_write_bytecode = True
@@ -44,7 +31,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # TODO might be cause for issues?
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--id', default='', type=str, help='Run ID')
-parser.add_argument('--dataset_dir', default=None, type=str, help='/miniImageNet')
+parser.add_argument('--dataset_dir', default=None, help='/miniImageNet')
 parser.add_argument('--data_name', default='miniImageNet', help='miniImageNet|StanfordDog|StanfordCar|CubBird')
 parser.add_argument('--mode', default='train', help='train|val|test|')
 parser.add_argument('--resume', default='', type=str, help='path to the lastest checkpoint (default: none)')
@@ -98,15 +85,12 @@ def validate(val_loader, model: ClassifierModel, epoch_index, best_prec1, F_txt)
 
         model.forward()
 
-        loss = model.module_topology['ENCODER'].calculate_loss([data.q_smax, data.sim_list_REDUCED], target)
+        loss = model.module_topology['BACKBONE_2D'].calculate_loss(data.sim_list_BACKBONE2D, target)
 
         # measure accuracy and record loss
-        prec1_smax = accuracy(model.data.q_smax, target)[0]
-        prec1_red, _ = accuracy(model.data.sim_list_REDUCED, target, topk=(1, 3))
-        loss = min(loss) if isinstance(loss, list) else loss
+        prec1, _ = accuracy(model.data.sim_list_BACKBONE2D, target, topk=(1, 3))
         losses.update(loss.item(), query_images.size(0))
 
-        prec1 = max(prec1_smax, prec1_red)
         top1.update(prec1[0], query_images.size(0))
         accuracies.append(prec1)
 
@@ -119,9 +103,7 @@ def validate(val_loader, model: ClassifierModel, epoch_index, best_prec1, F_txt)
             print(f'Test-({epoch_index}): [{episode_index}/{len(val_loader)}]\t'
                   f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
-                  f'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                  f'Prec@RED {prec1_red.item():.3f}\t'
-                  f'Prec@SMAX {prec1_smax.item():.3f}\t')
+                  f'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t')
 
             print('Test-({0}): [{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -138,7 +120,7 @@ def validate(val_loader, model: ClassifierModel, epoch_index, best_prec1, F_txt)
 def run():
     # ======================================== Settings of path ============================================
     # saving path
-    model = DN4_DTR()
+    model = DN4_DTR() if opt.id == "DN4_DTR" else DN4()
     p = model.data_loader.params
     opt.outf = '_'.join([p.outf, opt.id, opt.data_name, str(model.arch), str(p.way_num), 'Way', str(
         p.shot_num), 'Shot', 'K' + str(model.model_cfg.K_NEIGHBORS)])
@@ -158,9 +140,6 @@ def run():
     # ========================================== Model Config ===============================================
 
     best_prec1 = 0
-
-    # define_DN4Net(which_model=opt.basemodel, num_classes=opt.way_num, neighbor_k=opt.neighbor_k, norm='batch',
-    #                   init_type='normal', use_gpu=opt.cuda)
 
     # optionally resume from a checkpoint
     if opt.resume:
@@ -187,8 +166,7 @@ def run():
         loaders = model.loaders
         # ============================================ Training ===========================================
         # Fix the parameters of Batch Normalization after 10000 episodes (1 epoch)
-        # model.ENCODER.train(epoch_index < 1)
-
+        if model.epochix > 1: model.BACKBONE_2D.freeze_layers()
         # Train for 10000 episodes in each epoch
         model.run_epoch(txt_file)
 
@@ -201,21 +179,21 @@ def run():
         # record the best prec@1 and save checkpoint
         is_best = prec1 > best_prec1
         best_prec1 = max(prec1, best_prec1)
-
+        model.best_prec1 = best_prec1
         # save the checkpoint
         if is_best:
-            filename = os.path.join(opt.outf, 'epoch_%d_best.pth.tar' % epoch_index)
+            filename = os.path.join(opt.outf, 'epoch_%d_best.pth.tar' % model.epochix)
             model.save_model(filename)
 
         if epoch_index % 10 == 0:
-            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % epoch_index)
+            filename = os.path.join(opt.outf, 'epoch_%d.pth.tar' % model.epochix)
             model.save_model(filename)
 
         # Testing Prase
         print('============ Testing on the test set ============')
         print('============ Testing on the test set ============', file=txt_file)
         prec1, _ = validate(loaders.test_loader, model, epoch_index, best_prec1, txt_file)
-        model.ENCODER.train(True)
+        model.train(True)
     ###############################################################################
     # Fitting tree, now forward will provide tree output
 
@@ -243,3 +221,4 @@ def run():
 
 if __name__ == '__main__':
     run()
+

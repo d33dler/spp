@@ -69,13 +69,13 @@ class XGBHead(DTree):
     def feature_engineering(self, matrix: np.ndarray):
         return matrix
 
-    def forward(self, data: DataHolder):
+    def forward(self, x: DataFrame):
         """
         Predict
         :return:
         :rtype:
         """
-        output = self.model.predict(X=data.X[self.all_features])
+        output = self.model.predict(X=x[self.all_features])
 
         return output
 

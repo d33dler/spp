@@ -37,7 +37,7 @@ class DTree(ArchM.Child):
     def feature_engineering(self, matrix: np.ndarray):
         raise NotImplementedError
 
-    def forward(self, data: DataHolder):
+    def forward(self, data: DataFrame):
         raise NotImplementedError
 
     def plot_tree(self):

@@ -65,14 +65,14 @@ class Encoder(ArchM.Child):
         data.q_smax = encoder_sm(data.q)
         S_red = []
         data.S_reduced = S_red
-        for s in data.S_raw:
+        for s in data.DLD_topk:
             support_set_sam = encoder_conv(s)
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
             S_red.append(support_set_sam)
-        data.sim_list_REDUCED = self.knn.forward(data.q_reduced, data.S_reduced)
+        data.sim_list_REDUCED, data.DLD_topk = self.knn.forward(data.q_reduced, data.S_reduced)
 
         if self.training:
             self.backward([data.q_smax, data.sim_list_REDUCED], data.targets)

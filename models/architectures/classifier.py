@@ -105,19 +105,16 @@ class ClassifierModel(ArchM):
         # create empty dataframe
         batch_sz = self.model_cfg.BATCH_SIZE
         dt_head: DTree = self.DT
-        X_len = len(train_set) * batch_sz
+        X_len = self.model_cfg.DT.EPISODE_TRAIN_NUM* batch_sz
         ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
         ranks = [f"rank_{i}" for i in range(0, self.k_neighbors)]
-        deep_local_lbs_Q = [f"fQ_{i}" for i in range(0, 16)]
-        deep_local_lbs_S = []
-        for r in ranks:
-            deep_local_lbs_S += [f"{r}_fS{i}" for i in range(0, 16)]
-        all_columns = cls_labels + ft_engine + ranks
+        sim_topK = [f"DLD_sim_{i}" for i in range(0, self.num_classes * self.k_neighbors)]
+        all_columns = cls_labels + ft_engine + ranks + sim_topK
         col_len = len(all_columns)
         dt_head.all_features = all_columns
         dt_head.base_features = cls_labels
-        # dt_head.deep_features = deep_local_lbs_Q
+        dt_head.deep_features = sim_topK
         dt_head.ranking_features = ranks
         if self.model_cfg.DATASET is None:
             tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
@@ -129,8 +126,7 @@ class ClassifierModel(ArchM):
             print("TRAIN SET SIZE: ", len(train_set))
             self.eval()
             cls_col_ix = tree_df.columns.get_indexer(cls_labels)
-            deep_local_ix_Q = tree_df.columns.get_indexer(deep_local_lbs_Q)
-            deep_local_ix_S = tree_df.columns.get_indexer(deep_local_lbs_S)
+            DLD_topK = tree_df.columns.get_indexer(sim_topK)
             ranks_ix = tree_df.columns.get_indexer(ranks)
             max_ix = tree_df.columns.get_loc('max')
             # min_ix = tree_df.columns.get_loc('min')
@@ -143,8 +139,7 @@ class ClassifierModel(ArchM):
             dt_head.ranks_ix = ranks_ix
 
             y_col_ix = tree_df.columns.get_indexer(["y"])
-            normalizer = torch.nn.BatchNorm2d(64)
-
+            out_bank = np.empty(shape=(0, 5))
             with torch.no_grad():
                 for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                         train_set):
@@ -164,20 +159,26 @@ class ClassifierModel(ArchM):
                     self.data.q_in, self.data.S_in = input_var1, input_var2
                     # Obtain and normalize the output
                     self.forward()
-                    output = np.asarray(
+                    out = np.asarray(
                         [dt_head.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
+                    out_bank = np.concatenate([out_bank, out], axis=0)
                     target: np.ndarray = target.numpy()
                     # add measurements and target value to dataframe
-                    tree_df.iloc[ix:ix + batch_sz, cls_col_ix] = output
-                    tree_df.iloc[ix:ix + batch_sz, y_col_ix] = target
-                    tree_df.iloc[ix:ix + batch_sz, max_ix] = output.max(axis=1)
-                    tree_df.iloc[ix:ix + batch_sz, mean_ix] = output.mean(axis=1)
-                    tree_df.iloc[ix:ix + batch_sz, std_ix] = output.std(axis=1)
-                    top_k = np.argpartition(-output, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
-                    tree_df.iloc[ix:ix + batch_sz, ranks_ix] = output[np.arange(output.shape[0])[:, None], top_k]
-                    # queries_norm = normalizer(self.data.q.cpu()).numpy().reshape(batch_sz, 64 * 21 * 21)
-                    # tree_df.iloc[ix:ix + batch_sz, deep_local_ix_Q] = pca_n.fit_transform(queries_norm)
-                    ix += batch_sz
+                    out_rows = out.shape[0]
+                    tree_df.iloc[ix:ix + out_rows, cls_col_ix] = out
+                    tree_df.iloc[ix:ix + out_rows, y_col_ix] = target
+                    tree_df.iloc[ix:ix + out_rows, max_ix] = out.max(axis=1)
+                    tree_df.iloc[ix:ix + out_rows, mean_ix] = out.mean(axis=1)
+                    tree_df.iloc[ix:ix + out_rows, std_ix] = out.std(axis=1)
+
+                    top_ranks = np.argpartition(-out, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
+                    tree_df.iloc[ix:ix + out_rows, ranks_ix] = out[np.arange(out.shape[0])[:, None], top_ranks]
+                    tree_df.iloc[ix:ix + out_rows, DLD_topK] = self.data.DLD_topk
+
+                    # tree_df.iloc[ix:ix + out_rows, deep_local_ix_S] = [sup_t.detach().cpu().view(sup_t.size()[0], -1) for sup_t in self.data.S_raw]
+                    ix += out_rows
+                    if episode_index == self.model_cfg.DT.EPISODE_TRAIN_NUM - 1: break
+                print(out_bank.std(axis=1).mean())
 
         else:
             tree_df = pd.read_csv(self.model_cfg.DATASET, header=0)
@@ -207,7 +208,9 @@ class ClassifierModel(ArchM):
         # RANKS
         cls_vals = tree_df.iloc[:, base_features_ix].to_numpy()
         top_k = np.argpartition(-cls_vals, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
-        tree_df[self.dt_head.ranking_features] = cls_vals[np.arange(cls_vals.shape[0])[:, None], top_k]
+        tree_df[self.DT.ranking_features] = cls_vals[np.arange(cls_vals.shape[0])[:, None], top_k]
+
+        tree_df[deep_features_Q] = self.data.DLD_topk.detach().numpy()
         return tree_df
 
     def get_tree(self, module_name) -> DTree:
