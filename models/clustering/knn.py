@@ -11,7 +11,10 @@ import pdb
 import math
 import sys
 
+from torch.nn.functional import one_hot
+
 from models.utilities.utils import load_config, DataHolder
+from scipy.special import softmax
 
 
 class KNN_itc:
@@ -21,14 +24,14 @@ class KNN_itc:
 
     def __init__(self, k_neighbors: int):
         super(KNN_itc, self).__init__()
-
+        self.softmax = torch.nn.Softmax(dim=1)
         self.neighbor_k = k_neighbors
 
     # Calculate the k-Nearest Neighbor of each local descriptor
-    def cal_cosinesimilarity(self, q: Tensor, S: List[Tensor]):
+    def cal_cosinesimilarity(self, q: Tensor, S: List[Tensor], one_hot_=False):
         B, C, h, w = q.size()
-        Similarity_list = []
-        topk_ls = torch.zeros(B,self.neighbor_k * len(S))
+        similarity_ls = []
+        topk_ls = torch.zeros(B, self.neighbor_k * len(S))
         nk = self.neighbor_k
         for i in range(B):
             topk_q = torch.zeros(self.neighbor_k * len(S))
@@ -52,12 +55,12 @@ class KNN_itc:
                 inner_sim[0, j] = torch.sum(topk_value)
                 topk_ls[i, j * nk:j * nk + nk] = torch.sum(topk_value, dim=0)
 
-            Similarity_list.append(inner_sim)
+            similarity_ls.append(inner_sim)
 
-        Similarity_list = torch.cat(Similarity_list, 0)
+        similarity_ls = torch.cat(similarity_ls, 0)
+        if one_hot_:
+            similarity_ls = torch.eq(similarity_ls, torch.max(similarity_ls, dim=1)[0].view(-1, 1)).float()
+        return similarity_ls, topk_ls
 
-        return Similarity_list, topk_ls
-
-    def forward(self, q, S):
-
-        return self.cal_cosinesimilarity(q, S)
+    def forward(self, q, S, one_hot_: bool = False):
+        return self.cal_cosinesimilarity(q, S, one_hot_=one_hot_)

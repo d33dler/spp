@@ -80,9 +80,7 @@ def validate(val_loader, model: ClassifierModel, epoch_index, best_prec1, F_txt)
         target = torch.cat(query_targets, 0)
         target = target.cuda()
 
-        model.data.q_in = input_var1
-        model.data.S_in = input_var2
-        model.data.targets = target
+
 
         model.forward()
 
@@ -203,7 +201,7 @@ def run():
 
     loaders = model.data_loader.load_data(opt.mode, txt_file, opt.dataset_dir)
 
-    model.fit_tree_episodes(loaders.train_loader)
+    # model.fit_tree_episodes(loaders.train_loader)
 
     prec1, _ = validate(loaders.val_loader, model, opt.epochs, best_prec1, txt_file)
 

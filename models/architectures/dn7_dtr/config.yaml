@@ -13,6 +13,7 @@ BACKBONE_2D:
   MODE: TRAIN
   NORM: batch
   CUDA: True
+  ONE_HOT: True
   LEARNING_RATE: 0.005
   BETA_ONE: [ 0.5,0.9 ]
   INIT_WEIGHTS: kaiming

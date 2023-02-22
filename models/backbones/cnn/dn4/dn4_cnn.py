@@ -57,9 +57,11 @@ class FourLayer_64F(BaseBackbone2d):
         self.lr = model_cfg.LEARNING_RATE
         self.criterion = nn.CrossEntropyLoss().cuda()
         init_weights(self, model_cfg.INIT_WEIGHTS)
+
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.output_shape = 64
         self.knn = KNN_itc(data.k_neighbors)
+        self.one_hot = model_cfg.ONE_HOT
 
     def forward(self):
         # extract features of input1--query image
@@ -74,7 +76,7 @@ class FourLayer_64F(BaseBackbone2d):
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
-        data.sim_list_BACKBONE2D, data.DLD_topk = self.knn.forward(data.q, data.S)
+        data.sim_list_BACKBONE2D, data.DLD_topk = self.knn.forward(data.q, data.S, self.one_hot)
         if self.training:
             self.backward(data.sim_list_BACKBONE2D, data.targets)
         return data

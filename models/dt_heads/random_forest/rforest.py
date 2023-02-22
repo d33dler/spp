@@ -22,16 +22,17 @@ class RandomForestHead(DTree):
     output: np.ndarray = None
     config_id = 'config.yaml'
 
-    def __init__(self, num_classes: int):
-        super().__init__(num_classes)
+    def __init__(self, data: DataHolder):
+        super().__init__(data)
         self.features: List[str] = []
         self.cfg = load_config(Path(Path(__file__).parent / self.config_id))
         t = self.cfg.TYPE
+        self.fine_tuning = self.cfg.OPTIMIZE
         self.params: dict = self.cfg.PARAMETERS
         if t == 'REGRESSOR':
             self.model = xgb.XGBRFRegressor(**self.params)
         elif t == 'CLASSIFIER':
-            self.params['num_classes'] = num_classes
+            self.params['num_classes'] = self.num_classes
             print(self.params)
             self.model = xgb.XGBClassifier(**self.params)
         else:
@@ -41,6 +42,8 @@ class RandomForestHead(DTree):
 
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         self.set_fit()
+        if self.fine_tuning:
+            self.params = self.optimize(x, y)
         self.features = [f for f in x.columns if f not in y.columns]
         if self.cfg.TYPE == 'CLASSIFIER':
             return self._fit_classifier(x, y, eval_set, **kwargs)
@@ -69,13 +72,13 @@ class RandomForestHead(DTree):
     def feature_engineering(self, matrix: np.ndarray):
         return matrix
 
-    def forward(self, data: DataHolder):
+    def forward(self, data: DataFrame):
         """
         Predict
         :return:
         :rtype:
         """
-        output = self.model.predict(X=data.X[self.all_features])
+        output = self.model.predict(X=data[self.all_features])
 
         return output
 
@@ -86,6 +89,3 @@ class RandomForestHead(DTree):
     def plot_tree(self):
         xgb.plot_tree(self.model.get_booster())
         plt.show()
-
-    def optimize(self):
-        pass  # TODO hyperopt

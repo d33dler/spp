@@ -25,14 +25,15 @@ class DN4(ClassifierModel):
 
     def forward(self):
         self.BACKBONE_2D.forward()
+
         dt_head: DTree = self.DT
         if dt_head.is_fit:
             _input = np.asarray([dt_head.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
             self.data.X = self.feature_engine(dt_head.create_input(_input), dt_head.base_features,
                                               dt_head.deep_features)
-            o = torch.from_numpy(dt_head.forward(self.data).astype(np.int64))
+            o = torch.from_numpy(dt_head.forward(self.data.X).astype(np.int64))
             o = one_hot(o, self.num_classes).float().cuda()
-            self.data.tree_pred = o
+            self.data.sim_list_BACKBONE2D = o
 
     def run_epoch(self, output_file):
         batch_time = AverageMeter()

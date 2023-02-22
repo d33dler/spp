@@ -23,7 +23,7 @@ class ArchM(nn.Module):
         optimizer: Optimizer | List[Optimizer]
         criterion: _Loss | List[_Loss]
         loss: Tensor
-        optimize = True
+        fine_tuning = True
 
         def calculate_loss(self, pred, gt):
             if isinstance(self.criterion, list):
@@ -66,7 +66,7 @@ class ArchM(nn.Module):
                     param_group['lr'] = lr
 
         def set_optimize(self, optimize=True):
-            self.optimize = optimize
+            self.fine_tuning = optimize
 
         def load_optimizer_state_dict(self, optim_state_dict):
             if isinstance(self.optimizer, list):
@@ -169,5 +169,5 @@ class ArchM(nn.Module):
     def adjust_learning_rate(self, epoch_num):
         """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
         for k, mod in self.module_topology.items():
-            if mod.training and mod.optimize:
+            if mod.training and mod.fine_tuning:
                 mod.adjust_learning_rate(epoch=epoch_num)

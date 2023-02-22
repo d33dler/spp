@@ -202,7 +202,7 @@ def run():
 
     loaders = model.data_loader.load_data(opt.mode, txt_file, opt.dataset_dir)
 
-    model.fit_tree_episodes(loaders.train_loader)
+    # model.fit_tree_episodes(loaders.train_loader)
 
     prec1, _ = validate(loaders.val_loader, model, opt.epochs, best_prec1, txt_file)
 

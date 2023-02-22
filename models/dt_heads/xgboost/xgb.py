@@ -1,16 +1,22 @@
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Tuple, Any, Sequence, List
-
+import mlflow
 import numpy as np
 import pandas as pd
 import xgboost as xgb
 from pandas import DataFrame
 import matplotlib.pyplot as plt
+from sklearn.metrics import mean_absolute_error, log_loss
+from sklearn.model_selection import train_test_split
 from xgboost import DMatrix
-
+from hyperopt import hp, fmin, tpe, STATUS_OK
+from hyperopt.pyll import scope
 from models.dt_heads.dtree import DTree
 from models.utilities.utils import load_config, DataHolder
+
+
 
 
 class XGBHead(DTree):
@@ -27,6 +33,7 @@ class XGBHead(DTree):
         self.features: List[str] = []
         self.cfg = load_config(Path(Path(__file__).parent / self.config_id))
         t = self.cfg.TYPE
+        self.fine_tuning = self.cfg.OPTIMIZE
         self.params: dict = self.cfg.PARAMETERS
         if t == 'REGRESSOR':
             self.model = xgb.XGBRegressor(**self.params)
@@ -41,6 +48,8 @@ class XGBHead(DTree):
 
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         self.set_fit()
+        if self.fine_tuning:
+            self.params = self.optimize(x, y)
         self.features = [f for f in x.columns if f not in y.columns]
         if self.cfg.TYPE == 'CLASSIFIER':
             return self._fit_classifier(x, y, eval_set, **kwargs)
@@ -87,5 +96,3 @@ class XGBHead(DTree):
         xgb.plot_tree(self.model.get_booster())
         plt.show()
 
-    def optimize(self):
-        pass  # TODO hyperopt

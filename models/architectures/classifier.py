@@ -105,7 +105,7 @@ class ClassifierModel(ArchM):
         # create empty dataframe
         batch_sz = self.model_cfg.BATCH_SIZE
         dt_head: DTree = self.DT
-        X_len = self.model_cfg.DT.EPISODE_TRAIN_NUM* batch_sz
+        X_len = self.model_cfg.DT.EPISODE_TRAIN_NUM * batch_sz
         ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
         ranks = [f"rank_{i}" for i in range(0, self.k_neighbors)]
@@ -143,7 +143,8 @@ class ClassifierModel(ArchM):
             with torch.no_grad():
                 for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                         train_set):
-                    print("> Running episode: ", episode_index)
+                    if episode_index % 100 == 0:
+                        print("> Running episode: ", episode_index)
                     # Convert query and support images
                     query_images = torch.cat(query_images, 0)
                     input_var1 = query_images.cuda()
@@ -178,7 +179,7 @@ class ClassifierModel(ArchM):
                     # tree_df.iloc[ix:ix + out_rows, deep_local_ix_S] = [sup_t.detach().cpu().view(sup_t.size()[0], -1) for sup_t in self.data.S_raw]
                     ix += out_rows
                     if episode_index == self.model_cfg.DT.EPISODE_TRAIN_NUM - 1: break
-                print(out_bank.std(axis=1).mean())
+                print("STD:", out_bank.std(axis=1).mean())
 
         else:
             tree_df = pd.read_csv(self.model_cfg.DATASET, header=0)
@@ -188,16 +189,13 @@ class ClassifierModel(ArchM):
         print(self.data.X.head(5))
         print(self.data.X.tail(5))
         if self.model_cfg.DATASET is None:
-            tree_df.to_csv(f"tree_dataset{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv", index=False)
+            tree_df.to_csv(
+                f"tree_dataset_W{self.model_cfg.WAY_NUM}_S{self.model_cfg.SHOT_NUM}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv", index=False)
 
         dt_head.fit(self.data.X, self.data.y, self.data.eval_set)
 
     def feature_engine(self, tree_df: DataFrame, base_features: List[str], deep_features_Q: List[str]):
         base_features_ix = tree_df.index.get_indexer(base_features)
-
-        # DEEP LOCAL DESCRIPTORS
-        # queries_dld = self.normalizer(self.data.q.cpu()).detach().numpy().reshape(len(tree_df), 64 * 21 * 21)
-        # tree_df[deep_features_Q] = self.pca_n.fit_transform(queries_dld)
 
         # MIN MAX MEAN STD
         # tree_df['min'] = tree_df.iloc[:, base_features_ix].min(axis=1)
