@@ -27,7 +27,7 @@ class SevenLayer_64F(BaseBackbone2d):
         # self.build()
         # super(FourLayer_64F, self).__init__()
         self.data = data
-        model_cfg = data.cfg.BACKBONE_2D
+        model_cfg = data.cfg.BACKBONE
         norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
 
         self.features = nn.Sequential(  # 3*84*84

@@ -49,6 +49,14 @@ class DataHolderBase:
     norm_layer: Any  # torch
 
 
+def config_exchange(dest: dict, src: dict):
+
+    [(dest.update({k: v}) if not isinstance(dest[k], dict) else dest[k].update(v))
+     and src.update({k: dest.config[k]})
+     for k, v in src.items() if k in dest]
+    return dest
+
+
 @dataclass
 class DataHolder(DataHolderBase):
     """
@@ -93,6 +101,7 @@ class DataHolder(DataHolderBase):
         del self.q
         del self.S
         gc.collect()
+        torch.cuda.empty_cache()
 
 
 class AverageMeter(object):

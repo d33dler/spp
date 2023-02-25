@@ -1,0 +1,21 @@
+AUGMENTOR:
+  DISABLE: [ ]
+  TRANSFORMS: [
+    {
+      NAME: Resize,
+      ARGS: [ [ 100,100 ] ],
+      ENABLE: True,
+    },
+    { NAME: RandomCrop,
+      ARGS: [ 84 ] ,
+      ENABLE: False
+    },
+    { NAME: ColorJitter,
+      ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
+      ENABLE: False
+    },
+    { NAME: RandomHorizontalFlip,
+      ARGS: [ ],
+      ENABLE: False
+    }
+  ]

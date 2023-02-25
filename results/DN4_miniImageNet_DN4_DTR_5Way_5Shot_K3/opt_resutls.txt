@@ -2,7 +2,7 @@ Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -52,7 +52,7 @@ DN4_DTR(
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -102,7 +102,7 @@ DN4_DTR(
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -152,7 +152,7 @@ DN4_DTR(
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -202,60 +202,7 @@ DN4_DTR(
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-    (criterion): CrossEntropyLoss()
-  )
-  (ENCODER): Encoder(
-    (encoder_smax): Sequential(
-      (0): Flatten(start_dim=1, end_dim=-1)
-      (1): Linear(in_features=28224, out_features=512, bias=False)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): Dropout(p=0.2, inplace=False)
-      (4): Linear(in_features=512, out_features=128, bias=False)
-      (5): LeakyReLU(negative_slope=0.2, inplace=True)
-      (6): Dropout(p=0.2, inplace=False)
-      (7): Linear(in_features=128, out_features=5, bias=False)
-      (8): Softmax(dim=1)
-    )
-    (encoder_conv): Sequential(
-      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (5): LeakyReLU(negative_slope=0.2, inplace=True)
-      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (8): LeakyReLU(negative_slope=0.2, inplace=True)
-      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
-    )
-  )
-  (DT): XGBHead()
-)
-===================================== Epoch 0 =====================================
-Trainset: 10000
-Valset: 1000
-Testset: 1000
-Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
-=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
-DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -308,7 +255,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -361,7 +308,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -414,60 +361,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
-    (criterion): CrossEntropyLoss()
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-  )
-  (ENCODER): Encoder(
-    (encoder_smax): Sequential(
-      (0): Flatten(start_dim=1, end_dim=-1)
-      (1): Linear(in_features=28224, out_features=512, bias=False)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): Dropout(p=0.2, inplace=False)
-      (4): Linear(in_features=512, out_features=128, bias=False)
-      (5): LeakyReLU(negative_slope=0.2, inplace=True)
-      (6): Dropout(p=0.2, inplace=False)
-      (7): Linear(in_features=128, out_features=5, bias=False)
-      (8): Softmax(dim=1)
-    )
-    (encoder_conv): Sequential(
-      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (5): LeakyReLU(negative_slope=0.2, inplace=True)
-      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (8): LeakyReLU(negative_slope=0.2, inplace=True)
-      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
-    )
-  )
-  (DT): XGBHead()
-)
-===================================== Epoch 0 =====================================
-Trainset: 10000
-Valset: 1000
-Testset: 1000
-Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
-=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
-DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -520,7 +414,113 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
+    (criterion): CrossEntropyLoss()
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=28224, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.2, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.2, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): Softmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 1000
+Testset: 1000
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
+DN4_DTR(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (ENCODER): Encoder(
+    (encoder_smax): Sequential(
+      (0): Flatten(start_dim=1, end_dim=-1)
+      (1): Linear(in_features=28224, out_features=512, bias=False)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Dropout(p=0.2, inplace=False)
+      (4): Linear(in_features=512, out_features=128, bias=False)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Dropout(p=0.2, inplace=False)
+      (7): Linear(in_features=128, out_features=5, bias=False)
+      (8): Softmax(dim=1)
+    )
+    (encoder_conv): Sequential(
+      (0): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (4): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (5): LeakyReLU(negative_slope=0.2, inplace=True)
+      (6): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (7): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (8): LeakyReLU(negative_slope=0.2, inplace=True)
+      (9): MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (DT): XGBHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 1000
+Testset: 1000
+Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
+DN4_DTR(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -570,7 +570,7 @@ DN4_DTR(
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -623,7 +623,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -676,7 +676,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -729,7 +729,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -782,7 +782,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -835,7 +835,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -888,7 +888,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -941,7 +941,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -994,7 +994,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1047,7 +1047,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1100,7 +1100,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1153,7 +1153,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1206,7 +1206,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1259,7 +1259,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1312,7 +1312,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1365,7 +1365,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1418,7 +1418,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1471,7 +1471,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1524,7 +1524,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1577,7 +1577,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1630,7 +1630,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1683,7 +1683,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1736,7 +1736,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1789,7 +1789,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1842,7 +1842,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1902,7 +1902,7 @@ Eposide-(716): [700/1000]	Time 0.402 (0.438)	Data 0.001 (0.003)	Loss 107.100 (88
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -1955,7 +1955,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2008,7 +2008,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2071,7 +2071,7 @@ Eposide-(916): [900/1000]	Time 0.428 (0.448)	Data 0.001 (0.002)	Loss 86.775 (95.
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2124,7 +2124,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2187,7 +2187,7 @@ Eposide-(16): [900/1000]	Time 0.420 (0.441)	Data 0.001 (0.002)	Loss 37.998 (96.1
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2241,7 +2241,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2295,7 +2295,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2351,7 +2351,7 @@ Eposide-(16): [200/1000]	Time 0.234 (0.237)	Data 0.000 (0.005)	Loss 1.705 (1.705
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2400,7 +2400,7 @@ DN4_DTR(
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2462,7 +2462,7 @@ Eposide-(0): [900/1000]	Time 0.229 (0.226)	Data 0.000 (0.002)	Loss 1.758 (1.706)
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2515,7 +2515,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2568,7 +2568,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2621,7 +2621,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2674,7 +2674,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2727,7 +2727,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2780,7 +2780,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2835,7 +2835,7 @@ Eposide-(0): [200/1000]	Time 0.405 (0.447)	Data 0.002 (0.006)	Loss 1.705 (1.705)
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2888,7 +2888,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2941,7 +2941,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -2994,7 +2994,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3057,7 +3057,7 @@ Eposide-(0): [900/1000]	Time 0.423 (0.438)	Data 0.001 (0.003)	Loss 1.785 (1.705)
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3113,7 +3113,7 @@ Eposide-(0): [300/1000]	Time 0.423 (0.474)	Data 0.002 (0.006)	Loss 1.691 (1.703)
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3176,7 +3176,7 @@ Eposide-(0): [900/1000]	Time 0.421 (0.446)	Data 0.003 (0.003)	Loss 8.979 (40.182
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3229,7 +3229,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3302,7 +3302,7 @@ Test-(0): [900/1000]	Time 0.272 (0.277)	Loss 86166040.000 (86277214.979)	Prec@1 
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3357,7 +3357,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3412,7 +3412,7 @@ Testset: 1000
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3469,7 +3469,7 @@ Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3522,7 +3522,7 @@ Testset: 300
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3575,7 +3575,7 @@ Testset: 300
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3628,7 +3628,7 @@ Testset: 300
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3681,7 +3681,7 @@ Testset: 300
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3735,7 +3735,7 @@ Testset: 300
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3789,7 +3789,7 @@ Testset: 300
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3844,7 +3844,7 @@ Testset: 300
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3902,7 +3902,7 @@ Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -3963,7 +3963,7 @@ Testset: 2
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar', epochs=3, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar' (epoch 2)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -4040,7 +4040,7 @@ Testset: 2
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar', epochs=10, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_0_best.pth.tar' (epoch 2)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -4168,7 +4168,7 @@ Eposide-(5000): [1000/5000]	Time 0.436 (0.447)	Data 0.000 (0.001)	Loss 1.611 (1.
 Eposide-(5000): [1100/5000]	Time 0.442 (0.447)	Data 0.000 (0.001)	Loss 1.610 (1.624)	Prec@1 20.000 (20.964)
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=10, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -4195,7 +4195,7 @@ Valset: 500
 Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=10, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 DN7_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -4271,7 +4271,7 @@ Eposide-(0): [4800/5000]	Time 0.326 (0.345)	Data 0.001 (0.001)	Loss 1.196 (1.376
 Eposide-(0): [4900/5000]	Time 0.336 (0.345)	Data 0.001 (0.001)	Loss 0.908 (1.373)	Prec@1 69.333 (44.407)
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 DN7_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -4299,7 +4299,7 @@ Testset: 5
 ============ validation on the val set ============
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -4351,7 +4351,7 @@ Valset: 500
 Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -4403,7 +4403,7 @@ Valset: 500
 Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='', epochs=15, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5163,7 +5163,7 @@ Test-(10): [100/500]	Time 0.270 (0.286)	Loss 1.639 (1.671)	Prec@1 22.667 (23.036
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5216,7 +5216,7 @@ Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5269,7 +5269,7 @@ Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5322,7 +5322,7 @@ Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5375,7 +5375,7 @@ Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5428,7 +5428,7 @@ Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5481,7 +5481,7 @@ Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -5534,7 +5534,7 @@ Testset: 500
 Namespace(dataset_dir='../dataset/miniImageNet/', data_name='miniImageNet', mode='train', resume='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3')
 => loaded checkpoint '../results/DN4_miniImageNet_DN4_DTR_5Way_5Shot_K3/epoch_10_best.pth.tar' (epoch 55000)
 DN4_DTR(
-  (BACKBONE_2D): FourLayer_64F(
+  (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)

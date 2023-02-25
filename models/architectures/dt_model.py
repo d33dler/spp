@@ -15,12 +15,12 @@ from torch.utils.data import DataLoader as TorchDataLoader
 from data_loader.data_load import Parameters, DatasetLoader
 from models import backbones, clustering, dt_heads, necks
 from models.dt_heads.dtree import DTree
-from models.interfaces.arch_module import ArchM
+from models.interfaces.arch_module import ARCH
 from models.utilities.utils import load_config, DataHolder, save_checkpoint
 import torch.nn.functional as F
 
 
-class ClassifierModel(ArchM):
+class DTModel(ARCH):
     arch = 'Missing'
 
     def __init__(self, cfg_path):
@@ -28,7 +28,7 @@ class ClassifierModel(ArchM):
         self.loaders = None
         self.criterion = None
         self.optimizer = None
-        model_cfg = self.model_cfg
+        model_cfg = self.root_cfg
         self.num_classes = model_cfg.NUM_CLASSES
         self.k_neighbors = model_cfg.K_NEIGHBORS
         self.data = DataHolder(model_cfg)
@@ -50,29 +50,31 @@ class ClassifierModel(ArchM):
     def forward(self):
         raise NotImplementedError
 
-    def _build_BACKBONE_2D(self):
-        if self.model_cfg.get("BACKBONE_2D", None) is None:
+    def _build_BACKBONE(self):
+        if self.root_cfg.get("BACKBONE", None) is None:
             raise ValueError('Missing specification of backbone to use')
-        m = backbones.__all__[self.model_cfg.BACKBONE_2D.NAME](self.data)
-        m.cuda() if self.model_cfg.BACKBONE_2D.CUDA else False  # TODO may yield err?
-        self.module_topology['BACKBONE_2D'] = m
+        m: ARCH.Child = backbones.__all__[self.root_cfg.BACKBONE.NAME](self.data)
+        m.cuda() if self.root_cfg.BACKBONE.CUDA else False  # TODO may yield err?
+        self.module_topology['BACKBONE'] = m
         self.data.module_list.append(m)
         return m
 
     def _build_ENCODER(self):  # ENCODER | _
-        if self.model_cfg.get("ENCODER", None) is None:
+        if self.root_cfg.get("ENCODER", None) is None:
             raise ValueError('Missing specification of encoder to use')
-        m = necks.__all__[self.model_cfg.ENCODER.NAME](self.data)
-        m.cuda() if self.model_cfg.ENCODER.CUDA else False
+        m = necks.__all__[self.root_cfg.ENCODER.NAME]
+        m = m(self.override_child_cfg(m.get_config(), "ENCODER"))
+        m.cuda() if self.root_cfg.ENCODER.CUDA else False
         self.module_topology['ENCODER'] = m
         self.data.module_list.append(m)
         return m
 
     def _build_DT(self):
-        if self.model_cfg.get("DT", None) is None:
+        if self.root_cfg.get("DT", None) is None:
             return None
-        m = dt_heads.__all__[self.model_cfg.DT.NAME](self.data)
-        m.cuda() if self.model_cfg.DT.CUDA else False
+        m: ARCH.Child = dt_heads.__all__[self.root_cfg.DT.NAME]
+        m = m(self.override_child_cfg(m.get_config(), "DT"))
+        m.cuda() if self.root_cfg.DT.CUDA else False
         self.module_topology['DT'] = m
         self.data.module_list.append(m)
         return m
@@ -81,8 +83,13 @@ class ClassifierModel(ArchM):
         sub_net = getattr(self, network, None)
         return sub_net.parameters(recurse)  # TODO handle encoder's subnets
 
+    def verify_module(self, module):
+        if not isinstance(module, ARCH.Child):
+            raise ValueError(
+                "[CFG_OVERRIDE] Cannot override child module config. Child module doesn't subclass ARCH.Child!")
+
     def train(self, training: bool = True) -> None:
-        [sub_mod.train(training) for sub_mod in self.module_topology.values() if isinstance(sub_mod, ArchM.Child)]
+        [sub_mod.train(training) for sub_mod in self.module_topology.values() if isinstance(sub_mod, ARCH.Child)]
 
     def run_epoch(self, output_file):
         raise NotImplementedError
@@ -103,9 +110,9 @@ class ClassifierModel(ArchM):
         :rtype:
         """
         # create empty dataframe
-        batch_sz = self.model_cfg.BATCH_SIZE
+        batch_sz = self.root_cfg.BATCH_SIZE
         dt_head: DTree = self.DT
-        X_len = self.model_cfg.DT.EPISODE_TRAIN_NUM * batch_sz
+        X_len = self.root_cfg.DT.EPISODE_TRAIN_NUM * batch_sz
         ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
         ranks = [f"rank_{i}" for i in range(0, self.k_neighbors)]
@@ -116,7 +123,7 @@ class ClassifierModel(ArchM):
         dt_head.base_features = cls_labels
         dt_head.deep_features = sim_topK
         dt_head.ranking_features = ranks
-        if self.model_cfg.DATASET is None:
+        if self.root_cfg.DATASET is None:
             tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
             tree_df["y"] = pd.Series(np.zeros(shape=X_len), dtype=int)
             ix = 0
@@ -178,19 +185,19 @@ class ClassifierModel(ArchM):
 
                     # tree_df.iloc[ix:ix + out_rows, deep_local_ix_S] = [sup_t.detach().cpu().view(sup_t.size()[0], -1) for sup_t in self.data.S_raw]
                     ix += out_rows
-                    if episode_index == self.model_cfg.DT.EPISODE_TRAIN_NUM - 1: break
+                    if episode_index == self.root_cfg.DT.EPISODE_TRAIN_NUM - 1: break
                 print("STD:", out_bank.std(axis=1).mean())
 
         else:
-            tree_df = pd.read_csv(self.model_cfg.DATASET, header=0)
+            tree_df = pd.read_csv(self.root_cfg.DATASET, header=0)
         self.data.X = tree_df[all_columns]
         self.data.y = tree_df[['y']]
         print("Finished inference, fitting tree...")
         print(self.data.X.head(5))
         print(self.data.X.tail(5))
-        if self.model_cfg.DATASET is None:
+        if self.root_cfg.DATASET is None:
             tree_df.to_csv(
-                f"tree_dataset_W{self.model_cfg.WAY_NUM}_S{self.model_cfg.SHOT_NUM}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv", index=False)
+                f"tree_dataset_W{self.root_cfg.WAY_NUM}_S{self.root_cfg.SHOT_NUM}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv", index=False)
 
         dt_head.fit(self.data.X, self.data.y, self.data.eval_set)
 

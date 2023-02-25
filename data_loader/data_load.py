@@ -1,5 +1,6 @@
 import dataclasses
 import os
+from pathlib import Path
 
 import torch
 from torch import nn
@@ -7,6 +8,8 @@ from torch import nn
 from dataset.datasets_csv import CSVLoader
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+
+from models.utilities.utils import load_config, config_exchange
 
 
 @dataclasses.dataclass
@@ -38,7 +41,8 @@ class DatasetLoader:
     def __init__(self, cfg, params: Parameters) -> None:
         self.transforms_ls = []
         self.params = params
-        self.cfg = cfg
+        self.cfg = load_config(Path(Path(__file__).parent / "config.yaml"))
+        self.cfg.AUGMENTOR = config_exchange(self.cfg.AUGMENTOR, cfg)
 
     def augment(self, transform: nn.Module):
         self.transforms_ls = [transform] + self.transforms_ls
@@ -55,9 +59,9 @@ class DatasetLoader:
         episode_val_num = self.params.episode_val_num
         episode_test_num = self.params.episode_test_num
         transform_ls = []
-
-        for TF in self.cfg.TRANSFORMS:
-            if not TF.ENABLE:
+        cfg_aug = self.cfg.AUGMENTOR
+        for TF in cfg_aug.TRANSFORMS:
+            if TF.NAME in cfg_aug.DISABLE:
                 continue
             t = getattr(transforms, TF.NAME)
             if TF.ARGS:

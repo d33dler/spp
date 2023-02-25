@@ -3,6 +3,7 @@ from typing import Sequence, Tuple, Any, List
 
 import mlflow
 import numpy as np
+from easydict import EasyDict
 from hyperopt import hp, STATUS_OK, fmin, tpe
 from hyperopt.pyll import scope
 from scipy.special import softmax
@@ -12,11 +13,11 @@ from sklearn.model_selection import train_test_split
 from torch import nn
 
 import xgboost as xgb
-from models.interfaces.arch_module import ArchM
+from models.interfaces.arch_module import ARCH
 from models.utilities.utils import DataHolder
 
 
-class DTree(ArchM.Child):
+class DTree(ARCH.Child):
     is_fit = False
     features: List[str] = []
     base_features: List[str] = []
@@ -29,11 +30,11 @@ class DTree(ArchM.Child):
     mean_ix: int = 0
     ranks_ix: int = 0
 
-    def __init__(self, data: DataHolder):
-        super().__init__()
+    def __init__(self, config: EasyDict):
+        super().__init__(config)
         self.set_optimize(False)
         self.optimizer = None
-        self.num_classes = data.num_classes
+        self.num_classes = config.PARAMETERS["num_classes"]
 
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         raise NotImplementedError

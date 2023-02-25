@@ -5,11 +5,11 @@ import torch.nn as nn
 from torch import optim, Tensor
 
 from models.clustering import KNN_itc
-from models.interfaces.arch_module import ArchM
+from models.interfaces.arch_module import ARCH
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights
 
 
-class Encoder(ArchM.Child):
+class Encoder(ARCH.Child):
     def __init__(self, data: DataHolder):
         super().__init__()
 

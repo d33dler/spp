@@ -22,8 +22,9 @@ class RandomForestHead(DTree):
     output: np.ndarray = None
     config_id = 'config.yaml'
 
-    def __init__(self, data: DataHolder):
-        super().__init__(data)
+    def __init__(self, config):
+        super().__init__(config)
+        print(config)
         self.features: List[str] = []
         self.cfg = load_config(Path(Path(__file__).parent / self.config_id))
         t = self.cfg.TYPE
@@ -39,6 +40,10 @@ class RandomForestHead(DTree):
             raise NotImplementedError('XGB specified model type not supported')
         if self.cfg.LOAD_MODEL:
             self.model.load_model(self.cfg.MODEL_NAME)
+
+    @staticmethod
+    def get_config():
+        return load_config(Path(Path(__file__).parent / "config.yaml"))
 
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         self.set_fit()

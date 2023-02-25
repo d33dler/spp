@@ -24,17 +24,18 @@ class XGBHead(DTree):
     XGBModel head wrapper class providing minimalistic interfacing with the model
     and automatic initialization using the local file config
     """
+
     model: xgb.XGBModel
+
     output: np.ndarray = None
     config_id = 'config.yaml'
-
-    def __init__(self, data: DataHolder):
-        super().__init__(data)
+    def __init__(self, config):
+        super().__init__(config)
         self.features: List[str] = []
-        self.cfg = load_config(Path(Path(__file__).parent / self.config_id))
-        t = self.cfg.TYPE
-        self.fine_tuning = self.cfg.OPTIMIZE
-        self.params: dict = self.cfg.PARAMETERS
+        self.config = load_config(Path(Path(__file__).parent / self.config_id))
+        t = self.config.TYPE
+        self.fine_tuning = self.config.OPTIMIZE
+        self.params: dict = self.config.PARAMETERS
         if t == 'REGRESSOR':
             self.model = xgb.XGBRegressor(**self.params)
         elif t == 'CLASSIFIER':
@@ -43,15 +44,19 @@ class XGBHead(DTree):
             self.model = xgb.XGBClassifier(**self.params)
         else:
             raise NotImplementedError('XGB specified model type not supported')
-        if self.cfg.LOAD_MODEL:
-            self.model.load_model(self.cfg.MODEL_NAME)
+        if self.config.LOAD_MODEL:
+            self.model.load_model(self.config.MODEL_NAME)
+
+    @staticmethod
+    def get_config():
+        return load_config(Path(Path(__file__).parent / "config.yaml"))
 
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         self.set_fit()
         if self.fine_tuning:
             self.params = self.optimize(x, y)
         self.features = [f for f in x.columns if f not in y.columns]
-        if self.cfg.TYPE == 'CLASSIFIER':
+        if self.config.TYPE == 'CLASSIFIER':
             return self._fit_classifier(x, y, eval_set, **kwargs)
         return self._fit_regressor(x, y, eval_set, **kwargs)
 
@@ -62,10 +67,10 @@ class XGBHead(DTree):
 
         [print(f">{o[0]} : {o[1]}") for o in
          sorted(self.model.get_booster().get_score(importance_type='gain').items(), key=lambda q: q[1], reverse=True)]
-        if self.cfg.SAVE_MODEL:
+        if self.config.SAVE_MODEL:
             now = datetime.now()
             date = now.strftime('%m_%d_%H_%M_%S')
-            self.model.save_model(f"results/{self.cfg.MODEL_NAME}_[{date}].json")
+            self.model.save_model(f"results/{self.config.MODEL_NAME}_[{date}].json")
         return self.model
 
     def _fit_regressor(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):

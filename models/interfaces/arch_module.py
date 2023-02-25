@@ -1,6 +1,8 @@
 import functools
 import os
+from abc import ABC, abstractmethod
 from enum import Enum, EnumMeta
+from pathlib import Path
 from typing import Dict, List
 
 import torch
@@ -10,22 +12,35 @@ from torch.nn.modules.loss import _Loss
 from torch.optim import Optimizer
 
 from data_loader.data_load import Parameters, DatasetLoader
-from models.utilities.utils import save_checkpoint, load_config, accuracy
+from models.utilities.utils import save_checkpoint, load_config, accuracy, init_weights, config_exchange
 
 
-class ArchM(nn.Module):
+class ARCH(nn.Module):
     """
-    Architecture Module - wraps around nn.Module and organizes necessary functions/values
+    Module architecture class - wraps around nn.Module and organizes necessary functions/values and provides necessary
+    model functionalities
+    Any model in this framework must subclass ARCH
     """
+    root_cfg: EasyDict | dict
+    optimizers: Dict
+    best_prec1 = 0
+    _epochix = 0
+    _loss_val: Tensor
 
-    class Child(nn.Module):
+    class Child(nn.Module, ABC):
+        config: Dict | EasyDict
         lr: float | List[float]
         optimizer: Optimizer | List[Optimizer]
         criterion: _Loss | List[_Loss]
         loss: Tensor
+
         fine_tuning = True
 
-        def calculate_loss(self, pred, gt):
+        def __init__(self, config: EasyDict | dict) -> None:
+            super().__init__()
+            self.config = config
+
+        def calculate_loss(self, gt, pred):
             if isinstance(self.criterion, list):
                 loss_ls = []
                 for prediction, criterion, optimizer in zip(pred, self.criterion, self.optimizer):
@@ -47,8 +62,7 @@ class ArchM(nn.Module):
                     optimizer.step()
                 torch.cuda.empty_cache()
                 self.loss = loss_ls
-                return
-
+                return loss_ls
             self.loss = self.criterion(pred, gt)
             self.optimizer.zero_grad()
             self.loss.backward()
@@ -75,20 +89,22 @@ class ArchM(nn.Module):
             else:
                 self.optimizer.load_state_dict(optim_state_dict)
 
+        @staticmethod
+        @abstractmethod
+        def get_config():
+            return None
+
     class BaseConfig:
         __doc__ = "Base config class for yaml files. Override __doc__ for implementations."
 
     module_topology: Dict[str, Child]
-    model_cfg: EasyDict
-    best_prec1 = 0
-    epochix = 0
-    optimizers: dict
 
     def __init__(self, cfg_path) -> None:
         super().__init__()
-        self.model_cfg = self.load_config(cfg_path)
-        self.module_topology: Dict[str, ArchM.Child] = {_: None for _ in self.model_cfg.TOPOLOGY}
-        c = self.model_cfg
+        self.root_cfg = self.load_config(cfg_path)
+        self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
+        self._mod_topo_private = self.module_topology.copy()
+        c = self.root_cfg
         p = Parameters(c.IMAGE_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE, c.BATCH_SIZE)
@@ -117,54 +133,94 @@ class ArchM(nn.Module):
 
     def _set_modules_mode(self):
         for k, m in self.module_topology.items():
-            v = self.model_cfg[k].MODE == 'TRAIN'
+            v = self.root_cfg[k].MODE == 'TRAIN'
             print("Setting module: ", k, " TRAIN" if v else " TEST", " mode.")
             m.train(v)
 
     def save_model(self, filename):
+        priv = self._mod_topo_private
         state = {
-            'epoch_index': self.epochix,
+            'epoch_index': self._epochix,
             'arch': self.arch,
             'best_prec1': self.best_prec1
         }
         optimizers = {
-            f"{k}_optim": v.optimizer.state_dict() if not isinstance(v.optimizer, list) else
+            f"{priv[k]}_optim": v.optimizer.state_dict() if not isinstance(v.optimizer, list) else
             [o.state_dict() for o in v.optimizer] for k, v in self.module_topology.items() if v.optimizer is not None}
-        state_dicts = {f"{k}_state_dict": v.state_dict() for k, v in self.module_topology.items()}
+        state_dicts = {f"{priv[k]}_state_dict": v.state_dict() for k, v in self.module_topology.items()}
         state.update(optimizers)
         state.update(state_dicts)
         save_checkpoint(state, filename)
+        print("Saved model to:", filename)
 
     def load_model(self, path, txt_file=None):
+        priv = self._mod_topo_private
         if os.path.isfile(path):
             print("=> loading checkpoint '{}'".format(path))
             checkpoint = torch.load(path)
-            self.epochix = checkpoint['epoch_index']
+            self._epochix = checkpoint['epoch_index']
             self.best_prec1 = checkpoint['best_prec1']
-            [v.load_state_dict(checkpoint[f"{k}_state_dict"]) for k, v in self.module_topology.items()
-             if f"{k}_state_dict" in checkpoint]
-            [v.load_optimizer_state_dict(checkpoint[f"{k}_optim"]) for k, v in self.module_topology.items()
+            [v.load_state_dict(checkpoint[f"{priv[k]}_state_dict"]) for k, v in self.module_topology.items()
+             if f"{priv[k]}_state_dict" in checkpoint]
+            [v.load_optimizer_state_dict(checkpoint[f"{priv[k]}_optim"]) for k, v in self.module_topology.items()
              if f"{k}_optim" in checkpoint]
-            # optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']))
-            print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']), file=txt_file)
+            if txt_file:
+                print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']), file=txt_file)
         else:
             print("=> no checkpoint found at '{}'".format(path))
-            print("=> no checkpoint found at '{}'".format(path), file=self.p)
+            if txt_file:
+                print("=> no checkpoint found at '{}'".format(path), file=self.p)
 
     def load_config(self, path):
-        self.model_cfg = load_config(path)
-        return self.model_cfg
+        self.root_cfg = load_config(path)
+        return self.root_cfg
 
-    def get_loss(self, module_id: str):
+    def override_child_cfg(self, _config: EasyDict | dict, module_id: str):
+        """
+        Overrides ARCH.Child module configuration based on root config values.
+        Important:
+        The mappings should be nested in the root config in the module's YAML objects (e.g. BACKBONE, DT...)
+        and should not be nested in the child config!
+        The keys in child config and root config must match (obviously).
+
+        :param _config: child config
+        :param module_id: child module ID
+        :return: child cfg: EasyDict | dict
+        """
+        print(self.root_cfg[module_id].items())
+        if module_id not in self.root_cfg.keys():
+            raise KeyError("[CFG_OVERRIDE] Module ID not found in root cfg!")
+        config_exchange(_config, self.root_cfg[module_id])
+        return _config
+
+    def get_loss(self, module_id: str = None):
+        if module_id is None:
+            return self.module_topology[self.root_cfg.TRACK_LOSS].loss
         if module_id not in self.module_topology.keys():
             raise KeyError(f"Module {module_id} not found in architecture topology")
         return self.module_topology[module_id].loss
 
+    def calculate_loss(self, gt, pred):
+        return self.module_topology[self.root_cfg.TRACK_LOSS].calculate_loss(gt, pred)
+
     def calculate_accuracy(self, output, target, topk=(1, 3)):
-        prec1, _ = accuracy(output, target, topk=topk)
-        self.best_prec1 = prec1 if prec1 > self.best_prec1 else self.best_prec1
-        return prec1
+        prec = accuracy(output, target, topk=topk)
+        self.best_prec1 = prec[0] if prec[0] > self.best_prec1 else self.best_prec1
+        return prec
+
+    def get_epoch(self):
+        return self._epochix
+
+    def incr_epoch(self):
+        self._epochix += 1
+
+    def get_criterion(self):
+        return self.module_topology[self.root_cfg.TRACK_CRITERION].criterion
+
+    def init_weights(self):
+        for _id, module in self.module_topology.items():
+            init_weights(module, self.root_cfg[_id].INIT_WEIGHTS) if "INIT_WEIGHTS" in self.root_cfg[_id] else False
 
     def adjust_learning_rate(self, epoch_num):
         """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""

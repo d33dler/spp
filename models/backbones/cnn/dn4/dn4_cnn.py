@@ -1,6 +1,7 @@
 from dataclasses import field
 
 import torch.nn as nn
+from easydict import EasyDict
 from torch import optim
 
 from models.backbones.base import BaseBackbone2d
@@ -26,12 +27,10 @@ class FourLayer_64F(BaseBackbone2d):
         NUM_CLASSES: int = field(default_factory=int)  # 5 (commented out = default vals)
 
     #  norm_layer=nn.BatchNorm2d, num_classes=5, neighbor_k=3
-    def __init__(self, data: DataHolder):
+    def __init__(self, data: DataHolder, config: EasyDict = None):
         super().__init__(self.Config())
-        # self.build()
-        # super(FourLayer_64F, self).__init__()
         self.data = data
-        model_cfg = data.cfg.BACKBONE_2D
+        model_cfg = data.cfg.BACKBONE
         norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
 
         self.features = nn.Sequential(  # 3*84*84
@@ -53,10 +52,10 @@ class FourLayer_64F(BaseBackbone2d):
             norm_layer(64),
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
-        self.norm_layers = [1, 5, 9, 12]
+        self.FREEZE_LAYERS = [1, 5, 9, 12]
+        self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
         self.criterion = nn.CrossEntropyLoss().cuda()
-        init_weights(self, model_cfg.INIT_WEIGHTS)
 
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.output_shape = 64
@@ -80,31 +79,3 @@ class FourLayer_64F(BaseBackbone2d):
         if self.training:
             self.backward(data.sim_list_BACKBONE2D, data.targets)
         return data
-
-
-# def define_DN4Net(pretrained=False, model_root=None, which_model='Conv64', norm='batch', init_type='normal',
-#                   use_gpu=True, **kwargs):
-#     norm_layer, _ = get_norm_layer(norm_type=norm)
-#
-#     if use_gpu:
-#         assert (torch.cuda.is_available())
-#
-#     if which_model == 'Conv64F':
-#         DN4Net = FourLayer_64F()
-#     elif which_model == 'ResNet256F':
-#         net_opt = {
-#             'userelu': False, 'in_planes': 3, 'dropout': 0.5,
-#             'norm_layer': norm_layer
-#         }
-#         DN4Net = ResNetLike()
-#     else:
-#         raise NotImplementedError('Model name [%s] is not recognized' % which_model)
-#     init_weights(DN4Net, init_type=init_type)
-#
-#     if use_gpu:
-#         DN4Net.cuda()
-#
-#     if pretrained:
-#         DN4Net.load_state_dict(model_root)
-#
-#     return DN4Net

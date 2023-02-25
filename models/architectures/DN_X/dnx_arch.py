@@ -1,37 +1,29 @@
 import time
-from datetime import datetime
 from pathlib import Path
-from typing import List
 
 import numpy as np
-import pandas as pd
 import torch
-from pandas import DataFrame
-from torch import Tensor
 from torch.nn.functional import one_hot
-from torch.utils.data import DataLoader as TorchDataLoader
 
-from models.architectures.classifier import ClassifierModel
+from models.architectures.dt_model import DTModel
 from models.dt_heads.dtree import DTree
 from models.utilities.utils import AverageMeter, accuracy
 
 
-class DN7DA_DTR(ClassifierModel):
+class DN_X(DTModel):
     """
-    DN4 DTR Model
+    DN_X (4|7) Model
 
     Structure:
     [Deep learning module] ⟶ [K-NN module] ⟶ [Decision Tree]
-
     """
-    arch = 'DN4DA_DTR'
+    arch = 'DN4'
 
-    def __init__(self):
-        super().__init__(Path(__file__).parent / 'config.yaml')
-        # self.criterion = nn.CrossEntropyLoss().cuda()
+    def __init__(self, cfg_path):
+        super().__init__(cfg_path)
 
     def forward(self):
-        self.BACKBONE_2D.forward()
+        self.BACKBONE.forward()
 
         dt_head: DTree = self.DT
         if dt_head.is_fit:
@@ -40,7 +32,9 @@ class DN7DA_DTR(ClassifierModel):
                                               dt_head.deep_features)
             o = torch.from_numpy(dt_head.forward(self.data.X).astype(np.int64))
             o = one_hot(o, self.num_classes).float().cuda()
-            self.data.tree_pred = o
+            self.data.sim_list_BACKBONE2D = o
+            return o
+        return self.data.sim_list_BACKBONE2D
 
     def run_epoch(self, output_file):
         batch_time = AverageMeter()
@@ -49,7 +43,7 @@ class DN7DA_DTR(ClassifierModel):
         top1 = AverageMeter()
         train_loader = self.loaders.train_loader
         end = time.time()
-        epochix = self.epochix
+        epochix = self.get_epoch()
         for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_loader):
 
             # Measure data loading time
@@ -74,11 +68,11 @@ class DN7DA_DTR(ClassifierModel):
             self.data.S_in = input_var2
 
             # Calculate the output
-            self.forward()
+            out = self.forward()
 
-            loss = self.get_loss('BACKBONE_2D')
+            loss = self.get_loss()
             # Measure accuracy and record loss
-            prec1, _ = accuracy(self.data.sim_list_BACKBONE2D, target, topk=(1, 3))
+            prec1, _ = accuracy(out, target, topk=(1, 3))
 
             losses.update(loss.item(), query_images.size(0))
             top1.update(prec1[0], query_images.size(0))
@@ -88,7 +82,7 @@ class DN7DA_DTR(ClassifierModel):
             end = time.time()
 
             # ============== print the intermediate results ==============#
-            if episode_index % self.model_cfg.PRINT_FREQ == 0 and episode_index != 0:
+            if episode_index % self.root_cfg.PRINT_FREQ == 0 and episode_index != 0:
                 print(f'Eposide-({epochix}): [{episode_index}/{len(train_loader)}]\t'
                       f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
@@ -99,10 +93,9 @@ class DN7DA_DTR(ClassifierModel):
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                       'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
-                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                    epochix, episode_index, len(train_loader), batch_time=batch_time, data_time=data_time,
-                    loss=losses,
-                    top1=top1), file=output_file)
-            self.epochix += 1
-        del losses
+                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(epochix, episode_index, len(train_loader),
+                                                                      batch_time=batch_time, data_time=data_time,
+                                                                      loss=losses,
+                                                                      top1=top1), file=output_file)
+        self.incr_epoch()
         self.data.clear()
