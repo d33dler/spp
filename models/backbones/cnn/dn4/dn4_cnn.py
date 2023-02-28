@@ -10,13 +10,13 @@ from models.utilities.utils import DataHolder, init_weights, get_norm_layer
 
 
 ##############################################################################
-# Classes: FourLayer_64F
+# Class: FourLayer_64F
 ##############################################################################
 
 # Model: FourLayer_64F
 # Input: One query image and a support set
 # Base_model: 4 Convolutional layers --> Image-to-Class layer
-# Dataset: 3 x 84 x 84, for miniImageNet
+# Dataset: 3 x 84 x 84 (miniImageNet & Stanford Dogs)
 # Filters: 64->64->64->64
 # Mapping Sizes: 84->42->21->21->21
 
@@ -26,7 +26,6 @@ class FourLayer_64F(BaseBackbone2d):
         FILE_TYPE: str = "YAML"  # mandatory
         NUM_CLASSES: int = field(default_factory=int)  # 5 (commented out = default vals)
 
-    #  norm_layer=nn.BatchNorm2d, num_classes=5, neighbor_k=3
     def __init__(self, data: DataHolder, config: EasyDict = None):
         super().__init__(self.Config())
         self.data = data
@@ -76,6 +75,5 @@ class FourLayer_64F(BaseBackbone2d):
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
         data.sim_list_BACKBONE2D, data.DLD_topk = self.knn.forward(data.q, data.S, self.one_hot)
-        if self.training:
-            self.backward(data.sim_list_BACKBONE2D, data.targets)
+        self.data.output = data.sim_list_BACKBONE2D
         return data

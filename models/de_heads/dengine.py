@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Sequence, Tuple, Any
+from typing import Sequence, Tuple, Any, Dict, List
 
 import numpy as np
 from pandas import DataFrame
@@ -8,6 +8,14 @@ from models.interfaces.arch_module import ARCH
 
 
 class DecisionEngine(ARCH.Child):
+    """
+    Decision engine superclass interface
+    """
+    ALL_FT = "*"
+    BASE_FT = "base"
+    MISC_FT = "misc"
+    RANK_FT = "rank"
+    features: Dict[str, List[str]] = dict({ALL_FT: [], BASE_FT: [], MISC_FT: [], RANK_FT: []})
 
     def __init__(self, config):
         super(DecisionEngine, self).__init__(config)
@@ -47,7 +55,6 @@ class DecisionEngine(ARCH.Child):
         raise NotImplementedError
 
     def feature_engineering(self, matrix: np.ndarray):
-
         raise NotImplementedError
 
     @enabled.setter

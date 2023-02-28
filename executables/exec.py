@@ -23,37 +23,33 @@ from models.utilities.utils import AverageMeter
 
 sys.dont_write_bytecode = True
 
-# ============================ Data & Networks =====================================
-
-# ==================================================================================
-
-
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # TODO might be cause for issues?
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--arch', required=True, type=str, choices=architectures.__all__.keys(),
                     help='Model architecture ID')
-parser.add_argument('--cfg', required=True, type=str, help='Model architecture YAML config file')
+parser.add_argument('--config', required=True, type=str, help='Model architecture YAML config file')
 parser.add_argument('--dataset_dir', default=None, help='/miniImageNet')
 parser.add_argument('--data_name', default='miniImageNet', help='miniImageNet|StanfordDog|StanfordCar|CubBird')
 parser.add_argument('--mode', default='train', choices=["train", "test"])
 parser.add_argument('--resume', default='', type=str, help='path to the lastest checkpoint (default: none)')
-#  Few-shot parameters  #
 parser.add_argument('--epochs', type=int, default=30, help='the total number of training epoch')
 parser.add_argument('--cuda', action='store_true', default=True, help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='the number of gpus')
-parser.add_argument('--nc', type=int, default=3, help='input image channels')
-parser.add_argument('--clamp_lower', type=float, default=-0.01)
-parser.add_argument('--clamp_upper', type=float, default=0.01)
 parser.add_argument('--print_freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 100)')
 opt = parser.parse_args()
 opt.cuda = True
 cudnn.benchmark = True
 
+"""
+This is the main execution script. For training a model simply add the config path, architecture name, 
+dataset path & data_name.
 
-# ======================================= Define functions ============================================
+Example:
+python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_dir your/dataset/path --data_name aName
+"""
 def mean_confidence_interval(data, confidence=0.95):
     a = [1.0 * np.array(data[i].cpu()) for i in range(len(data))]
     n = len(a)
@@ -250,11 +246,12 @@ def train(model:DEModel, F_txt):
 def run():
     # ======================================== Settings of path ============================================
     ARCHITECTURE_MAP = architectures.__all__
-    model = ARCHITECTURE_MAP[opt.arch](opt.cfg)
+    model = ARCHITECTURE_MAP[opt.arch](opt.config)
     p = model.data_loader.params
     opt.outf = '_'.join([p.outf, opt.arch, opt.data_name, str(model.arch), str(p.way_num), 'Way', str(
         p.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS)])
     p.outf = opt.outf
+
     if not os.path.exists(opt.outf):
         os.makedirs(opt.outf)
 
@@ -267,7 +264,6 @@ def run():
     print(opt)
     print(opt, file=txt_file)
 
-    # ========================================== Model Config ===============================================
 
     # optionally resume from a checkpoint
     if opt.resume:

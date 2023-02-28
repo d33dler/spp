@@ -18,9 +18,16 @@ import torch.nn.functional as F
 
 class ARCH(nn.Module):
     """
-    Module architecture class - wraps around nn.Module and organizes necessary functions/values and provides necessary
-    model functionalities
-    Any model in this framework must subclass ARCH
+    Module architecture class - wraps around nn.Module and organizes necessary functions/variables and provides necessary
+    model functionalities. This class also hosts an inner class ARCH.Child to be implemented by any module used in
+    a model - ARCH stores the module instances and offers module management functionalities.
+    Functionalities:
+    Save & Load model
+    Override child module configuration (root config child-module sub-configs fields matching child module configuration fields)
+    Return calculated loss
+    Calculate accuracy
+    LR tweaking
+    Any model in this framework must subclass Class.ARCH !
     """
     root_cfg: EasyDict | dict
     optimizers: Dict
@@ -29,12 +36,20 @@ class ARCH(nn.Module):
     _loss_val: Tensor
 
     class Child(nn.Module, ABC):
+        """
+        ARCH.Child class - abstract class wrapping around nn.Module and providing typical
+        module training functionalities. Any model sub-classing ARCH should employ modules
+        sub-classing ARCH.Child.
+        Functionalities:
+        Loss calculation
+        Backward call
+        LR adjustment
+        """
         config: Dict | EasyDict
         lr: float | List[float]
         optimizer: Optimizer | List[Optimizer]
         criterion: _Loss | List[_Loss]
         loss: Tensor
-
         fine_tuning = True
 
         def __init__(self, config: EasyDict | dict) -> None:
@@ -42,6 +57,15 @@ class ARCH(nn.Module):
             self.config = config
 
         def calculate_loss(self, gt, pred):
+            """
+            Calculates without calculating the gradient
+            :param gt: ground truth
+            :type gt: Sequence
+            :param pred: predictions
+            :type pred: Sequence
+            :return: loss
+            :rtype: Any
+            """
             if isinstance(self.criterion, list):
                 loss_ls = []
                 for prediction, criterion, optimizer in zip(pred, self.criterion, self.optimizer):
@@ -68,6 +92,7 @@ class ARCH(nn.Module):
             self.optimizer.zero_grad()
             self.loss.backward()
             self.optimizer.step()
+            return self.loss
 
         def adjust_learning_rate(self, epoch):
 
@@ -109,6 +134,7 @@ class ARCH(nn.Module):
     def __init__(self, cfg_path) -> None:
         super().__init__()
         self._store_path = None
+        self.state = dict()
         self.root_cfg = self.load_config(cfg_path)
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
@@ -133,6 +159,11 @@ class ARCH(nn.Module):
         AveragePool2d = nn.AvgPool2d
         LPPool2d = nn.LPPool2d
 
+    def backward(self, pred, gt):
+        for m in self.module_topology.values():
+            if m.training:
+                m.backward(pred, gt)
+
     @staticmethod
     def get_func(fset: EnumMeta, name: str):
         if name not in fset.__members__.keys():
@@ -146,15 +177,27 @@ class ARCH(nn.Module):
             m.train(v)
 
     def save_model(self, filename=None):
+        """
+        Saves model to filename or back to same checkpoint file loaded into the model.
+        Subclasses can store in the ARCH.state field additional components  and call this function
+        to save everything.
+        :param filename:
+        :type filename:
+        :return:
+        :rtype:
+        """
         if filename is None:
             filename = self._store_path
+            if self._store_path is None:
+                raise ValueError("Missing model save path!")
 
         priv = self._mod_topo_private
+
         state = {
             'epoch_index': self._epochix,
             'arch': self.arch,
             'best_prec1': self.best_prec1,
-            'DE': self.module_topology['DE'].dump()
+
         }
         optimizers = {
             f"{priv[k]}_optim": v.optimizer.state_dict() if not isinstance(v.optimizer, list) else
@@ -162,10 +205,21 @@ class ARCH(nn.Module):
         state_dicts = {f"{priv[k]}_state_dict": v.state_dict() for k, v in self.module_topology.items()}
         state.update(optimizers)
         state.update(state_dicts)
+        state.update(self.state)
         save_checkpoint(state, filename)
         print("Saved model to:", filename)
 
     def load_model(self, path, txt_file=None):
+        """
+        Load models main components from checkpoint : modules state-dictionaries & optimizers-state-dictionaries
+        Method returns the checkpoint for any subclass of ARCH to load additional (model specific) components.
+        :param path: file path
+        :type path: Path | str
+        :param txt_file: logging file
+        :type txt_file: IOFile
+        :return: torch.checkpoint | None
+        :rtype: Any
+        """
         priv = self._mod_topo_private
         self._store_path = path
         if os.path.isfile(path):
@@ -177,15 +231,16 @@ class ARCH(nn.Module):
              if f"{priv[k]}_state_dict" in checkpoint]
             [v.load_optimizer_state_dict(checkpoint[f"{priv[k]}_optim"]) for k, v in self.module_topology.items()
              if f"{k}_optim" in checkpoint]
-            if 'DE' in checkpoint and 'DE' in self.module_topology.keys():
-                self.module_topology['DE'].load(checkpoint['DE'])
+
             print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']))
             if txt_file:
                 print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']), file=txt_file)
+            return checkpoint
         else:
             print("=> no checkpoint found at '{}'".format(path))
             if txt_file:
                 print("=> no checkpoint found at '{}'".format(path), file=self.p)
+            return None
 
     def load_config(self, path):
         self.root_cfg = load_config(path)
@@ -203,7 +258,6 @@ class ARCH(nn.Module):
         :param module_id: child module ID
         :return: child cfg: EasyDict | dict
         """
-        print(self.root_cfg[module_id].items())
         if module_id not in self.root_cfg.keys():
             raise KeyError("[CFG_OVERRIDE] Module ID not found in root cfg!")
         return config_exchange(_config, self.root_cfg[module_id])
@@ -216,10 +270,12 @@ class ARCH(nn.Module):
         return self.module_topology[module_id].loss
 
     def calculate_loss(self, gt, pred):
+        """
+        Calculate loss (without grad!)
+        """
         return self.module_topology[self.root_cfg.TRACK_LOSS].calculate_loss(gt, pred)
 
     def calculate_accuracy(self, output, target, topk=(1,)):
-
         prec = accuracy(F.softmax(output, dim=1), target, topk=topk)
         self.best_prec1 = prec[0] if prec[0] > self.best_prec1 else self.best_prec1
         return prec

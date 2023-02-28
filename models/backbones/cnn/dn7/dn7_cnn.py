@@ -7,6 +7,9 @@ from models.backbones.base import BaseBackbone2d
 from models.clustering.knn import KNN_itc
 from models.utilities.utils import DataHolder, init_weights, get_norm_layer
 
+##############################################################################
+# Class: SevenLayer_64F
+##############################################################################
 
 # Model: SevenLayer_64F
 # Input: One query image and a support set

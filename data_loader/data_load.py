@@ -14,6 +14,9 @@ from models.utilities.utils import load_config, config_exchange
 
 @dataclasses.dataclass
 class Parameters:
+    """
+    DataLoader parameters (extracted from model root config @see models/architectures/configs)
+    """
     img_sz: int
     dataset_dir: str
     shot_num: int
@@ -37,7 +40,9 @@ class Loaders:
 
 
 class DatasetLoader:
-
+    """
+    Class used for data preparation (episode construction, pre-processing, augmentation)
+    """
     def __init__(self, cfg, params: Parameters) -> None:
         self.transforms_ls = []
         self.params = params

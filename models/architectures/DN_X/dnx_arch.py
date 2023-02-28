@@ -13,21 +13,26 @@ from models.utilities.utils import AverageMeter, accuracy
 
 class DN_X(DEModel):
     """
-    DN_X (4|7) Model
-
+    DN_X (4|7|X) Model
+    Implements epoch run employing few-shot learning & performance tracking during training
     Structure:
     [Deep learning module] ⟶ [K-NN module] ⟶ [Decision Tree]
+
     """
     arch = 'DN4'
 
     def __init__(self, cfg_path):
+        """
+        Pass configuration file path to the superclass
+        :param cfg_path: model root configuration file path to be loaded (should include sub-module specifications)
+        :type cfg_path: Path | str
+        """
         super().__init__(cfg_path)
 
     def forward(self):
         self.BACKBONE.forward()
-
-        d_engine: DecisionEngine = self.DE
-        if d_engine.enabled:
+        d_engine: DecisionEngine = self._DE
+        if d_engine and d_engine.enabled:
             _input = np.asarray([d_engine.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
             self.data.X = d_engine.feature_engineering(
                 np.concatenate([_input, self.data.DLD_topk.detach().cpu().numpy()], axis=1))
@@ -38,6 +43,13 @@ class DN_X(DEModel):
         return self.data.sim_list_BACKBONE2D
 
     def run_epoch(self, output_file):
+        """
+        Functionality: Iterate over training dataset episodes , pre-process the query and support classes and update
+        the model IO-object (DataHolder). Run inference and collect loss for performance tracking.
+        :param output_file: opened txt file for logging
+        :type output_file: IOFile
+        :return: None
+        """
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
@@ -70,7 +82,7 @@ class DN_X(DEModel):
 
             # Calculate the output
             out = self.forward()
-
+            self.backward(out, target)
             loss = self.get_loss()
             # Measure accuracy and record loss
             prec1, _ = accuracy(out, target, topk=(1,))

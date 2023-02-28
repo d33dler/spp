@@ -1,21 +1,20 @@
-"""
-General utilities
-"""
 from __future__ import print_function
-
 import functools
 import gc
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Any
-
 import numpy as np
 import torch
 import yaml
 from easydict import EasyDict
 from pandas import DataFrame
-from torch import Tensor, nn, nn as nn
+from torch import Tensor, nn as nn
 from torch.nn import BatchNorm2d, init
+
+"""
+General utilities
+"""
 
 
 def save_checkpoint(state, filename='checkpoint.pth.tar'):
@@ -50,7 +49,6 @@ class DataHolderBase:
 
 
 def config_exchange(dest: dict, src: dict):
-
     [(dest.update({k: v}) if not isinstance(dest[k], dict) else dest[k].update(v))
      and src.update({k: dest.config[k]})
      for k, v in src.items() if k in dest]
@@ -61,6 +59,7 @@ def config_exchange(dest: dict, src: dict):
 class DataHolder(DataHolderBase):
     """
     Module IO specification object
+    Models can choose to employ it for sharing information explicitly among child modules.
     """
     # Classification
     num_classes: int
@@ -85,6 +84,8 @@ class DataHolder(DataHolderBase):
 
     # Tree-out
     tree_pred: np.ndarray
+
+    output: Any
 
     def __init__(self, cfg):
         self.eval_set = None

@@ -25,6 +25,11 @@ class RandomForestHead(DTree):
     config_id = 'config.yaml'
 
     def __init__(self, config):
+        """
+                Initialize model and create search space for parameter fine-tuning using hyperopt
+                :param config:
+                :type config:
+                """
         super().__init__(config)
         t = self.config.TYPE
 

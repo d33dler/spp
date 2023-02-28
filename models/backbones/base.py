@@ -13,6 +13,8 @@ from models.interfaces.arch_module import ARCH
 class BaseBackbone2d(ARCH.Child):
     """
     Abstraction class for 2d backbones implementing using torch
+    Finished: No
+    Tested: No
     """
     FEATURES: nn.Sequential
     FREEZE_LAYERS: List[int] = []

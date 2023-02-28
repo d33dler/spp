@@ -28,6 +28,11 @@ class XGBHead(DTree):
     config_id = 'config.yaml'
 
     def __init__(self, config):
+        """
+        Initialize model and create search space for parameter fine-tuning using hyperopt
+        :param config:
+        :type config:
+        """
         super().__init__(config)
         self.search_space = {
             'learning_rate': hp.quniform('learning_rate', 0.01, 0.1, 0.01),

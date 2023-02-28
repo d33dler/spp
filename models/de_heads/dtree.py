@@ -23,11 +23,9 @@ from models.utilities.utils import DataHolder
 
 
 class DTree(DecisionEngine, ABC):
-    ALL_FT = "*"
-    BASE_FT = "base"
-    MISC_FT = "misc"
-    RANK_FT = "rank"
-    features: Dict[str, List[str]] = dict({ALL_FT: [], BASE_FT: [], MISC_FT: [], RANK_FT: []})
+    """
+    Decision Tree decision engine type
+    """
     all_features: List[str] = []
     search_space = {}
     _float_int_fix = ['max_depth', 'num_parallel_tree', 'num_boost_round']
@@ -43,6 +41,16 @@ class DTree(DecisionEngine, ABC):
             self.ranks = max(min(3, self.num_classes - 1), 0)
 
     def optimize(self, train_X: pd.DataFrame, train_Y: pd.DataFrame):
+        """
+        Hyperparameter finetuning using hyperopt for ensemble tree (gradient boosting) algorithms
+        Uses mlflow for logging & tracking progress & performance.
+        :param train_X:
+        :type train_X:
+        :param train_Y:
+        :type train_Y:
+        :return:
+        :rtype:
+        """
         X_train, X_test, y_train, y_test = train_test_split(train_X, train_Y, test_size=0.3, shuffle=True)
         y_test = y_test.astype(float)
         y_train = y_train.astype(float)
@@ -64,8 +72,6 @@ class DTree(DecisionEngine, ABC):
 
             # Record Log loss as primary loss for Hyperopt to minimize
             predictions_test = booster.predict(test, output_margin=True)
-            # print(np.unique(predictions_test))
-            # print(np.unique(y_test))
             loss = log_loss(y_test, predictions_test, labels=labels)
 
             return {'status': STATUS_OK, 'loss': loss, 'booster': booster.attributes()}
