@@ -13,14 +13,18 @@ from torch.nn import Parameter
 from torch.utils.data import DataLoader as TorchDataLoader
 
 from data_loader.data_load import Parameters, DatasetLoader
-from models import backbones, clustering, dt_heads, necks
-from models.dt_heads.dtree import DTree
+from models import backbones, clustering, de_heads, necks
+from models.de_heads.dengine import DecisionEngine
+from models.de_heads.dtree import DTree
 from models.interfaces.arch_module import ARCH
 from models.utilities.utils import load_config, DataHolder, save_checkpoint
 import torch.nn.functional as F
 
 
-class DTModel(ARCH):
+class DEModel(ARCH):
+    """
+    DEModel (Decision-Engine model)
+    """
     arch = 'Missing'
 
     def __init__(self, cfg_path):
@@ -69,13 +73,13 @@ class DTModel(ARCH):
         self.data.module_list.append(m)
         return m
 
-    def _build_DT(self):
-        if self.root_cfg.get("DT", None) is None:
+    def _build_DE(self):
+        if self.root_cfg.get('DE', None) is None:
             return None
-        m: ARCH.Child = dt_heads.__all__[self.root_cfg.DT.NAME]
-        m = m(self.override_child_cfg(m.get_config(), "DT"))
-        m.cuda() if self.root_cfg.DT.CUDA else False
-        self.module_topology['DT'] = m
+        m: ARCH.Child = de_heads.__all__[self.root_cfg.DE.NAME]
+        m = m(self.override_child_cfg(m.get_config(), 'DE'))
+        m.cuda() if self.root_cfg.DE.CUDA else False
+        self.module_topology['DE'] = m
         self.data.module_list.append(m)
         return m
 
@@ -100,7 +104,26 @@ class DTModel(ARCH):
     def set_optimizer(self, optimizer):
         self.optimizer = optimizer
 
-    def fit_tree_episodes(self, train_set: TorchDataLoader):
+    def enable_decision_engine(self, train_set: TorchDataLoader = None, refit=False):
+        if 'DE' not in self.module_topology.keys():
+            raise AttributeError("Not able to enable decision engine - Missing DE module!")
+        dengine: DecisionEngine = self.module_topology['DE']
+        if not isinstance(dengine, DecisionEngine):
+            raise ValueError(f"Wrong class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
+                             f"got: : {type(dengine)}")
+        if not dengine.is_fit or refit:
+            self._fit_DE(train_set)
+        dengine.enabled = True
+
+    def _fit_DE(self, train_set):
+        if self.root_cfg.DE.ENGINE == "TREE":
+            self._fit_tree_episodes(train_set)
+        else:
+            raise ValueError(f"Decision Engine type not supported from choices [TREE] , got: {self.root_cfg.DE.ENGINE}")
+
+        self.save_model()
+
+    def _fit_tree_episodes(self, train_set: TorchDataLoader):  # TODO move to DTree?
         """
 
         :param train_set:
@@ -111,19 +134,20 @@ class DTModel(ARCH):
         """
         # create empty dataframe
         batch_sz = self.root_cfg.BATCH_SIZE
-        dt_head: DTree = self.DT
-        X_len = self.root_cfg.DT.EPISODE_TRAIN_NUM * batch_sz
+        dt: DTree = self.DE
+        X_len = self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz
         ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
-        ranks = [f"rank_{i}" for i in range(0, self.k_neighbors)]
+        ranks_len = dt.ranks
+        ranks = [f"rank_{i}" for i in range(0, ranks_len)]
         sim_topK = [f"DLD_sim_{i}" for i in range(0, self.num_classes * self.k_neighbors)]
         all_columns = cls_labels + ft_engine + ranks + sim_topK
         col_len = len(all_columns)
-        dt_head.all_features = all_columns
-        dt_head.base_features = cls_labels
-        dt_head.deep_features = sim_topK
-        dt_head.ranking_features = ranks
-        if self.root_cfg.DATASET is None:
+        dt.features[dt.ALL_FT] = all_columns
+        dt.features[dt.BASE_FT] = cls_labels
+        dt.features[dt.MISC_FT] = sim_topK
+        dt.features[dt.RANK_FT] = ranks
+        if self.root_cfg.DE.DATASET is None:
             tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
             tree_df["y"] = pd.Series(np.zeros(shape=X_len), dtype=int)
             ix = 0
@@ -136,17 +160,11 @@ class DTModel(ARCH):
             DLD_topK = tree_df.columns.get_indexer(sim_topK)
             ranks_ix = tree_df.columns.get_indexer(ranks)
             max_ix = tree_df.columns.get_loc('max')
-            # min_ix = tree_df.columns.get_loc('min')
             std_ix = tree_df.columns.get_loc('std')
             mean_ix = tree_df.columns.get_loc('mean')
 
-            dt_head.max_ix = max_ix
-            dt_head.mean_ix = mean_ix
-            dt_head.std_ix = std_ix
-            dt_head.ranks_ix = ranks_ix
-
             y_col_ix = tree_df.columns.get_indexer(["y"])
-            out_bank = np.empty(shape=(0, 5))
+            out_bank = np.empty(shape=(0, self.num_classes))
             with torch.no_grad():
                 for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                         train_set):
@@ -168,7 +186,7 @@ class DTModel(ARCH):
                     # Obtain and normalize the output
                     self.forward()
                     out = np.asarray(
-                        [dt_head.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
+                        [dt.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
                     out_bank = np.concatenate([out_bank, out], axis=0)
                     target: np.ndarray = target.numpy()
                     # add measurements and target value to dataframe
@@ -179,44 +197,29 @@ class DTModel(ARCH):
                     tree_df.iloc[ix:ix + out_rows, mean_ix] = out.mean(axis=1)
                     tree_df.iloc[ix:ix + out_rows, std_ix] = out.std(axis=1)
 
-                    top_ranks = np.argpartition(-out, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
+                    top_ranks = np.argpartition(-out, kth=ranks_len, axis=1)[:, :ranks_len]
                     tree_df.iloc[ix:ix + out_rows, ranks_ix] = out[np.arange(out.shape[0])[:, None], top_ranks]
                     tree_df.iloc[ix:ix + out_rows, DLD_topK] = self.data.DLD_topk
 
                     # tree_df.iloc[ix:ix + out_rows, deep_local_ix_S] = [sup_t.detach().cpu().view(sup_t.size()[0], -1) for sup_t in self.data.S_raw]
                     ix += out_rows
-                    if episode_index == self.root_cfg.DT.EPISODE_TRAIN_NUM - 1: break
+                    if episode_index == self.root_cfg.DE.EPISODE_TRAIN_NUM - 1:
+                        break
                 print("STD:", out_bank.std(axis=1).mean())
 
         else:
-            tree_df = pd.read_csv(self.root_cfg.DATASET, header=0)
+            tree_df = pd.read_csv(self.root_cfg.DE.DATASET, header=0)
         self.data.X = tree_df[all_columns]
         self.data.y = tree_df[['y']]
         print("Finished inference, fitting tree...")
         print(self.data.X.head(5))
         print(self.data.X.tail(5))
-        if self.root_cfg.DATASET is None:
+        if self.root_cfg.DE.DATASET is None:
             tree_df.to_csv(
-                f"tree_dataset_W{self.root_cfg.WAY_NUM}_S{self.root_cfg.SHOT_NUM}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv", index=False)
+                f"tree_dataset_W{self.root_cfg.WAY_NUM}_S{self.root_cfg.SHOT_NUM}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv",
+                index=False)
 
-        dt_head.fit(self.data.X, self.data.y, self.data.eval_set)
+        dt.fit(self.data.X, self.data.y, self.data.eval_set)
 
-    def feature_engine(self, tree_df: DataFrame, base_features: List[str], deep_features_Q: List[str]):
-        base_features_ix = tree_df.index.get_indexer(base_features)
-
-        # MIN MAX MEAN STD
-        # tree_df['min'] = tree_df.iloc[:, base_features_ix].min(axis=1)
-        tree_df['max'] = tree_df.iloc[:, base_features_ix].max(axis=1)
-        tree_df['mean'] = tree_df.iloc[:, base_features_ix].mean(axis=1)
-        tree_df['std'] = tree_df.iloc[:, base_features_ix].std(axis=1)
-
-        # RANKS
-        cls_vals = tree_df.iloc[:, base_features_ix].to_numpy()
-        top_k = np.argpartition(-cls_vals, kth=self.k_neighbors, axis=1)[:, :self.k_neighbors]
-        tree_df[self.DT.ranking_features] = cls_vals[np.arange(cls_vals.shape[0])[:, None], top_k]
-
-        tree_df[deep_features_Q] = self.data.DLD_topk.detach().numpy()
-        return tree_df
-
-    def get_tree(self, module_name) -> DTree:
-        return self.DT
+    def get_DEngine(self) -> DecisionEngine:
+        return self.DE

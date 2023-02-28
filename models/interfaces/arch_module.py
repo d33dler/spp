@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from enum import Enum, EnumMeta
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union, Any
 
 import torch
 from easydict import EasyDict
@@ -13,6 +13,7 @@ from torch.optim import Optimizer
 
 from data_loader.data_load import Parameters, DatasetLoader
 from models.utilities.utils import save_checkpoint, load_config, accuracy, init_weights, config_exchange
+import torch.nn.functional as F
 
 
 class ARCH(nn.Module):
@@ -94,6 +95,12 @@ class ARCH(nn.Module):
         def get_config():
             return None
 
+        def load(self, model: Any) -> None:
+            pass
+
+        def dump(self) -> Any:
+            return None
+
     class BaseConfig:
         __doc__ = "Base config class for yaml files. Override __doc__ for implementations."
 
@@ -101,6 +108,7 @@ class ARCH(nn.Module):
 
     def __init__(self, cfg_path) -> None:
         super().__init__()
+        self._store_path = None
         self.root_cfg = self.load_config(cfg_path)
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
@@ -137,12 +145,16 @@ class ARCH(nn.Module):
             print("Setting module: ", k, " TRAIN" if v else " TEST", " mode.")
             m.train(v)
 
-    def save_model(self, filename):
+    def save_model(self, filename=None):
+        if filename is None:
+            filename = self._store_path
+
         priv = self._mod_topo_private
         state = {
             'epoch_index': self._epochix,
             'arch': self.arch,
-            'best_prec1': self.best_prec1
+            'best_prec1': self.best_prec1,
+            'DE': self.module_topology['DE'].dump()
         }
         optimizers = {
             f"{priv[k]}_optim": v.optimizer.state_dict() if not isinstance(v.optimizer, list) else
@@ -155,6 +167,7 @@ class ARCH(nn.Module):
 
     def load_model(self, path, txt_file=None):
         priv = self._mod_topo_private
+        self._store_path = path
         if os.path.isfile(path):
             print("=> loading checkpoint '{}'".format(path))
             checkpoint = torch.load(path)
@@ -164,6 +177,8 @@ class ARCH(nn.Module):
              if f"{priv[k]}_state_dict" in checkpoint]
             [v.load_optimizer_state_dict(checkpoint[f"{priv[k]}_optim"]) for k, v in self.module_topology.items()
              if f"{k}_optim" in checkpoint]
+            if 'DE' in checkpoint and 'DE' in self.module_topology.keys():
+                self.module_topology['DE'].load(checkpoint['DE'])
             print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']))
             if txt_file:
                 print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']), file=txt_file)
@@ -191,8 +206,7 @@ class ARCH(nn.Module):
         print(self.root_cfg[module_id].items())
         if module_id not in self.root_cfg.keys():
             raise KeyError("[CFG_OVERRIDE] Module ID not found in root cfg!")
-        config_exchange(_config, self.root_cfg[module_id])
-        return _config
+        return config_exchange(_config, self.root_cfg[module_id])
 
     def get_loss(self, module_id: str = None):
         if module_id is None:
@@ -204,8 +218,9 @@ class ARCH(nn.Module):
     def calculate_loss(self, gt, pred):
         return self.module_topology[self.root_cfg.TRACK_LOSS].calculate_loss(gt, pred)
 
-    def calculate_accuracy(self, output, target, topk=(1, 3)):
-        prec = accuracy(output, target, topk=topk)
+    def calculate_accuracy(self, output, target, topk=(1,)):
+
+        prec = accuracy(F.softmax(output, dim=1), target, topk=topk)
         self.best_prec1 = prec[0] if prec[0] > self.best_prec1 else self.best_prec1
         return prec
 
@@ -225,5 +240,5 @@ class ARCH(nn.Module):
     def adjust_learning_rate(self, epoch_num):
         """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
         for k, mod in self.module_topology.items():
-            if mod.training and mod.fine_tuning:
+            if mod.training:
                 mod.adjust_learning_rate(epoch=epoch_num)

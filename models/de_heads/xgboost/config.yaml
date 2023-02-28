@@ -1,15 +1,12 @@
 TYPE: CLASSIFIER # REGRESSOR | CLASSIFIER
-
-SAVE_MODEL: True
 MODEL_NAME: model_test
-LOAD_MODEL: False
-OPTIMIZE: True
+OPTIMIZE: False
+ENGINE: TREE
 
 PARAMETERS: {
   tree_method: gpu_hist,
   objective: 'multi:softmax',
   eval_metric: 'mlogloss',
-  enable_categorical: True,
   max_depth: 9,
   min_child_weight: 3,
   gamma: 5,
@@ -18,8 +15,5 @@ PARAMETERS: {
   subsample: 1,
   seed: 666,
   lambda: 1,
-  alpha: 0.1,
-  n_estimators: 800,
-  early_stopping_rounds: 50,
   colsample_bytree: 0.9
 }

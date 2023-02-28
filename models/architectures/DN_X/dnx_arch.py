@@ -5,12 +5,13 @@ import numpy as np
 import torch
 from torch.nn.functional import one_hot
 
-from models.architectures.dt_model import DTModel
-from models.dt_heads.dtree import DTree
+from models.architectures.dt_model import DEModel
+from models.de_heads.dengine import DecisionEngine
+from models.de_heads.dtree import DTree
 from models.utilities.utils import AverageMeter, accuracy
 
 
-class DN_X(DTModel):
+class DN_X(DEModel):
     """
     DN_X (4|7) Model
 
@@ -25,12 +26,12 @@ class DN_X(DTModel):
     def forward(self):
         self.BACKBONE.forward()
 
-        dt_head: DTree = self.DT
-        if dt_head.is_fit:
-            _input = np.asarray([dt_head.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
-            self.data.X = self.feature_engine(dt_head.create_input(_input), dt_head.base_features,
-                                              dt_head.deep_features)
-            o = torch.from_numpy(dt_head.forward(self.data.X).astype(np.int64))
+        d_engine: DecisionEngine = self.DE
+        if d_engine.enabled:
+            _input = np.asarray([d_engine.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
+            self.data.X = d_engine.feature_engineering(
+                np.concatenate([_input, self.data.DLD_topk.detach().cpu().numpy()], axis=1))
+            o = torch.from_numpy(d_engine.forward(self.data.X).astype(np.int64))
             o = one_hot(o, self.num_classes).float().cuda()
             self.data.sim_list_BACKBONE2D = o
             return o
@@ -72,7 +73,7 @@ class DN_X(DTModel):
 
             loss = self.get_loss()
             # Measure accuracy and record loss
-            prec1, _ = accuracy(out, target, topk=(1, 3))
+            prec1, _ = accuracy(out, target, topk=(1,))
 
             losses.update(loss.item(), query_images.size(0))
             top1.update(prec1[0], query_images.size(0))

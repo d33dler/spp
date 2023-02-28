@@ -18,7 +18,7 @@ from torchvision.transforms import transforms
 from dataset.datasets_csv import CSVLoader
 from models import architectures
 from models.architectures.DN_X.dnx_arch import DN_X
-from models.architectures.dt_model import DTModel
+from models.architectures.dt_model import DEModel
 from models.utilities.utils import AverageMeter
 
 sys.dont_write_bytecode = True
@@ -62,7 +62,7 @@ def mean_confidence_interval(data, confidence=0.95):
     return m, h
 
 
-def validate(val_loader, model: DTModel, best_prec1, F_txt):
+def validate(val_loader, model: DEModel, best_prec1, F_txt):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -96,11 +96,11 @@ def validate(val_loader, model: DTModel, best_prec1, F_txt):
         loss = model.calculate_loss(target, data.sim_list_BACKBONE2D)
 
         # measure accuracy and record loss
-        prec1, _ = model.calculate_accuracy(out, target, topk=(1, 3))
+        prec1 = model.calculate_accuracy(out, target, topk=(1,3))
         losses.update(loss.item(), query_images.size(0))
 
-        top1.update(prec1[0], query_images.size(0))
-        accuracies.append(prec1)
+        top1.update(prec1[0].item(), query_images.size(0))
+        accuracies.append(prec1[0].item())
 
         # measure elapsed time
         batch_time.update(time.time() - end)
@@ -111,17 +111,17 @@ def validate(val_loader, model: DTModel, best_prec1, F_txt):
             print(f'Test-({model.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
                   f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
-                  f'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t')
+                  f'Prec@1 {top1.val} ({top1.avg})\t')
 
             print('Test-({0}): [{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(model.get_epoch(), episode_index, len(val_loader),
+                  'Prec@1 {top1.val} ({top1.avg})'.format(model.get_epoch(), episode_index, len(val_loader),
                                                                   batch_time=batch_time, loss=losses, top1=top1),
                   file=F_txt)
 
-    print(' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}'.format(top1=top1, best_prec1=best_prec1))
-    print(' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}'.format(top1=top1, best_prec1=best_prec1), file=F_txt)
+    print(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
+    print(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}', file=F_txt)
 
     return top1.avg, accuracies
 
@@ -134,6 +134,7 @@ def test(model, F_txt):
     total_accuracy = 0.0
     total_h = np.zeros(repeat_num)
     total_accuracy_vector = []
+    best_prec1 = 0
     params = model.data_loader.params
     for r in range(repeat_num):
         print('===================================== Round %d =====================================' % r)
@@ -162,8 +163,8 @@ def test(model, F_txt):
         )
 
         # =========================================== Evaluation ==========================================
-        prec1, accuracies = validate(test_loader, model, model.get_criterion(), F_txt)
-
+        prec1, accuracies = validate(test_loader, model,best_prec1, F_txt)
+        best_prec1 = max(prec1, best_prec1)
         test_accuracy, h = mean_confidence_interval(accuracies)
         print("Test accuracy", test_accuracy, "h", h[0])
         print("Test accuracy", test_accuracy, "h", h[0], file=F_txt)
@@ -179,7 +180,7 @@ def test(model, F_txt):
     # ============================================== Testing end ==========================================
 
 
-def train(model:DTModel, F_txt):
+def train(model:DEModel, F_txt):
     best_prec1 = 0
     # ======================================== Training phase ===============================================
     print('\n............Start training............\n')
@@ -227,12 +228,12 @@ def train(model:DTModel, F_txt):
     ###############################################################################
     # Fitting tree, now forward will provide the ensemble tree output
 
-    print('============ Validation on the val set ============')
-    print('============ validation on the val set ============', file=F_txt)
-
+    # print('============ Validation on the val set ============')
+    # print('============ validation on the val set ============', file=F_txt)
+    #
     loaders = model.data_loader.load_data(opt.mode, F_txt, opt.dataset_dir)
 
-    # model.fit_tree_episodes(loaders.train_loader)
+    # model.enable_decision_engine(loaders.train_loader)
 
     prec1, _ = validate(loaders.val_loader, model, best_prec1, F_txt)
 
@@ -241,7 +242,7 @@ def train(model:DTModel, F_txt):
     prec1, _ = validate(loaders.test_loader, model, best_prec1, F_txt)
     # record the best prec@1 and save checkpoint
     best_prec1 = max(prec1, best_prec1)
-    model.get_tree('DT').plot_tree()
+    model.get_DEngine().plot_self()
     F_txt.close()
     print('Training and evaluation completed')
 

@@ -1,0 +1,93 @@
+# Main params
+NUM_CLASSES: 5
+BATCH_SIZE: 50
+K_NEIGHBORS: 5
+USE_BIAS: True
+#Model skeleton
+TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
+  BACKBONE: 'BACKBONE_2D',
+  DE: 'DT'
+}
+TRACK_LOSS: BACKBONE
+TRACK_CRITERION: BACKBONE
+
+BACKBONE:
+  NAME: DN7_CNN2d # DN4_CNN2d | ResNet2d
+  MODE: TEST
+  NORM: batch
+  CUDA: True
+  ONE_HOT: False
+  LEARNING_RATE: 0.005
+  BETA_ONE: [ 0.5,0.9 ]
+  INIT_WEIGHTS: kaiming
+  FREEZE_EPOCH: 1
+
+DE:
+  NAME: RandomForest # XGB | RF
+  MODE: TRAIN
+  CUDA: True
+  EPISODE_TRAIN_NUM: 6000
+  PARAMETERS: { tree_method: gpu_hist,
+                objective: 'multi:softmax',
+                eval_metric: 'mlogloss',
+                enable_categorical: True,
+                max_depth: 9,
+                min_child_weight: 3,
+                gamma: 5,
+                eta: 0.01,
+                learning_rate: 0.04,
+                subsample: 1,
+                seed: 666,
+                lambda: 1,
+                alpha: 0.1,
+                n_estimators: 800,
+                early_stopping_rounds: 50,
+                colsample_bytree: 0.9,
+                num_classes: 5
+  } # add parameters here to override default settings
+
+
+AUGMENTOR:
+  DISABLE: []
+  TRANSFORMS: [
+    {
+      NAME: Resize,
+      ARGS: [ [ 100,100 ] ],
+    },
+    { NAME: RandomCrop,
+      ARGS: [ 84 ]
+    },
+    { NAME: ColorJitter,
+      ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 }
+    },
+    { NAME: RandomHorizontalFlip,
+      ARGS: [ ]
+    }
+  ]
+
+
+#BACKBONE & ENCODER
+
+#Decision Tree
+DATASET:
+
+
+# Dataloader
+DATASET_DIR: '../dataset/miniImageNet/'
+DATA_NAME: 'miniImageNet'
+OUTF: '../results/'
+BASEMODEL: 'Conv64F'
+WORKERS: 8
+IMAGE_SIZE: 84
+EPISODE_SIZE: 1
+TEST_EPISODE_SIZE: 1
+EPOCHS: 30
+EPISODE_TRAIN_NUM: 10000
+EPISODE_VAL_NUM: 600
+EPISODE_TEST_NUM: 600
+WAY_NUM: 5
+SHOT_NUM: 5
+QUERY_NUM: 10
+
+# Misc
+PRINT_FREQ: 100

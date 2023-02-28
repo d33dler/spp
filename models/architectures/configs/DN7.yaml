@@ -6,13 +6,13 @@ USE_BIAS: True
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
-  DT: 'DT'
+  DE: 'DT'
 }
 TRACK_LOSS: BACKBONE
 TRACK_CRITERION: BACKBONE
 
 BACKBONE:
-  NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
+  NAME: DN7_CNN2d # DN4_CNN2d | ResNet2d
   MODE: TEST
   NORM: batch
   CUDA: True
@@ -22,7 +22,7 @@ BACKBONE:
   INIT_WEIGHTS: kaiming
   FREEZE_EPOCH: 1
 
-DT:
+DE: # Decision Engine
   NAME: RandomForest # XGB | RF
   MODE: TRAIN
   CUDA: True
@@ -69,7 +69,7 @@ AUGMENTOR:
 #BACKBONE & ENCODER
 
 #Decision Tree
-DATASET: tree_dataset_W5_S5_2023_02_22_16_00_09.csv
+DATASET:
 
 
 # Dataloader
@@ -84,7 +84,7 @@ TEST_EPISODE_SIZE: 1
 EPOCHS: 30
 EPISODE_TRAIN_NUM: 10000
 EPISODE_VAL_NUM: 600
-EPISODE_TEST_NUM: 1000
+EPISODE_TEST_NUM: 600
 WAY_NUM: 5
 SHOT_NUM: 5
 QUERY_NUM: 10
