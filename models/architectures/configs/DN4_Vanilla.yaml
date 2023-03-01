@@ -13,7 +13,8 @@ TRACK_CRITERION: BACKBONE
 
 BACKBONE:
   NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
-  MODE: TEST
+  MODE: TRAIN
+  GRAD: True
   NORM: batch
   CUDA: True
   ONE_HOT: False
@@ -26,6 +27,7 @@ DE:
   NAME: XGB # XGB | RF
   ENGINE: TREE
   MODE: TRAIN
+  GRAD: False
   CUDA: True
   EPISODE_TRAIN_NUM: 8000
   MODEL_NAME: __ignore__
@@ -49,7 +51,7 @@ AUGMENTOR:
   TRANSFORMS: [
     {
       NAME: Resize,
-      ARGS: [ [ 100,100 ] ],
+      ARGS: [ [ 84,84 ] ],
     },
     { NAME: RandomCrop,
       ARGS: [ 84 ]

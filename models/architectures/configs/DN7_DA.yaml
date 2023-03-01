@@ -14,6 +14,7 @@ TRACK_CRITERION: BACKBONE
 BACKBONE:
   NAME: DN7_CNN2d # DN4_CNN2d | ResNet2d
   MODE: TEST
+  GRAD: True
   NORM: batch
   CUDA: True
   ONE_HOT: False
@@ -25,6 +26,7 @@ BACKBONE:
 DE:
   NAME: RandomForest # XGB | RF
   MODE: TRAIN
+  GRAD: False
   CUDA: True
   EPISODE_TRAIN_NUM: 6000
   PARAMETERS: { tree_method: gpu_hist,

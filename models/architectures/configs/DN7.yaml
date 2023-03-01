@@ -14,6 +14,7 @@ TRACK_CRITERION: BACKBONE
 BACKBONE:
   NAME: DN7_CNN2d # DN4_CNN2d | ResNet2d
   MODE: TEST
+  GRAD: True
   NORM: batch
   CUDA: True
   ONE_HOT: False
@@ -26,6 +27,7 @@ DE: # Decision Engine
   NAME: RandomForest # XGB | RF
   MODE: TRAIN
   CUDA: True
+  GRAD: False
   EPISODE_TRAIN_NUM: 6000
   PARAMETERS: { tree_method: gpu_hist,
                 objective: 'multi:softmax',
@@ -52,7 +54,7 @@ AUGMENTOR:
   TRANSFORMS: [
     {
       NAME: Resize,
-      ARGS: [ [ 100,100 ] ],
+      ARGS: [ [ 84,84 ] ],
     },
     { NAME: RandomCrop,
       ARGS: [ 84 ]

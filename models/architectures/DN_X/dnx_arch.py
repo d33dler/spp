@@ -31,7 +31,7 @@ class DN_X(DEModel):
 
     def forward(self):
         self.BACKBONE.forward()
-        d_engine: DecisionEngine = self._DE
+        d_engine: DecisionEngine = self.DE
         if d_engine and d_engine.enabled:
             _input = np.asarray([d_engine.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
             self.data.X = d_engine.feature_engineering(
@@ -85,7 +85,7 @@ class DN_X(DEModel):
             self.backward(out, target)
             loss = self.get_loss()
             # Measure accuracy and record loss
-            prec1, _ = accuracy(out, target, topk=(1,))
+            prec1, _ = accuracy(out, target, topk=(1,3))
 
             losses.update(loss.item(), query_images.size(0))
             top1.update(prec1[0], query_images.size(0))

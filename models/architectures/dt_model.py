@@ -17,7 +17,7 @@ from models import backbones, clustering, de_heads, necks
 from models.de_heads.dengine import DecisionEngine
 from models.de_heads.dtree import DTree
 from models.interfaces.arch_module import ARCH
-from models.utilities.utils import load_config, DataHolder, save_checkpoint, config_exchange
+from models.utilities.utils import load_config, DataHolder, save_checkpoint, config_exchange, create_confusion_matrix
 import torch.nn.functional as F
 
 
@@ -28,7 +28,8 @@ class DEModel(ARCH):
     Can be used as a generic model as well.
     """
     arch = 'Missing'
-    _DE: DecisionEngine
+    DE: DecisionEngine
+
     def __init__(self, cfg_path):
         super().__init__(cfg_path)
         self.loaders = None
@@ -80,13 +81,14 @@ class DEModel(ARCH):
             return None
         de: DecisionEngine = de_heads.__all__[self.root_cfg.DE.NAME]
         de = de(config_exchange(de.get_config(), self.root_cfg['DE']))
+        self.module_topology['DE'] = de
         de.cuda() if self.root_cfg.DE.CUDA else False
-        self._DE = de
+        self.DE = de
         return de
 
     def sub_parameters(self, network: str, recurse: bool = True) -> Iterator[Parameter]:
         sub_net = getattr(self, network, None)
-        return sub_net.parameters(recurse)  # TODO handle encoder's subnets
+        return sub_net.parameters(recurse)
 
     def verify_module(self, module):
         if not isinstance(module, ARCH.Child):
@@ -106,13 +108,14 @@ class DEModel(ARCH):
         self.optimizer = optimizer
 
     def save_model(self, filename=None):
-        self.state.update({'DE': self._DE.dump()})
+        if self.DE.is_fit:
+            self.state.update({'DE': self.DE.dump()})
         super().save_model(filename)
 
     def load_model(self, path, txt_file=None):
         checkpoint = super().load_model(path, txt_file)
         if 'DE' in checkpoint and 'DE' in self.root_cfg:
-            self._DE.load(checkpoint['DE'])
+            self.DE.load(checkpoint['DE'])
 
     def enable_decision_engine(self, train_set: TorchDataLoader = None, refit=False):
         """
@@ -126,7 +129,7 @@ class DEModel(ARCH):
         """
         if 'DE' not in self.root_cfg:
             raise AttributeError("Not able to enable decision engine - Missing DE module specification in config!")
-        dengine = self._DE
+        dengine = self.DE
         if not isinstance(dengine, DecisionEngine):
             raise ValueError(f"Wrong class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
                              f"got: : {type(dengine)}")
@@ -156,8 +159,8 @@ class DEModel(ARCH):
         :return: None
         """
         # create empty dataframe
-        batch_sz = self.root_cfg.BATCH_SIZE
-        dt: DTree = self._DE
+        batch_sz = self.data_loader.params.batch_sz
+        dt: DTree = self.DE
         X_len = self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz
         ft_engine = ['max', 'mean', 'std']
         cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
@@ -189,6 +192,7 @@ class DEModel(ARCH):
 
             y_col_ix = tree_df.columns.get_indexer(["y"])
             out_bank = np.empty(shape=(0, self.num_classes))
+            target_bank = np.empty(shape=0, dtype=int)
             with torch.no_grad():
                 for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                         train_set):
@@ -211,8 +215,9 @@ class DEModel(ARCH):
                     self.forward()
                     out = np.asarray(
                         [dt.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
-                    out_bank = np.concatenate([out_bank, out], axis=0)
                     target: np.ndarray = target.numpy()
+                    out_bank = np.concatenate([out_bank, out], axis=0)
+                    target_bank = np.concatenate([target_bank, target], axis=0)
                     # add measurements and target value to dataframe
                     out_rows = out.shape[0]
                     tree_df.iloc[ix:ix + out_rows, cls_col_ix] = out
@@ -225,11 +230,11 @@ class DEModel(ARCH):
                     tree_df.iloc[ix:ix + out_rows, ranks_ix] = out[np.arange(out.shape[0])[:, None], top_ranks]
                     tree_df.iloc[ix:ix + out_rows, DLD_topK] = self.data.DLD_topk
 
-                    # tree_df.iloc[ix:ix + out_rows, deep_local_ix_S] = [sup_t.detach().cpu().view(sup_t.size()[0], -1) for sup_t in self.data.S_raw]
                     ix += out_rows
                     if episode_index == self.root_cfg.DE.EPISODE_TRAIN_NUM - 1:
                         break
                 print("STD:", out_bank.std(axis=1).mean())
+
 
         else:
             tree_df = pd.read_csv(self.root_cfg.DE.DATASET, header=0)
@@ -246,4 +251,4 @@ class DEModel(ARCH):
         dt.fit(self.data.X, self.data.y, self.data.eval_set)
 
     def get_DEngine(self) -> DecisionEngine:
-        return self._DE
+        return self.DE

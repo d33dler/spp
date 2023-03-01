@@ -1,8 +1,9 @@
 TYPE: CLASSIFIER # REGRESSOR | CLASSIFIER
-#TODO update this
-MODEL_NAME: model_test
+MODEL_NAME: __ignore__
 OPTIMIZE: True
 ENGINE: TREE
+GRAD: False
+
 PARAMETERS: {
   tree_method: gpu_hist,
   objective: 'multi:softmax',

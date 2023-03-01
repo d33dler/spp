@@ -5,16 +5,29 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Any
 import numpy as np
+import pandas as pd
 import torch
 import yaml
 from easydict import EasyDict
+from matplotlib import pyplot as plt
 from pandas import DataFrame
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, ConfusionMatrixDisplay
 from torch import Tensor, nn as nn
 from torch.nn import BatchNorm2d, init
-
+import seaborn as sns
 """
 General utilities
 """
+
+
+def create_confusion_matrix(true: np.ndarray, pred: np.ndarray):
+    cm = confusion_matrix(true, pred)
+
+    fig, ax = plt.subplots(figsize=(12, 10))
+    disp = ConfusionMatrixDisplay(cm)
+    disp.plot(ax=ax)
+    ax.grid(False)
+    plt.show()
 
 
 def save_checkpoint(state, filename='checkpoint.pth.tar'):

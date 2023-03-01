@@ -98,6 +98,7 @@ class BaseBackbone2d(ARCH.Child):
             self.config = self._YamlCFG(config)
         else:
             raise AttributeError("Config file type not supported")
+
         self.collect_funcs()
         use_bias = self.ACTIVATION_F == nn.InstanceNorm2d
         # TODO finish abstraction

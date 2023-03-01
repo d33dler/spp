@@ -27,13 +27,12 @@ class SevenLayer_64F(BaseBackbone2d):
     #  norm_layer=nn.BatchNorm2d, num_classes=5, neighbor_k=3
     def __init__(self, data: DataHolder):
         super().__init__(self.Config())
-        # self.build()
-        # super(FourLayer_64F, self).__init__()
         self.data = data
         model_cfg = data.cfg.BACKBONE
-        norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
+        self.require_grad = model_cfg.GRAD
 
-        self.features = nn.Sequential(  # 3*84*84
+        norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
+        self.FEATURES = nn.Sequential(  # 3*84*84
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(64),
             nn.LeakyReLU(0.2, True),

@@ -1,0 +1,122 @@
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla_miniImage.yaml', dataset_dir='../dataset/miniImageNet', data_name='imgnet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, print_freq=100, outf='../results/_DN_X_imgnet_DN4_5_Way_1_Shot_K3')
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 600
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla_miniImage.yaml', dataset_dir='../dataset/miniImageNet', data_name='imgnet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, print_freq=100, outf='../results/_DN_X_imgnet_DN4_5_Way_1_Shot_K3')
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 600
+Testset: 600
+Eposide-(0): [100/10000]	Time 0.249 (0.266)	Data 0.000 (0.011)	Loss 1.998 (3.283)	Prec@1 24.000 (23.776)
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla_miniImage.yaml', dataset_dir='../dataset/miniImageNet', data_name='imgnet', mode='train', resume='', epochs=1, cuda=True, ngpu=1, print_freq=100, outf='../results/_DN_X_imgnet_DN4_5_Way_1_Shot_K3')
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 600
+Testset: 600
+============ validation on the val set ============
+Test-(1): [100/600]	Time 0.153 (0.139)	Loss 2.193 (28.282)	Prec@1 12.0 (22.825083194392743)
+Test-(1): [200/600]	Time 0.151 (0.137)	Loss 23.041 (28.407)	Prec@1 17.33333396911621 (23.40961923172225)
+Test-(1): [300/600]	Time 0.119 (0.135)	Loss 2.629 (28.319)	Prec@1 28.0 (23.388704946270813)
+Test-(1): [400/600]	Time 0.148 (0.135)	Loss 1.926 (27.209)	Prec@1 17.33333396911621 (23.68412370277462)
+Test-(1): [500/600]	Time 0.188 (0.134)	Loss 5.898 (26.611)	Prec@1 25.33333396911621 (23.651364617718908)
+ * Prec@1 23.756 Best_prec1 0.000
+============ Testing on the test set ============
+Test-(1): [100/600]	Time 0.132 (0.140)	Loss 2.254 (41.698)	Prec@1 24.0 (24.09240990818137)
+Test-(1): [200/600]	Time 0.188 (0.137)	Loss 60.083 (43.972)	Prec@1 17.33333396911621 (24.42454467128165)
+Test-(1): [300/600]	Time 0.125 (0.135)	Loss 4.755 (44.124)	Prec@1 13.333333969116211 (24.367664042501353)
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla_miniImage.yaml', dataset_dir='../dataset/miniImageNet', data_name='imgnet', mode='train', resume='../results/DN4_miniImageNet_Conv64F_5Way_5Shot_K3/model_best.pth.tar', epochs=0, cuda=True, ngpu=1, print_freq=100, outf='../results/_DN_X_imgnet_DN4_5_Way_1_Shot_K3')
+=> loaded checkpoint '../results/DN4_miniImageNet_Conv64F_5Way_5Shot_K3/model_best.pth.tar' (epoch 16)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+Trainset: 100
+Valset: 600
+Testset: 600
+Test-(16): [100/600]	Time 0.115 (0.146)	Loss 2.011 (1.602)	Prec@1 52.0 (50.98349962140074)
+Test-(16): [200/600]	Time 0.097 (0.136)	Loss 1.582 (1.608)	Prec@1 40.0 (51.13101294028818)

@@ -1,19 +1,20 @@
 # Main params
 NUM_CLASSES: 5
-BATCH_SIZE: 50
-K_NEIGHBORS: 5
+K_NEIGHBORS: 3
 USE_BIAS: True
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
   DE: 'DT'
 }
+#Return loss of this module when benchmarking
 TRACK_LOSS: BACKBONE
 TRACK_CRITERION: BACKBONE
 
 BACKBONE:
   NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
-  MODE: TEST
+  MODE: TRAIN
+  GRAD: True
   NORM: batch
   CUDA: True
   ONE_HOT: False
@@ -26,8 +27,9 @@ DE:
   NAME: RandomForest # XGB | RF
   ENGINE: TREE
   MODE: TRAIN
+  GRAD: False
   CUDA: True
-  EPISODE_TRAIN_NUM: 8000
+  EPISODE_TRAIN_NUM: 4000
   MODEL_NAME: __ignore__
   OPTIMIZE: True
   DATASET:
@@ -49,7 +51,7 @@ AUGMENTOR:
   TRANSFORMS: [
     {
       NAME: Resize,
-      ARGS: [ [ 100,100 ] ],
+      ARGS: [ [ 84,84 ] ],
     },
     { NAME: RandomCrop,
       ARGS: [ 84 ]
@@ -73,7 +75,7 @@ IMAGE_SIZE: 84
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 EPOCHS: 30
-EPISODE_TRAIN_NUM: 10000
+EPISODE_TRAIN_NUM: 5000
 EPISODE_VAL_NUM: 600
 EPISODE_TEST_NUM: 600
 WAY_NUM: 5

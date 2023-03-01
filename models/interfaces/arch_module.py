@@ -51,10 +51,12 @@ class ARCH(nn.Module):
         criterion: _Loss | List[_Loss]
         loss: Tensor
         fine_tuning = True
+        require_grad = False
 
         def __init__(self, config: EasyDict | dict) -> None:
             super().__init__()
             self.config = config
+
 
         def calculate_loss(self, gt, pred):
             """
@@ -75,7 +77,7 @@ class ARCH(nn.Module):
             return self.criterion(pred, gt)
 
         def backward(self, pred, gt):
-            if not self.training:
+            if not (self.training and self.require_grad):
                 return
             if isinstance(self.criterion, list):
                 loss_ls = []
@@ -141,7 +143,7 @@ class ARCH(nn.Module):
         c = self.root_cfg
         p = Parameters(c.IMAGE_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
-                       c.TEST_EPISODE_SIZE, c.BATCH_SIZE)
+                       c.TEST_EPISODE_SIZE, c.QUERY_NUM * c.WAY_NUM)
         self.data_loader = DatasetLoader(c.AUGMENTOR, p)
 
     class ActivationFuncs(Enum):
@@ -296,5 +298,5 @@ class ARCH(nn.Module):
     def adjust_learning_rate(self, epoch_num):
         """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
         for k, mod in self.module_topology.items():
-            if mod.training:
+            if mod.training and mod.require_grad:
                 mod.adjust_learning_rate(epoch=epoch_num)

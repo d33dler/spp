@@ -30,9 +30,12 @@ class FourLayer_64F(BaseBackbone2d):
         super().__init__(self.Config())
         self.data = data
         model_cfg = data.cfg.BACKBONE
+
+        self.require_grad = model_cfg.GRAD
+
         norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
 
-        self.features = nn.Sequential(  # 3*84*84
+        self.FEATURES = nn.Sequential(  # 3*84*84
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(64),
             nn.LeakyReLU(0.2, True),

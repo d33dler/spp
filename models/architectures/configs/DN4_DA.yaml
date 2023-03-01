@@ -26,6 +26,7 @@ DE:
   NAME: RandomForest # XGB | RF
   MODE: TRAIN
   CUDA: True
+  GRAD: False
   EPISODE_TRAIN_NUM: 6000
   PARAMETERS: { tree_method: gpu_hist,
                 objective: 'multi:softmax',
