@@ -33,14 +33,12 @@ class DN_X(DEModel):
         self.BACKBONE.forward()
         d_engine: DecisionEngine = self.DE
         if d_engine and d_engine.enabled:
-            _input = np.asarray([d_engine.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
+            _input = d_engine.normalize(self.data.sim_list.detach().cpu().numpy())
             self.data.X = d_engine.feature_engineering(
                 np.concatenate([_input, self.data.DLD_topk.detach().cpu().numpy()], axis=1))
-            o = torch.from_numpy(d_engine.forward(self.data.X).astype(np.int64))
-            o = one_hot(o, self.num_classes).float().cuda()
-            self.data.sim_list_BACKBONE2D = o
-            return o
-        return self.data.sim_list_BACKBONE2D
+            self.data.sim_list = one_hot(torch.from_numpy(d_engine.forward(self.data.X).astype(np.int64)),
+                                         self.num_classes).float().cuda()
+        return self.data.sim_list
 
     def run_epoch(self, output_file):
         """
@@ -85,7 +83,7 @@ class DN_X(DEModel):
             self.backward(out, target)
             loss = self.get_loss()
             # Measure accuracy and record loss
-            prec1, _ = accuracy(out, target, topk=(1,3))
+            prec1, _ = accuracy(out, target, topk=(1, 3))
 
             losses.update(loss.item(), query_images.size(0))
             top1.update(prec1[0], query_images.size(0))

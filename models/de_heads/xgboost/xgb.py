@@ -57,7 +57,7 @@ class XGBHead(DTree):
 
     def plot_importance(self):
         xgb.plot_importance(self.model, importance_type='gain')
-        plt.show(block=False)
+        plt.show(block=True)
 
     def plot_self(self):
         xgb.plot_tree(self.model)

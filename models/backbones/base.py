@@ -16,7 +16,7 @@ class BaseBackbone2d(ARCH.Child):
     Finished: No
     Tested: No
     """
-    FEATURES: nn.Sequential
+    features: nn.Sequential
     FREEZE_LAYERS: List[int] = []
     FREEZE_EPOCH: int = 1
     ACTIVATION_F: ARCH.ActivationFuncs
@@ -197,4 +197,4 @@ class BaseBackbone2d(ARCH.Child):
 
     def freeze_layers(self):
         for layer_ix in self.FREEZE_LAYERS:
-            self.FEATURES[layer_ix] = self.FEATURES[layer_ix].requires_grad_(False)
+            self.features[layer_ix] = self.features[layer_ix].requires_grad_(False)

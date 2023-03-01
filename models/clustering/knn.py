@@ -1,20 +1,7 @@
-from pathlib import Path
 from typing import List
 
-import numpy as np
 import torch
-import torch.nn as nn
 from torch import Tensor
-from torch.nn import init
-import functools
-import pdb
-import math
-import sys
-
-from torch.nn.functional import one_hot
-
-from models.utilities.utils import load_config, DataHolder
-from scipy.special import softmax
 
 
 class KNN_itc:
@@ -28,7 +15,7 @@ class KNN_itc:
         self.neighbor_k = k_neighbors
 
     # Calculate the k-Nearest Neighbor of each local descriptor
-    def cal_cosinesimilarity(self, q: Tensor, S: List[Tensor], one_hot_=False):
+    def cal_cosinesimilarity(self, q: Tensor, S: List[Tensor]):
         B, C, h, w = q.size()
         similarity_ls = []
         topk_ls = torch.zeros(B, self.neighbor_k * len(S))
@@ -58,9 +45,7 @@ class KNN_itc:
             similarity_ls.append(inner_sim)
 
         similarity_ls = torch.cat(similarity_ls, 0)
-        if one_hot_:
-            similarity_ls = torch.eq(similarity_ls, torch.max(similarity_ls, dim=1)[0].view(-1, 1)).float()
         return similarity_ls, topk_ls
 
-    def forward(self, q, S, one_hot_: bool = False):
-        return self.cal_cosinesimilarity(q, S, one_hot_=one_hot_)
+    def forward(self, q, S):
+        return self.cal_cosinesimilarity(q, S)

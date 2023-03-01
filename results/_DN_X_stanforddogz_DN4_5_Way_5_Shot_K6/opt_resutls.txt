@@ -1,0 +1,26 @@
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K6')
+=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+===================================== Round 0 =====================================
+Testset: 600-------------0

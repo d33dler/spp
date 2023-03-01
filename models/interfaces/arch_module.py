@@ -141,7 +141,7 @@ class ARCH(nn.Module):
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
         c = self.root_cfg
-        p = Parameters(c.IMAGE_SIZE, c.DATASET_DIR, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
+        p = Parameters(c.IMAGE_SIZE, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE, c.QUERY_NUM * c.WAY_NUM)
         self.data_loader = DatasetLoader(c.AUGMENTOR, p)

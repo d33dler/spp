@@ -84,7 +84,7 @@ class DataHolder(DataHolderBase):
     q: Tensor
     DLD_topk: Tensor
     S: List[Tensor]  # CUDA
-    sim_list_BACKBONE2D: Tensor  # CUDA
+    sim_list: Tensor  # CUDA
     # Encoder OUTPUT
     q_smax: Tensor
     q_reduced: Tensor

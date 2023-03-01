@@ -66,8 +66,7 @@ class DTree(DecisionEngine, ABC):
 
             # Train model and record run time
             start_time = time.time()
-            booster = xgb.train(params=params, dtrain=train, evals=[(test, "test")], verbose_eval=False,
-                                num_boost_round=int(params['num_boost_round']))
+            booster = xgb.train(params=params, dtrain=train, evals=[(test, "test")], verbose_eval=False)
             run_time = time.time() - start_time
 
             # Record Log loss as primary loss for Hyperopt to minimize
@@ -82,7 +81,7 @@ class DTree(DecisionEngine, ABC):
                 space=self.search_space,
                 algo=tpe.suggest,
                 loss_threshold=0.1,
-                max_evals=50,
+                max_evals=150,
                 rstate=np.random.default_rng(666),
             )
         mlflow.xgboost.autolog(disable=True)
@@ -130,9 +129,9 @@ class DTree(DecisionEngine, ABC):
         return output
 
     @staticmethod
-    def normalize(x: np.ndarray, axis=0):
+    def normalize(x: np.ndarray, axis=1):
         """Softmax function with x as input vector."""
-        return softmax(x, axis=0)
+        return softmax(x, axis=axis)
 
     def _fit_classifier(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         if eval_set is None:
@@ -157,6 +156,7 @@ class DTree(DecisionEngine, ABC):
         raise NotImplementedError
 
     def feature_engineering(self, matrix: np.ndarray, **kwargs):
+
         tree_df = self._create_input(matrix)
         base_features_ix = tree_df.index.get_indexer(self.features[self.BASE_FT])
 

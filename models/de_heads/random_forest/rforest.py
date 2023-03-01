@@ -36,7 +36,6 @@ class RandomForestHead(DTree):
         self._init_model(t, **self.params)
         self.search_space = {
             'learning_rate': hp.quniform('learning_rate', 0.01, 0.1, 0.01),
-            'num_boost_round': 1,
             'max_depth': scope.int(hp.quniform('max_depth', 3, 11, 1)),
             'num_parallel_tree': scope.int(hp.quniform('num_parallel_tree', 30, 130, 5)),
             'min_child_weight': hp.quniform('min_child_weight', 0.1, 5, 0.5),

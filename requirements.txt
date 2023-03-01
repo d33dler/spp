@@ -12,3 +12,5 @@ PyYAML~=5.4.1
 torchvision
 pandas~=1.5.2
 hyperopt~=0.2.7
+seaborn
+mlflow

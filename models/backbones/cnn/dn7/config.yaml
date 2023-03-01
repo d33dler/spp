@@ -18,3 +18,4 @@ NORM_ARGS: { } # for now only one set of parameters
 POOL_ARGS: { }
 DEBLOCK_ARGS: { }
 FILE_TYPE: YAML
+GRAD: True

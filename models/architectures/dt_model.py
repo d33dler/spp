@@ -47,7 +47,7 @@ class DEModel(ARCH):
         return 'TRAIN' if self.training else 'TEST'
 
     def load_data(self, mode, output_file, dataset_dir=None):
-        self.loaders = self.data_loader.load_data(mode, output_file, dataset_dir)
+        self.loaders = self.data_loader.load_data(mode, dataset_dir, output_file)
 
     def build(self):
         for module_name in self.module_topology.keys():
@@ -117,10 +117,11 @@ class DEModel(ARCH):
         if 'DE' in checkpoint and 'DE' in self.root_cfg:
             self.DE.load(checkpoint['DE'])
 
-    def enable_decision_engine(self, train_set: TorchDataLoader = None, refit=False):
+    def enable_decision_engine(self, train_set: TorchDataLoader = None, refit=False, filename=None):
         """
         Enables the DE for inference calls (otherwise DE is not used).
 
+        :param filename:
         :param train_set: data loader hosting same data used for training the model
         :type train_set: TorchDataLoader
         :param refit: force re-fit a model that already contains a fitted DE
@@ -135,6 +136,7 @@ class DEModel(ARCH):
                              f"got: : {type(dengine)}")
         if not dengine.is_fit or refit:
             self._fit_DE(train_set)
+            self.save_model(filename)
         dengine.enabled = True
 
     def _fit_DE(self, train_set):
@@ -149,8 +151,6 @@ class DEModel(ARCH):
             self._fit_tree_episodes(train_set)
         else:
             raise ValueError(f"Decision Engine type not supported from choices [TREE] , got: {self.root_cfg.DE.ENGINE}")
-
-        self.save_model()
 
     def _fit_tree_episodes(self, train_set: TorchDataLoader):  # TODO move to DTree?
         """
@@ -212,9 +212,10 @@ class DEModel(ARCH):
 
                     self.data.q_in, self.data.S_in = input_var1, input_var2
                     # Obtain and normalize the output
-                    self.forward()
-                    out = np.asarray(
-                        [dt.normalize(x) for x in self.data.sim_list_BACKBONE2D.detach().cpu().numpy()])
+                    out = self.forward()
+                    if isinstance(out, torch.Tensor):
+                        out = out.detach().cpu().numpy()
+                    out = dt.normalize(out)
                     target: np.ndarray = target.numpy()
                     out_bank = np.concatenate([out_bank, out], axis=0)
                     target_bank = np.concatenate([target_bank, target], axis=0)
@@ -233,7 +234,7 @@ class DEModel(ARCH):
                     ix += out_rows
                     if episode_index == self.root_cfg.DE.EPISODE_TRAIN_NUM - 1:
                         break
-                print("STD:", out_bank.std(axis=1).mean())
+                print("STD:", out_bank.std(axis=0).mean())
 
 
         else:

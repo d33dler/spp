@@ -35,7 +35,7 @@ class FourLayer_64F(BaseBackbone2d):
 
         norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
 
-        self.FEATURES = nn.Sequential(  # 3*84*84
+        self.features = nn.Sequential(  # 3*84*84
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(64),
             nn.LeakyReLU(0.2, True),
@@ -62,7 +62,6 @@ class FourLayer_64F(BaseBackbone2d):
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.output_shape = 64
         self.knn = KNN_itc(data.k_neighbors)
-        self.one_hot = model_cfg.ONE_HOT
 
     def forward(self):
         # extract features of input1--query image
@@ -77,6 +76,6 @@ class FourLayer_64F(BaseBackbone2d):
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
-        data.sim_list_BACKBONE2D, data.DLD_topk = self.knn.forward(data.q, data.S, self.one_hot)
-        self.data.output = data.sim_list_BACKBONE2D
+        data.sim_list, data.DLD_topk = self.knn.forward(data.q, data.S)
+        self.data.output = data.sim_list
         return data

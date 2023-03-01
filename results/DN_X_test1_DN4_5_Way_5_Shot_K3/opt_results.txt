@@ -1,6 +1,4 @@
-Namespace(arch='DN_X', cfg='../models/architectures/configs/DN4_Vanilla.yaml', dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='train', resume='../results/models/epoch_14_best.pth.tar', epochs=0, cuda=True, ngpu=1, nc=3, clamp_lower=-0.01, clamp_upper=0.01, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
   (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
@@ -20,19 +18,237 @@ DN_X(
     )
     (criterion): CrossEntropyLoss()
   )
-  (DT): RandomForestHead()
+  (DE): RandomForestHead()
 )
-============ validation on the val set ============
-Trainset: 10000
+===================================== Epoch 0 =====================================
+Trainset: 100
 Valset: 600
+Testset: 200
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 50
+Testset: 50
+============ Testing on the test set ============
+ * Prec@1 24.760 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 25.720 Best_prec1 24.760Trainset: 100
+Valset: 50
+Testset: 50
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 50
+Testset: 50
+============ Testing on the test set ============
+ * Prec@1 26.240 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 27.600 Best_prec1 26.240Trainset: 100
+Valset: 50
+Testset: 50
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 50
+Testset: 50
+============ Testing on the test set ============
+ * Prec@1 25.640 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 25.720 Best_prec1 25.640Trainset: 100
+Valset: 50
+Testset: 50
+ * Prec@1 22.600 Best_prec1 25.640
+============ Testing on the test set ============
+ * Prec@1 22.400 Best_prec1 25.640Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 50
+Testset: 50
+============ Testing on the test set ============
+ * Prec@1 25.600 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 26.200 Best_prec1 25.600Trainset: 100
+Valset: 50
+Testset: 50
+ * Prec@1 23.480 Best_prec1 25.600
+============ Testing on the test set ============
+ * Prec@1 23.240 Best_prec1 25.600Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 50
+Testset: 50
+============ Testing on the test set ============
+ * Prec@1 26.680 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 25.120 Best_prec1 26.680Trainset: 100
+Valset: 50
+Testset: 50
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 50
+Testset: 50
+============ Testing on the test set ============
+ * Prec@1 27.280 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 25.800 Best_prec1 27.280Trainset: 100
+Valset: 50
+Testset: 50
+ * Prec@1 26.200 Best_prec1 27.280
+============ Testing on the test set ============
+ * Prec@1 26.560 Best_prec1 27.280Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='../results/models/epoch_14_best.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Epoch 14 =====================================
+Trainset: 10000
+Valset: 800
 Testset: 600
-Test-(14): [100/600]	Time 0.149 (0.163)	Loss 1.318 (1.030)	Prec@1 42.000 (59.881)
-Test-(14): [200/600]	Time 0.150 (0.159)	Loss 1.039 (1.029)	Prec@1 56.000 (60.328)
-Test-(14): [300/600]	Time 0.148 (0.158)	Loss 1.210 (1.042)	Prec@1 48.000 (59.256)
-Test-(14): [400/600]	Time 0.147 (0.157)	Loss 0.757 (1.042)	Prec@1 70.000 (59.521)
-Test-(14): [500/600]	Time 0.162 (0.157)	Loss 0.859 (1.040)	Prec@1 70.000 (59.808)
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
+Eposide-(14): [100/10000]	Time 0.189 (0.231)	Data 0.001 (0.012)	Loss 0.608 (0.831)	Prec@1 78.000 (69.485)
+Eposide-(14): [200/10000]	Time 0.195 (0.227)	Data 0.001 (0.006)	Loss 0.764 (0.845)	Prec@1 64.000 (68.856)
+Eposide-(14): [300/10000]	Time 0.240 (0.226)	Data 0.001 (0.004)	Loss 0.599 (0.837)	Prec@1 78.000 (69.056)
+Eposide-(14): [400/10000]	Time 0.197 (0.228)	Data 0.001 (0.003)	Loss 0.731 (0.828)	Prec@1 70.000 (69.162)
+Eposide-(14): [500/10000]	Time 0.209 (0.226)	Data 0.001 (0.003)	Loss 0.881 (0.823)	Prec@1 70.000 (69.309)
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test1', mode='train', resume='../results/models/epoch_14_best.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
 DN_X(
   (BACKBONE): FourLayer_64F(
     (features): Sequential(
@@ -53,54 +269,18 @@ DN_X(
     )
     (criterion): CrossEntropyLoss()
   )
-  (DE): XGBHead()
+  (DE): RandomForestHead()
 )
-===================================== Round 0 =====================================
-Testset: 600-------------0
-Test-(14): [100/600]	Time 0.105 (0.132)	Loss 1.265 (1.251)	Prec@1 64.0 (65.38613861386139)
-Test-(14): [200/600]	Time 0.119 (0.126)	Loss 1.325 (1.261)	Prec@1 57.99999999999999 (64.38805970149254)
-Test-(14): [300/600]	Time 0.126 (0.123)	Loss 1.205 (1.262)	Prec@1 70.0 (64.25249169435216)
-Test-(14): [400/600]	Time 0.148 (0.122)	Loss 1.205 (1.255)	Prec@1 70.0 (64.98753117206982)
-Test-(14): [500/600]	Time 0.118 (0.122)	Loss 1.205 (1.256)	Prec@1 70.0 (64.84231536926147)
- * Prec@1 64.870 Best_prec1 0.000
-Test accuracy 64.87 h 0.7967357886263473
-===================================== Round 1 =====================================
-Testset: 600-------------1
-Test-(14): [100/600]	Time 0.133 (0.128)	Loss 1.385 (1.255)	Prec@1 52.0 (65.02970297029702)
-Test-(14): [200/600]	Time 0.106 (0.123)	Loss 1.065 (1.253)	Prec@1 84.0 (65.16417910447761)
-Test-(14): [300/600]	Time 0.109 (0.121)	Loss 1.025 (1.252)	Prec@1 88.0 (65.24916943521595)
-Test-(14): [400/600]	Time 0.118 (0.120)	Loss 1.125 (1.247)	Prec@1 78.0 (65.80049875311721)
-Test-(14): [500/600]	Time 0.129 (0.120)	Loss 1.105 (1.250)	Prec@1 80.0 (65.52095808383234)
- * Prec@1 65.797 Best_prec1 64.870
-Test accuracy 65.79666666666667 h 0.8294512136540081
-===================================== Round 2 =====================================
-Testset: 600-------------2
-Test-(14): [100/600]	Time 0.130 (0.128)	Loss 1.285 (1.256)	Prec@1 62.0 (64.89108910891089)
-Test-(14): [200/600]	Time 0.121 (0.123)	Loss 1.405 (1.259)	Prec@1 50.0 (64.6268656716418)
-Test-(14): [300/600]	Time 0.107 (0.121)	Loss 1.325 (1.256)	Prec@1 57.99999999999999 (64.85714285714286)
-Test-(14): [400/600]	Time 0.136 (0.121)	Loss 1.265 (1.255)	Prec@1 64.0 (64.99750623441396)
-Test-(14): [500/600]	Time 0.118 (0.121)	Loss 1.225 (1.255)	Prec@1 68.0 (64.99001996007983)
- * Prec@1 65.303 Best_prec1 65.797
-Test accuracy 65.30333333333333 h 0.8125468832540866
-===================================== Round 3 =====================================
-Testset: 600-------------3
-Test-(14): [100/600]	Time 0.113 (0.129)	Loss 1.105 (1.245)	Prec@1 80.0 (65.94059405940594)
-Test-(14): [200/600]	Time 0.112 (0.126)	Loss 1.265 (1.253)	Prec@1 64.0 (65.16417910447761)
-Test-(14): [300/600]	Time 0.141 (0.124)	Loss 1.385 (1.253)	Prec@1 52.0 (65.17607973421927)
-Test-(14): [400/600]	Time 0.109 (0.123)	Loss 1.245 (1.252)	Prec@1 66.0 (65.23690773067332)
-Test-(14): [500/600]	Time 0.113 (0.122)	Loss 1.265 (1.249)	Prec@1 64.0 (65.5688622754491)
- * Prec@1 65.497 Best_prec1 65.797
-Test accuracy 65.49666666666667 h 0.7754807160718219
-===================================== Round 4 =====================================
-Testset: 600-------------4
-Test-(14): [100/600]	Time 0.122 (0.137)	Loss 1.265 (1.252)	Prec@1 64.0 (65.26732673267327)
-Test-(14): [200/600]	Time 0.111 (0.129)	Loss 1.405 (1.252)	Prec@1 50.0 (65.23383084577114)
-Test-(14): [300/600]	Time 0.134 (0.128)	Loss 1.185 (1.251)	Prec@1 72.0 (65.3421926910299)
-Test-(14): [400/600]	Time 0.111 (0.127)	Loss 1.165 (1.249)	Prec@1 74.0 (65.58104738154613)
-Test-(14): [500/600]	Time 0.109 (0.126)	Loss 1.305 (1.248)	Prec@1 60.0 (65.69660678642714)
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
+===================================== Epoch 14 =====================================
+Trainset: 100
+Valset: 100
+Testset: 100
+============ Testing on the test set ============
+ * Prec@1 55.040 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 60.020 Best_prec1 55.040Trainset: 100
+Valset: 100
+Testset: 100
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/miniImageNet', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
   (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
@@ -120,14 +300,20 @@ DN_X(
     )
     (criterion): CrossEntropyLoss()
   )
-  (DE): XGBHead()
+  (DE): RandomForestHead()
 )
-===================================== Round 0 =====================================
-Testset: 600-------------0
-Test-(14): [100/600]	Time 0.127 (0.127)	Loss 1.185 (1.235)	Prec@1 72.0 (66.99009900990099)
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
+===================================== Epoch 0 =====================================
+Trainset: 100
+Valset: 50
+Testset: 50
+============ Testing on the test set ============
+ * Prec@1 34.120 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 33.320 Best_prec1 34.120Trainset: 100
+Valset: 50
+Testset: 50
+ * Prec@1 29.760 Best_prec1 34.120
+============ Testing on the test set ============
+ * Prec@1 32.560 Best_prec1 34.120Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/miniImageNet', data_name='test1', mode='train', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test1_DN4_5_Way_5_Shot_K3')DN_X(
   (BACKBONE): FourLayer_64F(
     (features): Sequential(
       (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
@@ -147,175 +333,9 @@ DN_X(
     )
     (criterion): CrossEntropyLoss()
   )
-  (DE): XGBHead()
+  (DE): RandomForestHead()
 )
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
-  (BACKBONE): FourLayer_64F(
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-    (criterion): CrossEntropyLoss()
-  )
-  (DE): XGBHead()
-)
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
-  (BACKBONE): FourLayer_64F(
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-    (criterion): CrossEntropyLoss()
-  )
-  (DE): XGBHead()
-)
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
-  (BACKBONE): FourLayer_64F(
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-    (criterion): CrossEntropyLoss()
-  )
-  (DE): XGBHead()
-)
-===================================== Round 0 =====================================
-Testset: 600-------------0
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
-  (BACKBONE): FourLayer_64F(
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-    (criterion): CrossEntropyLoss()
-  )
-  (DE): XGBHead()
-)
-===================================== Round 0 =====================================
-Testset: 600-------------0
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
-  (BACKBONE): FourLayer_64F(
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-    (criterion): CrossEntropyLoss()
-  )
-  (DE): XGBHead()
-)
-===================================== Round 0 =====================================
-Testset: 600-------------0
-Test-(14): [100/600]	Time 0.111 (0.132)	Loss 1.566 (1.566)	Prec@1 62.0 (62.87128712871287)
-Test-(14): [200/600]	Time 0.127 (0.125)	Loss 1.545 (1.566)	Prec@1 82.0 (62.985074626865675)
-Test-(14): [300/600]	Time 0.109 (0.122)	Loss 1.577 (1.566)	Prec@1 56.00000000000001 (62.7641196013289)
-Test-(14): [400/600]	Time 0.112 (0.122)	Loss 1.565 (1.566)	Prec@1 68.0 (62.583541147132166)
-Test-(14): [500/600]	Time 0.109 (0.121)	Loss 1.559 (1.566)	Prec@1 68.0 (62.662674650698605)
- * Prec@1 62.903 Best_prec1 0.000
-Test accuracy 62.903333333333336 h 0.8424381351619946
-===================================== Round 1 =====================================
-Testset: 600-------------1
-Namespace(arch='DN_X', config='../models/architectures/configs/DN4_Vanilla.yaml', dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='stanforddogz', mode='test', resume='../results/models/epoch_14_best.pth.tar', epochs=0, ngpu=1, print_freq=100, outf='../results/_DN_X_stanforddogz_DN4_5_Way_5_Shot_K1')
-=> loaded checkpoint '../results/models/epoch_14_best.pth.tar' (epoch 14)
-DN_X(
-  (BACKBONE): FourLayer_64F(
-    (features): Sequential(
-      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (2): LeakyReLU(negative_slope=0.2, inplace=True)
-      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (6): LeakyReLU(negative_slope=0.2, inplace=True)
-      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
-      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (10): LeakyReLU(negative_slope=0.2, inplace=True)
-      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (13): LeakyReLU(negative_slope=0.2, inplace=True)
-    )
-    (criterion): CrossEntropyLoss()
-  )
-  (DE): XGBHead()
-)
-===================================== Round 0 =====================================
-Testset: 600-------------0
-Test-(14): [100/600]	Time 0.114 (0.132)	Loss 1.525 (1.280)	Prec@1 38.0 (62.43564356435643)
-Test-(14): [200/600]	Time 0.104 (0.126)	Loss 1.205 (1.280)	Prec@1 70.0 (62.507462686567166)
-Test-(14): [300/600]	Time 0.121 (0.123)	Loss 1.325 (1.280)	Prec@1 57.99999999999999 (62.46511627906977)
-Test-(14): [400/600]	Time 0.122 (0.122)	Loss 1.305 (1.278)	Prec@1 60.0 (62.68329177057357)
-Test-(14): [500/600]	Time 0.130 (0.123)	Loss 1.185 (1.280)	Prec@1 72.0 (62.5189620758483)
- * Prec@1 62.203 Best_prec1 0.000
-Test accuracy 62.20333333333333 h 0.8574435797290398
-===================================== Round 1 =====================================
-Testset: 600-------------1
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 800
+Testset: 600

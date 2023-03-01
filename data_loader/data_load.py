@@ -18,7 +18,6 @@ class Parameters:
     DataLoader parameters (extracted from model root config @see models/architectures/configs)
     """
     img_sz: int
-    dataset_dir: str
     shot_num: int
     way_num: int
     query_num: int
@@ -53,10 +52,10 @@ class DatasetLoader:
     def augment(self, transform: nn.Module):
         self.transforms_ls = [transform] + self.transforms_ls
 
-    def load_data(self, mode, F_txt, dataset_directory=None):
+    def load_data(self, mode, dataset_directory, F_txt):
         # ======================================= Folder of Datasets =======================================
         # image transform & normalization
-        dataset_dir = dataset_directory or self.params.dataset_dir
+        dataset_dir = dataset_directory
         img_sz = self.params.img_sz
         shot_num = self.params.shot_num
         way_num = self.params.way_num
@@ -80,6 +79,7 @@ class DatasetLoader:
             transform_ls.append(t)
         transform_ls += [transforms.ToTensor(),
                          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        print(transform_ls)
         ImgTransform = transforms.Compose(transform_ls)
         self.transforms_ls = transform_ls
         trainset = CSVLoader(

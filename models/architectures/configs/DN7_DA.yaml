@@ -1,6 +1,5 @@
 # Main params
 NUM_CLASSES: 5
-BATCH_SIZE: 50
 K_NEIGHBORS: 5
 USE_BIAS: True
 #Model skeleton
@@ -17,7 +16,6 @@ BACKBONE:
   GRAD: True
   NORM: batch
   CUDA: True
-  ONE_HOT: False
   LEARNING_RATE: 0.005
   BETA_ONE: [ 0.5,0.9 ]
   INIT_WEIGHTS: kaiming
