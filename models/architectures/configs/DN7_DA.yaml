@@ -1,7 +1,8 @@
 # Main params
-NUM_CLASSES: 5
+NAME: DN7_DA
 K_NEIGHBORS: 5
 USE_BIAS: True
+DATASET: miniImageNet
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
@@ -24,9 +25,13 @@ BACKBONE:
 DE:
   NAME: RandomForest # XGB | RF
   MODE: TRAIN
+  ENGINE: TREE
   GRAD: False
   CUDA: True
   EPISODE_TRAIN_NUM: 6000
+  OPTIMIZE: True
+  OPTIMIZATION_ROUNDS: 150
+  DATASET:
   PARAMETERS: { tree_method: gpu_hist,
                 objective: 'multi:softmax',
                 eval_metric: 'mlogloss',
@@ -67,9 +72,6 @@ AUGMENTOR:
 
 
 #BACKBONE & ENCODER
-
-#Decision Tree
-DATASET:
 
 
 # Dataloader

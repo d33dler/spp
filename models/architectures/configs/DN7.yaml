@@ -1,7 +1,8 @@
 # Main params
-NUM_CLASSES: 5
+NAME: DN4_DA
 K_NEIGHBORS: 5
 USE_BIAS: True
+DATASET: miniImageNet
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
@@ -26,6 +27,9 @@ DE: # Decision Engine
   MODE: TRAIN
   CUDA: True
   GRAD: False
+  OPTIMIZE: True
+  OPTIMIZATION_ROUNDS: 150
+  DATASET:
   EPISODE_TRAIN_NUM: 6000
   PARAMETERS: { tree_method: gpu_hist,
                 objective: 'multi:softmax',
@@ -65,11 +69,6 @@ AUGMENTOR:
     }
   ]
 
-
-#BACKBONE & ENCODER
-
-#Decision Tree
-DATASET:
 
 
 # Dataloader

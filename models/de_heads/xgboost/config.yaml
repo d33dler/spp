@@ -3,6 +3,7 @@ MODEL_NAME: __ignore__
 OPTIMIZE: False
 ENGINE: TREE
 GRAD: False
+OPTIMIZATION_ROUNDS: 150
 
 PARAMETERS: {
   tree_method: gpu_hist,

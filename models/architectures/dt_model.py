@@ -36,7 +36,7 @@ class DEModel(ARCH):
         self.criterion = None
         self.optimizer = None
         model_cfg = self.root_cfg
-        self.num_classes = model_cfg.NUM_CLASSES
+        self.num_classes = model_cfg.WAY_NUM
         self.k_neighbors = model_cfg.K_NEIGHBORS
         self.data = DataHolder(model_cfg)
         self.build()
@@ -163,15 +163,15 @@ class DEModel(ARCH):
         dt: DTree = self.DE
         X_len = self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz
         ft_engine = ['max', 'mean', 'std']
-        cls_labels = [f"cls_{i}" for i in range(0, self.num_classes)]
+        dist_diffs = [f"diff_{i}" for i in range(0, self.num_classes)]
         ranks_len = dt.ranks
         ranks = [f"rank_{i}" for i in range(0, ranks_len)]
         sim_topK = [f"DLD_sim_{i}" for i in range(0, self.num_classes * self.k_neighbors)]
-        all_columns = cls_labels + ft_engine + ranks + sim_topK
+        all_columns = dist_diffs + ranks + ft_engine + sim_topK
         col_len = len(all_columns)
         # Add column IDs for the DE (required by DE for creating the inputs in inference step)
         dt.features[dt.ALL_FT] = all_columns
-        dt.features[dt.BASE_FT] = cls_labels
+        dt.features[dt.BASE_FT] = dist_diffs
         dt.features[dt.MISC_FT] = sim_topK
         dt.features[dt.RANK_FT] = ranks
         if self.root_cfg.DE.DATASET is None:
@@ -183,7 +183,7 @@ class DEModel(ARCH):
             print(tree_df.info(verbose=True))
             print("TRAIN SET SIZE: ", len(train_set))
             self.eval()
-            cls_col_ix = tree_df.columns.get_indexer(cls_labels)
+            dist_diffsix = tree_df.columns.get_indexer(dist_diffs)
             DLD_topK = tree_df.columns.get_indexer(sim_topK)
             ranks_ix = tree_df.columns.get_indexer(ranks)
             max_ix = tree_df.columns.get_loc('max')
@@ -221,24 +221,28 @@ class DEModel(ARCH):
                     target_bank = np.concatenate([target_bank, target], axis=0)
                     # add measurements and target value to dataframe
                     out_rows = out.shape[0]
-                    tree_df.iloc[ix:ix + out_rows, cls_col_ix] = out
+                    rank_indices = np.argsort(-out, axis=1)
+                    tree_df.iloc[ix:ix + out_rows, dist_diffsix[1:]] = np.diff(
+                        np.take_along_axis(out, rank_indices, axis=1), axis=1)
                     tree_df.iloc[ix:ix + out_rows, y_col_ix] = target
                     tree_df.iloc[ix:ix + out_rows, max_ix] = out.max(axis=1)
                     tree_df.iloc[ix:ix + out_rows, mean_ix] = out.mean(axis=1)
                     tree_df.iloc[ix:ix + out_rows, std_ix] = out.std(axis=1)
 
-                    top_ranks = np.argpartition(-out, kth=ranks_len, axis=1)[:, :ranks_len]
-                    tree_df.iloc[ix:ix + out_rows, ranks_ix] = out[np.arange(out.shape[0])[:, None], top_ranks]
+                    tree_df.iloc[ix:ix + out_rows, ranks_ix] = rank_indices
+
                     tree_df.iloc[ix:ix + out_rows, DLD_topK] = self.data.DLD_topk
 
                     ix += out_rows
+
                     if episode_index == self.root_cfg.DE.EPISODE_TRAIN_NUM - 1:
                         break
-                print("STD:", out_bank.std(axis=0).mean())
+                print("STD:", out_bank.std(axis=1).mean())
 
 
         else:
             tree_df = pd.read_csv(self.root_cfg.DE.DATASET, header=0)
+        tree_df[ranks] = tree_df[ranks].astype('int')
         self.data.X = tree_df[all_columns]
         self.data.y = tree_df[['y']]
         print(self.data.X.head(5))
@@ -246,7 +250,7 @@ class DEModel(ARCH):
         print("Finished inference, fitting tree...")
         if self.root_cfg.DE.DATASET is None:
             tree_df.to_csv(
-                f"tree_dataset_W{self.root_cfg.WAY_NUM}_S{self.root_cfg.SHOT_NUM}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv",
+                f"{self.root_cfg.DATASET}_{self.root_cfg.NAME}_W{self.root_cfg.WAY_NUM}_S{self.root_cfg.SHOT_NUM}K_{self.k_neighbors}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_V2.csv",
                 index=False)
 
         dt.fit(self.data.X, self.data.y, self.data.eval_set)

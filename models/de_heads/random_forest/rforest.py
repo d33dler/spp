@@ -46,7 +46,7 @@ class RandomForestHead(DTree):
             'eval_metric': self.params['eval_metric'],
             'tree_method': self.params['tree_method'],
             'eta': 1,
-            'seed': 123
+            'seed': 123,
         }
         [self.search_space.update({k: v}) for k, v in self.params.items() if k not in self.search_space.keys()]
 

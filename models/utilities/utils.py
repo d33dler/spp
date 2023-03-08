@@ -107,7 +107,7 @@ class DataHolder(DataHolderBase):
         self.k_neighbors = cfg.K_NEIGHBORS
         self.use_bias = cfg.USE_BIAS
         self.norm_layer = BatchNorm2d
-        self.num_classes = cfg.NUM_CLASSES
+        self.num_classes = cfg.WAY_NUM
 
     def clear(self):
         del self.q_in

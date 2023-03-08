@@ -1,6 +1,6 @@
 # Main params
-NUM_CLASSES: 5
-K_NEIGHBORS: 3
+NAME: DN4_Vanilla
+DATASET: miniImageNet
 USE_BIAS: True
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
@@ -10,6 +10,8 @@ TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint
 #Return loss of this module when benchmarking
 TRACK_LOSS: BACKBONE
 TRACK_CRITERION: BACKBONE
+
+K_NEIGHBORS: 3
 
 BACKBONE:
   NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
@@ -31,6 +33,7 @@ DE:
   EPISODE_TRAIN_NUM: 4000
   MODEL_NAME: __ignore__
   OPTIMIZE: True
+  OPTIMIZATION_ROUNDS: 150
   DATASET:
   PARAMETERS: { tree_method: gpu_hist,
                 num_class: 5,

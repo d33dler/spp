@@ -89,7 +89,7 @@ class ResNetLike(BaseBackbone2d):
 
         self.feat_extractor.add_module('ReluF1', nn.LeakyReLU(0.2, True))  # get Batch*256*21*21
 
-        self.imgtoclass = KNN_itc(neighbor_k=self.config.NUM_CLASSES)  # Batch*num_classes
+        self.imgtoclass = KNN_itc(neighbor_k=self.config.WAY_NUM)  # Batch*num_classes
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):

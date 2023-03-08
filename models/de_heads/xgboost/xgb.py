@@ -1,20 +1,13 @@
-import time
-from datetime import datetime
 from pathlib import Path
-from typing import Tuple, Any, Sequence, List
-import mlflow
-import numpy as np
-import pandas as pd
-import xgboost as xgb
-from pandas import DataFrame
+
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_absolute_error, log_loss
-from sklearn.model_selection import train_test_split
-from xgboost import DMatrix
-from hyperopt import hp, fmin, tpe, STATUS_OK
+import numpy as np
+import xgboost as xgb
+from hyperopt import hp
 from hyperopt.pyll import scope
+
 from models.de_heads.dtree import DTree
-from models.utilities.utils import load_config, DataHolder
+from models.utilities.utils import load_config
 
 
 class XGBHead(DTree):
@@ -46,7 +39,8 @@ class XGBHead(DTree):
             'reg_lambda': hp.quniform('reg_lambda', 0.1, 10, 1),
             'objective': self.params['objective'],
             'eval_metric': self.params['eval_metric'],
-            'seed': 123
+            'seed': 123,
+            'tree_method': self.params['tree_method'],
         }
         [self.search_space.update({k: v}) for k, v in self.params.items() if k not in self.search_space.keys()]
         self._init_model(_type=self.config.TYPE, **self.params)

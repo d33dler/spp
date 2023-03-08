@@ -1,0 +1,85 @@
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='../results/models/dn4__miniImageNet_epoch_23.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_10_Way_1_Shot_K1')=> loaded checkpoint '../results/models/dn4__miniImageNet_epoch_23.pth.tar' (epoch 23)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(23): [100/600]	Time 0.276 (0.283)	Loss 1.990 (2.021)	Prec@1 37.0 (32.910892486572266)
+
+Test-(23): [200/600]	Time 0.254 (0.278)	Loss 1.882 (2.035)	Prec@1 37.0 (32.50746154785156)
+
+Test-(23): [300/600]	Time 0.294 (0.275)	Loss 1.515 (2.043)	Prec@1 48.0 (32.50165939331055)
+
+Test-(23): [400/600]	Time 0.250 (0.272)	Loss 2.179 (2.044)	Prec@1 33.0 (32.49376678466797)
+
+Test-(23): [500/600]	Time 0.204 (0.269)	Loss 1.903 (2.043)	Prec@1 30.0 (32.47505187988281)
+ * Prec@1 32.520 Best_prec1 0.000Test accuracy= 32.52000045776367 h= 0.48775121569633484
+===================================== Round 1 =====================================
+Testset: 600-------------1
+Test-(23): [100/600]	Time 0.291 (0.293)	Loss 2.124 (2.024)	Prec@1 41.0 (31.900989532470703)
+
+Test-(23): [200/600]	Time 0.245 (0.285)	Loss 2.166 (2.022)	Prec@1 34.0 (32.6716423034668)
+
+Test-(23): [300/600]	Time 0.300 (0.282)	Loss 1.938 (2.019)	Prec@1 27.0 (32.833885192871094)
+
+Test-(23): [400/600]	Time 0.247 (0.279)	Loss 1.950 (2.022)	Prec@1 32.0 (32.92020034790039)
+
+Test-(23): [500/600]	Time 0.321 (0.277)	Loss 1.714 (2.023)	Prec@1 43.0 (32.88822555541992)
+ * Prec@1 32.775 Best_prec1 32.520Test accuracy= 32.775001525878906 h= 0.5024569034576416
+===================================== Round 2 =====================================
+Testset: 600-------------2
+Test-(23): [100/600]	Time 0.269 (0.287)	Loss 2.286 (2.094)	Prec@1 23.0 (31.316831588745117)
+
+Test-(23): [200/600]	Time 0.393 (0.277)	Loss 2.432 (2.062)	Prec@1 27.0 (32.02487564086914)
+
+Test-(23): [300/600]	Time 0.278 (0.277)	Loss 1.969 (2.045)	Prec@1 32.0 (32.19601058959961)
+
+Test-(23): [400/600]	Time 0.412 (0.278)	Loss 2.050 (2.037)	Prec@1 35.0 (32.147132873535156)
+
+Test-(23): [500/600]	Time 0.254 (0.278)	Loss 1.827 (2.043)	Prec@1 40.0 (31.98802375793457)
+ * Prec@1 32.290 Best_prec1 32.775Test accuracy= 32.290000915527344 h= 0.49432727694511414
+===================================== Round 3 =====================================
+Testset: 600-------------3
+Test-(23): [100/600]	Time 0.385 (0.284)	Loss 2.119 (2.052)	Prec@1 40.0 (31.48514747619629)
+
+Test-(23): [200/600]	Time 0.360 (0.282)	Loss 2.373 (2.050)	Prec@1 25.0 (32.30845642089844)
+
+Test-(23): [300/600]	Time 0.299 (0.280)	Loss 2.093 (2.036)	Prec@1 32.0 (32.514949798583984)
+
+Test-(23): [400/600]	Time 0.305 (0.281)	Loss 2.175 (2.043)	Prec@1 15.0 (32.46882629394531)
+
+Test-(23): [500/600]	Time 0.325 (0.284)	Loss 1.757 (2.039)	Prec@1 43.0 (32.45109939575195)
+ * Prec@1 32.575 Best_prec1 32.775Test accuracy= 32.57500076293945 h= 0.49943622946739197
+===================================== Round 4 =====================================
+Testset: 600-------------4
+Test-(23): [100/600]	Time 0.285 (0.320)	Loss 1.823 (2.050)	Prec@1 43.0 (32.25742721557617)
+
+Test-(23): [200/600]	Time 0.281 (0.307)	Loss 2.322 (2.042)	Prec@1 25.0 (32.2835807800293)
+
+Test-(23): [300/600]	Time 0.281 (0.302)	Loss 1.816 (2.038)	Prec@1 34.0 (32.514949798583984)
+
+Test-(23): [400/600]	Time 0.268 (0.295)	Loss 2.145 (2.040)	Prec@1 34.0 (32.47880172729492)
+
+Test-(23): [500/600]	Time 0.272 (0.292)	Loss 2.255 (2.046)	Prec@1 26.0 (32.36726379394531)
+ * Prec@1 32.412 Best_prec1 32.775Test accuracy= 32.41166687011719 h= 0.4863581657409668
+
+Aver_accuracy= 32.51433181762695 Aver_h= 0.49406595826148986

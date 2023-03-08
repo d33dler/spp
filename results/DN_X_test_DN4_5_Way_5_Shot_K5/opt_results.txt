@@ -1,0 +1,371 @@
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(0): [100/600]	Time 0.127 (0.134)	Loss 16.860 (10.971)	Prec@1 34.0 (38.138614654541016)
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='../results/models/dn4__miniImageNet_epoch_23.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn4__miniImageNet_epoch_23.pth.tar' (epoch 23)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(23): [100/600]	Time 0.111 (0.141)	Loss 1.610 (1.352)	Prec@1 60.0 (65.20791625976562)
+
+Test-(23): [200/600]	Time 0.122 (0.129)	Loss 2.594 (1.367)	Prec@1 40.0 (65.13433074951172)
+
+Test-(23): [300/600]	Time 0.103 (0.128)	Loss 2.227 (1.372)	Prec@1 48.0 (64.77075958251953)
+
+Test-(23): [400/600]	Time 0.103 (0.124)	Loss 1.645 (1.391)	Prec@1 64.0 (64.48877716064453)
+
+Test-(23): [500/600]	Time 0.106 (0.122)	Loss 0.921 (1.405)	Prec@1 70.0 (64.3113784790039)
+ * Prec@1 64.017 Best_prec1 0.000Test accuracy= 64.01667022705078 h= 0.734659731388092
+===================================== Round 1 =====================================
+Testset: 600-------------1
+Test-(23): [100/600]	Time 0.130 (0.123)	Loss 1.434 (1.388)	Prec@1 62.0 (64.13861083984375)
+
+Test-(23): [200/600]	Time 0.105 (0.118)	Loss 2.129 (1.397)	Prec@1 52.0 (64.16915893554688)
+
+Test-(23): [300/600]	Time 0.127 (0.117)	Loss 1.141 (1.385)	Prec@1 58.0 (64.5049819946289)
+
+Test-(23): [400/600]	Time 0.114 (0.116)	Loss 2.272 (1.376)	Prec@1 60.0 (64.77306365966797)
+
+Test-(23): [500/600]	Time 0.106 (0.115)	Loss 1.470 (1.381)	Prec@1 62.0 (64.4990005493164)
+ * Prec@1 64.427 Best_prec1 64.017Test accuracy= 64.42666625976562 h= 0.7248280048370361
+===================================== Round 2 =====================================
+Testset: 600-------------2
+Test-(23): [100/600]	Time 0.101 (0.128)	Loss 2.258 (1.487)	Prec@1 58.0 (62.297027587890625)
+
+Test-(23): [200/600]	Time 0.132 (0.122)	Loss 0.674 (1.448)	Prec@1 76.0 (63.31343460083008)
+
+Test-(23): [300/600]	Time 0.121 (0.120)	Loss 1.285 (1.452)	Prec@1 66.0 (63.63454818725586)
+
+Test-(23): [400/600]	Time 0.106 (0.119)	Loss 1.422 (1.445)	Prec@1 68.0 (63.8204460144043)
+
+Test-(23): [500/600]	Time 0.113 (0.119)	Loss 1.869 (1.444)	Prec@1 60.0 (63.80838394165039)
+ * Prec@1 63.863 Best_prec1 64.427Test accuracy= 63.86333465576172 h= 0.7157545685768127
+===================================== Round 3 =====================================
+Testset: 600-------------3
+Test-(23): [100/600]	Time 0.132 (0.128)	Loss 1.171 (1.484)	Prec@1 68.0 (63.049503326416016)
+
+Test-(23): [200/600]	Time 0.117 (0.120)	Loss 1.654 (1.440)	Prec@1 66.0 (64.31841278076172)
+
+Test-(23): [300/600]	Time 0.103 (0.118)	Loss 1.853 (1.418)	Prec@1 50.0 (64.63787078857422)
+
+Test-(23): [400/600]	Time 0.093 (0.117)	Loss 1.721 (1.416)	Prec@1 46.0 (64.6733169555664)
+
+Test-(23): [500/600]	Time 0.106 (0.117)	Loss 1.211 (1.412)	Prec@1 62.0 (64.68263244628906)
+ * Prec@1 64.540 Best_prec1 64.427Test accuracy= 64.54000091552734 h= 0.7272393703460693
+===================================== Round 4 =====================================
+Testset: 600-------------4
+Test-(23): [100/600]	Time 0.100 (0.129)	Loss 1.287 (1.439)	Prec@1 64.0 (62.95049285888672)
+
+Test-(23): [200/600]	Time 0.132 (0.123)	Loss 1.473 (1.431)	Prec@1 64.0 (63.164180755615234)
+
+Test-(23): [300/600]	Time 0.115 (0.121)	Loss 2.145 (1.427)	Prec@1 58.0 (63.62790298461914)
+
+Test-(23): [400/600]	Time 0.132 (0.120)	Loss 1.157 (1.425)	Prec@1 62.0 (63.725685119628906)
+
+Test-(23): [500/600]	Time 0.123 (0.120)	Loss 2.019 (1.430)	Prec@1 60.0 (63.648704528808594)
+ * Prec@1 63.607 Best_prec1 64.540Test accuracy= 63.606666564941406 h= 0.7396629452705383
+
+Aver_accuracy= 64.09066772460938 Aver_h= 0.7284289240837097
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='../results/models/dn4__miniImageNet_epoch_23.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn4__miniImageNet_epoch_23.pth.tar' (epoch 23)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+Trainset: 10000
+Valset: 800
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='../results/models/dn4__miniImageNet_epoch_23.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn4__miniImageNet_epoch_23.pth.tar' (epoch 23)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+Trainset: 10000
+Valset: 800
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(23): [100/600]	Time 0.109 (0.142)	Loss 1.285 (1.259)	Prec@1 62.0 (64.61386108398438)
+
+Test-(23): [200/600]	Time 0.148 (0.135)	Loss 1.165 (1.255)	Prec@1 74.0 (64.9353256225586)
+
+Test-(23): [300/600]	Time 0.126 (0.135)	Loss 1.285 (1.263)	Prec@1 62.0 (64.18604278564453)
+
+Test-(23): [400/600]	Time 0.122 (0.139)	Loss 1.245 (1.263)	Prec@1 66.0 (64.16957092285156)
+
+Test-(23): [500/600]	Time 0.152 (0.139)	Loss 1.285 (1.264)	Prec@1 62.0 (64.11975860595703)
+ * Prec@1 64.033 Best_prec1 0.000Test accuracy= 64.03333282470703 h= 0.7131599187850952
+===================================== Round 1 =====================================
+Testset: 600-------------1
+Test-(23): [100/600]	Time 0.118 (0.138)	Loss 1.185 (1.261)	Prec@1 72.0 (64.33663177490234)
+
+Test-(23): [200/600]	Time 0.177 (0.133)	Loss 1.405 (1.254)	Prec@1 50.0 (65.07463073730469)
+
+Test-(23): [300/600]	Time 0.143 (0.132)	Loss 1.365 (1.257)	Prec@1 54.0 (64.78404998779297)
+
+Test-(23): [400/600]	Time 0.123 (0.130)	Loss 1.225 (1.262)	Prec@1 68.0 (64.28428649902344)
+
+Test-(23): [500/600]	Time 0.105 (0.130)	Loss 1.245 (1.266)	Prec@1 66.0 (63.85628890991211)
+ * Prec@1 63.980 Best_prec1 64.033Test accuracy= 63.97999954223633 h= 0.7308217883110046
+===================================== Round 2 =====================================
+Testset: 600-------------2
+Test-(23): [100/600]	Time 0.107 (0.137)	Loss 1.185 (1.273)	Prec@1 72.0 (63.22772216796875)
+
+Test-(23): [200/600]	Time 0.122 (0.133)	Loss 1.065 (1.271)	Prec@1 84.0 (63.353233337402344)
+
+Test-(23): [300/600]	Time 0.143 (0.131)	Loss 1.425 (1.269)	Prec@1 48.0 (63.588035583496094)
+
+Test-(23): [400/600]	Time 0.156 (0.129)	Loss 1.205 (1.267)	Prec@1 70.0 (63.81047058105469)
+
+Test-(23): [500/600]	Time 0.108 (0.130)	Loss 1.305 (1.264)	Prec@1 60.0 (64.1077880859375)
+ * Prec@1 64.090 Best_prec1 64.033Test accuracy= 64.08999633789062 h= 0.7727298736572266
+===================================== Round 3 =====================================
+Testset: 600-------------3
+Test-(23): [100/600]	Time 0.126 (0.142)	Loss 1.145 (1.276)	Prec@1 76.0 (62.89108657836914)
+
+Test-(23): [200/600]	Time 0.135 (0.135)	Loss 1.245 (1.267)	Prec@1 66.0 (63.830848693847656)
+
+Test-(23): [300/600]	Time 0.134 (0.137)	Loss 1.305 (1.268)	Prec@1 60.0 (63.707637786865234)
+
+Test-(23): [400/600]	Time 0.123 (0.135)	Loss 1.245 (1.266)	Prec@1 66.0 (63.860347747802734)
+
+Test-(23): [500/600]	Time 0.109 (0.133)	Loss 1.305 (1.265)	Prec@1 60.0 (63.94810485839844)
+ * Prec@1 64.167 Best_prec1 64.090Test accuracy= 64.16666412353516 h= 0.6723872423171997
+===================================== Round 4 =====================================
+Testset: 600-------------4
+Test-(23): [100/600]	Time 0.113 (0.139)	Loss 1.185 (1.276)	Prec@1 72.0 (62.87128448486328)
+
+Test-(23): [200/600]	Time 0.139 (0.134)	Loss 1.205 (1.266)	Prec@1 70.0 (63.840797424316406)
+
+Test-(23): [300/600]	Time 0.116 (0.131)	Loss 1.225 (1.263)	Prec@1 68.0 (64.15282440185547)
+
+Test-(23): [400/600]	Time 0.139 (0.131)	Loss 1.265 (1.266)	Prec@1 64.0 (63.895259857177734)
+
+Test-(23): [500/600]	Time 0.138 (0.131)	Loss 1.445 (1.266)	Prec@1 46.0 (63.8403205871582)
+ * Prec@1 63.860 Best_prec1 64.167Test accuracy= 63.86000061035156 h= 0.6846365332603455
+
+Aver_accuracy= 64.0260009765625 Aver_h= 0.7147470712661743
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='../results/models/dn4__miniImageNet_epoch_23.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn4__miniImageNet_epoch_23.pth.tar' (epoch 23)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+Trainset: 10000
+Valset: 800
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='../results/models/dn4__miniImageNet_epoch_23.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn4__miniImageNet_epoch_23.pth.tar' (epoch 23)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+Trainset: 10000
+Valset: 800
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(23): [100/600]	Time 0.126 (0.138)	Loss 1.145 (1.268)	Prec@1 76.0 (63.70296859741211)
+
+Test-(23): [200/600]	Time 0.132 (0.135)	Loss 1.245 (1.273)	Prec@1 66.0 (63.13433074951172)
+
+Test-(23): [300/600]	Time 0.114 (0.133)	Loss 1.225 (1.270)	Prec@1 68.0 (63.49501419067383)
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/miniImageNet', data_name='test', mode='test', resume='../results/models/dn4__miniImageNet_epoch_23.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn4__miniImageNet_epoch_23.pth.tar' (epoch 23)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+Trainset: 10000
+Valset: 800
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(23): [100/600]	Time 0.136 (0.157)	Loss 1.225 (1.261)	Prec@1 68.0 (64.35643768310547)
+
+Test-(23): [200/600]	Time 0.155 (0.153)	Loss 1.305 (1.268)	Prec@1 60.0 (63.72139358520508)
+
+Test-(23): [300/600]	Time 0.138 (0.151)	Loss 1.165 (1.268)	Prec@1 74.0 (63.674415588378906)
+
+Test-(23): [400/600]	Time 0.158 (0.150)	Loss 1.245 (1.273)	Prec@1 66.0 (63.20698165893555)
+
+Test-(23): [500/600]	Time 0.147 (0.149)	Loss 1.145 (1.271)	Prec@1 76.0 (63.353294372558594)
+ * Prec@1 63.337 Best_prec1 0.000Test accuracy= 63.336666107177734 h= 0.7185916900634766
+===================================== Round 1 =====================================
+Testset: 600-------------1
+Test-(23): [100/600]	Time 0.143 (0.157)	Loss 1.365 (1.284)	Prec@1 54.0 (62.118812561035156)
+
+Test-(23): [200/600]	Time 0.141 (0.152)	Loss 1.265 (1.269)	Prec@1 64.0 (63.60198974609375)
+
+Test-(23): [300/600]	Time 0.140 (0.150)	Loss 1.365 (1.268)	Prec@1 54.0 (63.687705993652344)
+
+Test-(23): [400/600]	Time 0.143 (0.150)	Loss 1.225 (1.267)	Prec@1 68.0 (63.8204460144043)
+
+Test-(23): [500/600]	Time 0.143 (0.150)	Loss 1.405 (1.265)	Prec@1 50.0 (63.96806335449219)
+ * Prec@1 64.017 Best_prec1 63.337Test accuracy= 64.01667022705078 h= 0.7376336455345154
+===================================== Round 2 =====================================
+Testset: 600-------------2
+Test-(23): [100/600]	Time 0.138 (0.156)	Loss 1.285 (1.274)	Prec@1 62.0 (63.108909606933594)
+
+Test-(23): [200/600]	Time 0.194 (0.152)	Loss 1.245 (1.269)	Prec@1 66.0 (63.58209228515625)
+
+Test-(23): [300/600]	Time 0.138 (0.152)	Loss 1.245 (1.265)	Prec@1 66.0 (64.00664520263672)
+
+Test-(23): [400/600]	Time 0.157 (0.151)	Loss 1.405 (1.267)	Prec@1 50.0 (63.745635986328125)
+
+Test-(23): [500/600]	Time 0.138 (0.149)	Loss 1.345 (1.267)	Prec@1 56.0 (63.792415618896484)
+ * Prec@1 63.920 Best_prec1 64.017Test accuracy= 63.91999816894531 h= 0.6985398530960083
+===================================== Round 3 =====================================
+Testset: 600-------------3
+Test-(23): [100/600]	Time 0.131 (0.159)	Loss 1.185 (1.262)	Prec@1 72.0 (64.23762512207031)
+
+Test-(23): [200/600]	Time 0.154 (0.154)	Loss 1.325 (1.266)	Prec@1 58.0 (63.93035125732422)
+
+Test-(23): [300/600]	Time 0.140 (0.154)	Loss 1.125 (1.269)	Prec@1 78.0 (63.59468078613281)
+
+Test-(23): [400/600]	Time 0.195 (0.153)	Loss 1.225 (1.269)	Prec@1 68.0 (63.59600830078125)
+
+Test-(23): [500/600]	Time 0.158 (0.153)	Loss 1.385 (1.270)	Prec@1 52.0 (63.46906280517578)
+ * Prec@1 63.417 Best_prec1 64.017Test accuracy= 63.41666793823242 h= 0.744555652141571
+===================================== Round 4 =====================================
+Testset: 600-------------4
+Test-(23): [100/600]	Time 0.161 (0.168)	Loss 1.125 (1.275)	Prec@1 78.0 (62.95049285888672)
+
+Test-(23): [200/600]	Time 0.142 (0.159)	Loss 1.145 (1.266)	Prec@1 76.0 (63.93035125732422)
+
+Test-(23): [300/600]	Time 0.198 (0.155)	Loss 1.285 (1.266)	Prec@1 62.0 (63.8604621887207)
+
+Test-(23): [400/600]	Time 0.135 (0.153)	Loss 1.345 (1.269)	Prec@1 56.0 (63.54114532470703)
+
+Test-(23): [500/600]	Time 0.140 (0.152)	Loss 1.225 (1.271)	Prec@1 68.0 (63.41716766357422)
+ * Prec@1 63.350 Best_prec1 64.017Test accuracy= 63.349998474121094 h= 0.7342115640640259
+
+Aver_accuracy= 63.608001708984375 Aver_h= 0.7267064809799194

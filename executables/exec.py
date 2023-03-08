@@ -58,8 +58,12 @@ python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_d
 
 
 class Exec:
-    out_bank = np.empty(shape=(0, 5))
+
     target_bank = np.empty(shape=0)
+
+    def __init__(self):
+        self.out_bank = None
+        self.k = None
 
     def mean_confidence_interval(self, data, confidence=0.95):
         a = [1.0 * np.array(data[i].cpu()) for i in range(len(data))]
@@ -252,7 +256,6 @@ class Exec:
             prec1, _ = self.validate(loaders.test_loader, model, best_prec1, F_txt)
             # record the best prec@1 and save checkpoint
             model.best_prec1 = max(prec1, best_prec1)
-            # model.get_DEngine().plot_self()
         F_txt.close()
 
         print('Training and evaluation completed')
@@ -285,10 +288,13 @@ class Exec:
         # Print & log the model architecture
         print(model)
         print(model, file=txt_file)
+        self.k = model.k_neighbors
+        self.out_bank = np.empty(shape=(0, model.num_classes))
 
         if opt.mode == "test":
             if opt.dengine:
-                model.enable_decision_engine(refit=opt.refit_dengine)
+                loaders = model.data_loader.load_data(opt.mode, opt.dataset_dir, txt_file)
+                model.enable_decision_engine(train_set=loaders.train_loader, refit=opt.refit_dengine)
             self.test(model, F_txt=txt_file)
         else:
             self.train(model, F_txt=txt_file)

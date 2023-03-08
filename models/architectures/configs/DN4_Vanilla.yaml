@@ -1,7 +1,8 @@
 # Main params
-NUM_CLASSES: 5
+NAME: DN4_Vanilla
 K_NEIGHBORS: 3
 USE_BIAS: True
+DATASET: miniImageNet
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
@@ -29,6 +30,7 @@ DE:
   CUDA: True
   MODEL_NAME: __ignore__
   OPTIMIZE: True
+  OPTIMIZATION_ROUNDS: 150
   DATASET:
   EPISODE_TRAIN_NUM: 9000
   PARAMETERS: { tree_method: gpu_hist,
