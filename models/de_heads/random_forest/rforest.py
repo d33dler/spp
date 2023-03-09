@@ -38,6 +38,7 @@ class RandomForestHead(DTree):
             'learning_rate': hp.quniform('learning_rate', 0.01, 0.1, 0.01),
             'max_depth': scope.int(hp.quniform('max_depth', 3, 11, 1)),
             'num_parallel_tree': scope.int(hp.quniform('num_parallel_tree', 30, 130, 5)),
+            'num_boost_round': 1,
             'min_child_weight': hp.quniform('min_child_weight', 0.1, 5, 0.5),
             'subsample': hp.uniform('subsample', 0.5, 0.9),
             'gamma': hp.quniform('gamma', 0.1, 15, 1),
@@ -49,7 +50,6 @@ class RandomForestHead(DTree):
             'seed': 123,
         }
         [self.search_space.update({k: v}) for k, v in self.params.items() if k not in self.search_space.keys()]
-
 
     @staticmethod
     def get_config():

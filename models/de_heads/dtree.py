@@ -1,26 +1,23 @@
 import time
 from abc import ABC
-from typing import Sequence, Tuple, Any, List, Dict
+from typing import Sequence, Tuple, Any, List
 
 import mlflow
 import numpy as np
 import pandas as pd
+import xgboost as xgb
 from easydict import EasyDict
-from hyperopt import hp, STATUS_OK, fmin, tpe
-from hyperopt.pyll import scope
-from scipy.special import softmax
+from hyperopt import STATUS_OK, fmin, tpe
 from pandas import DataFrame
+from scipy.special import softmax
+from skimage.color import rgb2hsv
 from sklearn.metrics import log_loss
 from sklearn.model_selection import train_test_split
-from torch import nn
-
-import xgboost as xgb
+from sklearn.preprocessing import StandardScaler
 from xgboost import DMatrix
 
 from models.de_heads.dengine import DecisionEngine
-from models.interfaces.arch_module import ARCH
-from models.utilities.utils import DataHolder
-from sklearn.preprocessing import OneHotEncoder
+
 
 class DTree(DecisionEngine, ABC):
     """
@@ -41,8 +38,9 @@ class DTree(DecisionEngine, ABC):
         self.optimizer = None
         self.ranks = None
         self.num_classes = None
-        self._one_hot_encoder = OneHotEncoder()
+        self._scaler = StandardScaler()
         self._cols = []
+        self.bins = 8
         if config.TYPE == "CLASSIFIER":
             self.num_classes = config.PARAMETERS["num_class"]
             self.ranks = self.num_classes
@@ -97,7 +95,7 @@ class DTree(DecisionEngine, ABC):
         return best_params
 
     def _create_input(self, matrix: np.ndarray):
-        return pd.DataFrame(matrix, columns=self.features[self.BASE_FT] + self.features[self.MISC_FT])
+        return pd.DataFrame(matrix, columns=self.features[self.BASE_FT])
 
     def load(self, state: dict):
         if isinstance(state, bytearray):
@@ -160,21 +158,42 @@ class DTree(DecisionEngine, ABC):
         self.features[self.ALL_FT] = [f for f in x.columns if f not in y.columns]
         return self._fit_model(x, y, eval_set, **kwargs)
 
-    def feature_engineering(self, matrix: np.ndarray, **kwargs):
+    def feature_engineering(self, matrix: np.ndarray, _input, **kwargs):
 
         tree_df: pd.DataFrame = self._create_input(matrix)
 
-        # tree_df['min'] = tree_df.iloc[:, base_features_ix].min(axis=1)
         base_ft = self.features[self.BASE_FT]
         rank_ft = self.features[self.RANK_FT]
+        misc_ft = self.features[self.MISC_FT]
         cls_vals = tree_df[base_ft].to_numpy()
         rank_indices = np.argsort(-cls_vals, axis=1)
         tree_df[rank_ft] = rank_indices
-        tree_df[base_ft[1:]] = np.diff(np.take_along_axis(cls_vals, rank_indices, axis=1), axis=1)
-        tree_df[base_ft[0]] = 0
 
         tree_df['max'] = tree_df[base_ft].max(axis=1)
         tree_df['mean'] = tree_df[base_ft].mean(axis=1)
         tree_df['std'] = tree_df[base_ft].std(axis=1)
+
         tree_df[rank_ft]=tree_df[rank_ft].astype('int')
+        # assume image_tensor is a torch tensor of shape [50, 3, 100, 100]
+        batch_size, num_channels, height, width = _input.shape
+        # reshape the tensor to [50, 3, 10000] to simplify computation
+        image_tensor_reshaped = _input.view(batch_size, num_channels, height * width)
+        # convert the tensor to numpy array
+        image_array = image_tensor_reshaped.numpy()
+        # convert from channel-first to channel-last format
+        image_array = np.transpose(image_array, (0, 2, 1))
+        # convert the images from RGB to HSV color space
+        image_array = rgb2hsv(image_array)
+        # extract color histogram features for each image
+        histograms = []
+        bins = self.bins
+        for i in range(batch_size):
+            hist_r, _ = np.histogram(image_array[i, :, 0], bins=bins, range=(0, 1))
+            hist_g, _ = np.histogram(image_array[i, :, 1], bins=bins, range=(0, 1))
+            hist_b, _ = np.histogram(image_array[i, :, 2], bins=bins, range=(0, 1))
+            histograms.append(np.concatenate([hist_r, hist_g, hist_b]))
+
+        # scale the features
+        histograms = np.asarray(self._scaler.fit_transform(histograms))
+        tree_df = pd.concat([tree_df, pd.DataFrame(histograms, columns=misc_ft)], axis=1)
         return tree_df

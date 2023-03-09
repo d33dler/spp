@@ -77,6 +77,7 @@ class DataHolder(DataHolderBase):
     # Classification
     num_classes: int
     # Input
+    q_in_CPU: Tensor
     q_in: Tensor
     S_in: List[Tensor]
     targets: Tensor

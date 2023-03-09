@@ -101,7 +101,7 @@ class Exec:
             target = torch.cat(query_targets, 0)
 
             target = target.cuda()
-
+            model.data.q_in_CPU = query_images
             model.data.q_in, model.data.S_in = input_var1, input_var2
 
             out = model.forward()

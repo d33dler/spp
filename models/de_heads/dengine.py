@@ -54,7 +54,7 @@ class DecisionEngine(ARCH.Child):
     def _create_input(self, matrix: np.ndarray):
         raise NotImplementedError
 
-    def feature_engineering(self, matrix: np.ndarray):
+    def feature_engineering(self, matrix: np.ndarray, input, **kwargs):
         raise NotImplementedError
 
     @enabled.setter

@@ -33,9 +33,8 @@ class DN_X(DEModel):
         self.BACKBONE.forward()
         d_engine: DecisionEngine = self.DE
         if d_engine and d_engine.enabled:
-            _input = d_engine.normalize(self.data.sim_list.detach().cpu().numpy())
-            self.data.X = d_engine.feature_engineering(
-                np.concatenate([_input, self.data.DLD_topk.detach().cpu().numpy()], axis=1))
+            sim_ls = d_engine.normalize(self.data.sim_list.detach().cpu().numpy())
+            self.data.X = d_engine.feature_engineering(sim_ls, self.data.q_in_CPU)
             self.data.sim_list = one_hot(torch.from_numpy(d_engine.forward(self.data.X).astype(np.int64)),
                                          self.num_classes).float().cuda()
         return self.data.sim_list
@@ -75,6 +74,7 @@ class DN_X(DEModel):
             target = torch.cat(query_targets, 0)
             target = target.cuda()
             self.data.targets = target
+            self.data.q_in_CPU = query_images
             self.data.q_in = input_var1
             self.data.S_in = input_var2
 

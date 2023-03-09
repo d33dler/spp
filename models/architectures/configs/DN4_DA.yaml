@@ -23,16 +23,16 @@ BACKBONE:
   FREEZE_EPOCH: 1
 
 DE:
-  NAME: XGB # XGB | RandomForest
+  NAME: RandomForest # XGB | RandomForest
   ENGINE: TREE
   MODE: TRAIN
   GRAD: False
   CUDA: True
   MODEL_NAME: __ignore__
   OPTIMIZE: True
-  OPTIMIZATION_ROUNDS: 100
-  DATASET: miniImageNet_DN4_DA_W5_S1K_1_2023_03_08_14_29_29_V2.csv
-  EPISODE_TRAIN_NUM: 4000
+  OPTIMIZATION_ROUNDS: 10
+  DATASET:
+  EPISODE_TRAIN_NUM: 100
   PARAMETERS: { tree_method: gpu_hist,
                 num_class: 5,
                 objective: 'multi:softmax',

@@ -2,12 +2,14 @@ import os
 from collections import OrderedDict
 from datetime import datetime
 from typing import Iterator, List, Dict
-
+from skimage.color import rgb2hsv
 import numpy as np
 import pandas as pd
 import torch
 from pandas import DataFrame
+from pandas.io.formats.style import color
 from sklearn.decomposition import KernelPCA, PCA
+from sklearn.preprocessing import StandardScaler
 from torch import nn, Tensor
 from torch.nn import Parameter
 from torch.utils.data import DataLoader as TorchDataLoader
@@ -159,32 +161,39 @@ class DEModel(ARCH):
         :return: None
         """
         # create empty dataframe
+
         batch_sz = self.data_loader.params.batch_sz
         dt: DTree = self.DE
-        X_len = self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz
-        ft_engine = ['max', 'mean', 'std']
-        dist_diffs = [f"diff_{i}" for i in range(0, self.num_classes)]
+        bins = dt.bins
         ranks_len = dt.ranks
+        X_len = self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz
+
+        cos_sim = [f"cls_{i}" for i in range(0, self.num_classes)]
+        col_hist = [f'bin_{i}' for i in range(bins * 3)]
         ranks = [f"rank_{i}" for i in range(0, ranks_len)]
-        sim_topK = [f"DLD_sim_{i}" for i in range(0, self.num_classes * self.k_neighbors)]
-        all_columns = dist_diffs + ranks + ft_engine + sim_topK
+        agg = ['max', 'mean', 'std']
+
+        all_columns = cos_sim + col_hist + ranks + agg
         col_len = len(all_columns)
         # Add column IDs for the DE (required by DE for creating the inputs in inference step)
         dt.features[dt.ALL_FT] = all_columns
-        dt.features[dt.BASE_FT] = dist_diffs
-        dt.features[dt.MISC_FT] = sim_topK
+        dt.features[dt.BASE_FT] = cos_sim
+        dt.features[dt.MISC_FT] = col_hist
         dt.features[dt.RANK_FT] = ranks
+
+        scaler = StandardScaler()
+
         if self.root_cfg.DE.DATASET is None:
             tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
-            tree_df["y"] = pd.Series(np.zeros(shape=X_len), dtype=int)
-            ix = 0
+            tree_df["y"] = 0
+            tree_df["y"] = tree_df["y"].astype(int)
 
             print("--- Beginning training dataset creation for DE ---")
             print(tree_df.info(verbose=True))
             print("TRAIN SET SIZE: ", len(train_set))
-            self.eval()
-            dist_diffsix = tree_df.columns.get_indexer(dist_diffs)
-            DLD_topK = tree_df.columns.get_indexer(sim_topK)
+
+            cls = tree_df.columns.get_indexer(cos_sim)
+            histix = tree_df.columns.get_indexer(col_hist)
             ranks_ix = tree_df.columns.get_indexer(ranks)
             max_ix = tree_df.columns.get_loc('max')
             std_ix = tree_df.columns.get_loc('std')
@@ -193,6 +202,9 @@ class DEModel(ARCH):
             y_col_ix = tree_df.columns.get_indexer(["y"])
             out_bank = np.empty(shape=(0, self.num_classes))
             target_bank = np.empty(shape=0, dtype=int)
+
+            ix = 0
+            self.eval()
             with torch.no_grad():
                 for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                         train_set):
@@ -220,21 +232,42 @@ class DEModel(ARCH):
                     out_bank = np.concatenate([out_bank, out], axis=0)
                     target_bank = np.concatenate([target_bank, target], axis=0)
                     # add measurements and target value to dataframe
+
                     out_rows = out.shape[0]
                     rank_indices = np.argsort(-out, axis=1)
-                    tree_df.iloc[ix:ix + out_rows, dist_diffsix[1:]] = np.diff(
-                        np.take_along_axis(out, rank_indices, axis=1), axis=1)
+
+                    tree_df.iloc[ix:ix + out_rows, cls] = out
                     tree_df.iloc[ix:ix + out_rows, y_col_ix] = target
+
                     tree_df.iloc[ix:ix + out_rows, max_ix] = out.max(axis=1)
                     tree_df.iloc[ix:ix + out_rows, mean_ix] = out.mean(axis=1)
                     tree_df.iloc[ix:ix + out_rows, std_ix] = out.std(axis=1)
 
                     tree_df.iloc[ix:ix + out_rows, ranks_ix] = rank_indices
 
-                    tree_df.iloc[ix:ix + out_rows, DLD_topK] = self.data.DLD_topk
+                    # assume image_tensor is a torch tensor of shape [50, 3, 100, 100]
+                    batch_size, num_channels, height, width = query_images.shape
+                    # reshape the tensor to [50, 3, 10000] to simplify computation
+                    image_tensor_reshaped = query_images.view(batch_size, num_channels, height * width)
+                    # convert the tensor to numpy array
+                    image_array = image_tensor_reshaped.numpy()
+                    # convert from channel-first to channel-last format
+                    image_array = np.transpose(image_array, (0, 2, 1))
+                    # convert the images from RGB to HSV color space
+                    image_array = rgb2hsv(image_array)
+                    # extract color histogram features for each image
+                    histograms = []
+                    for i in range(batch_size):
+                        hist_r, _ = np.histogram(image_array[i, :, 0], bins=bins, range=(0, 1))
+                        hist_g, _ = np.histogram(image_array[i, :, 1], bins=bins, range=(0, 1))
+                        hist_b, _ = np.histogram(image_array[i, :, 2], bins=bins, range=(0, 1))
+                        histograms.append(np.concatenate([hist_r, hist_g, hist_b]))
 
+                    # scale the features
+                    histograms = scaler.fit_transform(histograms)
+                    # convert the list of histograms to a pandas DataFrame
+                    tree_df.iloc[ix:ix + out_rows, histix] = histograms
                     ix += out_rows
-
                     if episode_index == self.root_cfg.DE.EPISODE_TRAIN_NUM - 1:
                         break
                 print("STD:", out_bank.std(axis=1).mean())
