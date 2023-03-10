@@ -45,10 +45,11 @@ class DTree(DecisionEngine, ABC):
             self.num_classes = config.PARAMETERS["num_class"]
             self.ranks = self.num_classes
 
-    def optimize(self, train_X: pd.DataFrame, train_Y: pd.DataFrame):
+    def optimize(self, train_X: pd.DataFrame, train_Y: pd.DataFrame, eval_set: Tuple[Any, Any]):
         """
         Hyperparameter finetuning using hyperopt for ensemble tree (gradient boosting) algorithms
         Uses mlflow for logging & tracking progress & performance.
+        :param eval_set:
         :param train_X:
         :type train_X:
         :param train_Y:
@@ -56,9 +57,10 @@ class DTree(DecisionEngine, ABC):
         :return:
         :rtype:
         """
-        X_train, X_test, y_train, y_test = train_test_split(train_X, train_Y, test_size=0.3, shuffle=True)
-        y_test = y_test.astype(float)
-        y_train = y_train.astype(float)
+        X_train, _, y_train, _ = train_test_split(train_X, train_Y, test_size=0.3, shuffle=True)
+        X_test, y_test = eval_set
+        y_test = y_test.astype(int)
+        y_train = y_train.astype(int)
         train = xgb.DMatrix(data=X_train, label=y_train, enable_categorical=True)
         test = xgb.DMatrix(data=X_test, label=y_test, enable_categorical=True)
         labels = np.unique(y_test)
@@ -79,11 +81,12 @@ class DTree(DecisionEngine, ABC):
             loss = log_loss(y_test, predictions_test, labels=labels)
 
             return {'status': STATUS_OK, 'loss': loss, 'booster': booster.attributes()}
-
+        p = self.search_space.copy()
+        p.pop('num_boost_round')
         with mlflow.start_run(run_name='xgb_loss_threshold'):
             best_params = fmin(
                 fn=train_model,
-                space=self.search_space,
+                space=p,
                 algo=tpe.suggest,
                 loss_threshold=self._optim_threshold,
                 max_evals=self._optim_cycles,
@@ -102,7 +105,7 @@ class DTree(DecisionEngine, ABC):
             return
         self._init_model(state['type'], **self.params)
         self.model.load_model(state['model'])
-        self.params = state['hp']
+        self.params.update(state['hp'])
         self.features = state['features']
         self.is_fit = True
 
@@ -143,8 +146,13 @@ class DTree(DecisionEngine, ABC):
         if eval_set is None:
             _, eval_x, _, eval_y = train_test_split(x, y, test_size=0.3, shuffle=True)
             eval_set = [(xgb.DMatrix(data=eval_x, label=eval_y, enable_categorical=True), 'test')]
-        self.model = xgb.train(params=self.params, dtrain=DMatrix(data=x, label=y,enable_categorical=True), evals=eval_set,
-                               num_boost_round=self.params['num_boost_round'],early_stopping_rounds=10, **kwargs)
+        else:
+            eval_set = [(xgb.DMatrix(data=eval_x, label=eval_y, enable_categorical=True), 'test') for eval_x, eval_y in
+                        eval_set]
+        self.model = xgb.train(params=self.params, dtrain=DMatrix(data=x, label=y, enable_categorical=True),
+                               evals=eval_set,
+                               num_boost_round=self.params.get('num_boost_round', 100), early_stopping_rounds=10,
+                               **kwargs)
 
         [print(f">{o[0]} : {o[1]}") for o in
          sorted(self.model.get_score(importance_type='gain').items(), key=lambda q: q[1], reverse=True)]
@@ -153,7 +161,7 @@ class DTree(DecisionEngine, ABC):
     def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
         self.is_fit = True
         if self.fine_tuning:
-            self.params.update(self.optimize(x, y))
+            self.params.update(self.optimize(x, y, eval_set[0]))
             print(">BEST PARAMETERS:", self.params)
         self.features[self.ALL_FT] = [f for f in x.columns if f not in y.columns]
         return self._fit_model(x, y, eval_set, **kwargs)
@@ -173,7 +181,7 @@ class DTree(DecisionEngine, ABC):
         tree_df['mean'] = tree_df[base_ft].mean(axis=1)
         tree_df['std'] = tree_df[base_ft].std(axis=1)
 
-        tree_df[rank_ft]=tree_df[rank_ft].astype('int')
+        tree_df[rank_ft] = tree_df[rank_ft].astype('int')
         # assume image_tensor is a torch tensor of shape [50, 3, 100, 100]
         batch_size, num_channels, height, width = _input.shape
         # reshape the tensor to [50, 3, 10000] to simplify computation

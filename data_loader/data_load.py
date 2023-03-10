@@ -33,9 +33,9 @@ class Parameters:
 
 @dataclasses.dataclass
 class Loaders:
-    train_loader: DataLoader
-    val_loader: DataLoader
-    test_loader: DataLoader
+    train_loader: CSVLoader
+    val_loader: CSVLoader
+    test_loader: CSVLoader
 
 
 class DatasetLoader:
@@ -83,7 +83,7 @@ class DatasetLoader:
         ImgTransform = transforms.Compose(transform_ls)
         self.transforms_ls = transform_ls
         trainset = CSVLoader(
-            data_dir=dataset_dir, mode=mode, image_size=img_sz, transform=ImgTransform,
+            data_dir=dataset_dir, mode='train', image_size=img_sz, transform=ImgTransform,
             episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num
         )
         valset = CSVLoader(

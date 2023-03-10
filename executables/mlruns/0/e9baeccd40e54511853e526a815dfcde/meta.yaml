@@ -1,0 +1,15 @@
+artifact_uri: file:///home/radubereja/Desktop/spp/executables/mlruns/0/e9baeccd40e54511853e526a815dfcde/artifacts
+end_time: 1678407227567
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: e9baeccd40e54511853e526a815dfcde
+run_name: xgb_loss_threshold
+run_uuid: e9baeccd40e54511853e526a815dfcde
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1678406607313
+status: 3
+tags: []
+user_id: radubereja

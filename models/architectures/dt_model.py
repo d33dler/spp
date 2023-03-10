@@ -15,6 +15,7 @@ from torch.nn import Parameter
 from torch.utils.data import DataLoader as TorchDataLoader
 
 from data_loader.data_load import Parameters, DatasetLoader
+from dataset.datasets_csv import CSVLoader
 from models import backbones, clustering, de_heads, necks
 from models.de_heads.dengine import DecisionEngine
 from models.de_heads.dtree import DTree
@@ -119,7 +120,7 @@ class DEModel(ARCH):
         if 'DE' in checkpoint and 'DE' in self.root_cfg:
             self.DE.load(checkpoint['DE'])
 
-    def enable_decision_engine(self, train_set: TorchDataLoader = None, refit=False, filename=None):
+    def enable_decision_engine(self, refit=False, filename=None):
         """
         Enables the DE for inference calls (otherwise DE is not used).
 
@@ -137,77 +138,56 @@ class DEModel(ARCH):
             raise ValueError(f"Wrong class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
                              f"got: : {type(dengine)}")
         if not dengine.is_fit or refit:
-            self._fit_DE(train_set)
+            self._fit_DE()
             self.save_model(filename)
         dengine.enabled = True
 
-    def _fit_DE(self, train_set):
+    def _fit_DE(self):
         """
         Identify DE type and run the appropriate fitting function
-        :param train_set:
-        :type train_set:
         :return:
         :rtype:
         """
         if self.root_cfg.DE.ENGINE == "TREE":
-            self._fit_tree_episodes(train_set)
+            self._fit_tree_episodes()
         else:
             raise ValueError(f"Decision Engine type not supported from choices [TREE] , got: {self.root_cfg.DE.ENGINE}")
 
-    def _fit_tree_episodes(self, train_set: TorchDataLoader):  # TODO move to DTree?
-        """
-        Create the inference dataset containing the feature set F_T for the DE and fit the DE.
-        :param train_set: data loader hosting same data used for training the model
-        :return: None
-        """
-        # create empty dataframe
-
-        batch_sz = self.data_loader.params.batch_sz
-        dt: DTree = self.DE
+    def _create_df(self, dataset, length):
+        dt = self.DE
         bins = dt.bins
-        ranks_len = dt.ranks
-        X_len = self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz
-
-        cos_sim = [f"cls_{i}" for i in range(0, self.num_classes)]
-        col_hist = [f'bin_{i}' for i in range(bins * 3)]
-        ranks = [f"rank_{i}" for i in range(0, ranks_len)]
-        agg = ['max', 'mean', 'std']
-
-        all_columns = cos_sim + col_hist + ranks + agg
-        col_len = len(all_columns)
-        # Add column IDs for the DE (required by DE for creating the inputs in inference step)
-        dt.features[dt.ALL_FT] = all_columns
-        dt.features[dt.BASE_FT] = cos_sim
-        dt.features[dt.MISC_FT] = col_hist
-        dt.features[dt.RANK_FT] = ranks
+        # to copilot: rewrite this the other way around
+        all_columns = dt.features[dt.ALL_FT]
+        cos_sim = dt.features[dt.BASE_FT]
+        col_hist = dt.features[dt.MISC_FT]
+        ranks = dt.features[dt.RANK_FT]
 
         scaler = StandardScaler()
+        tree_df = DataFrame(np.zeros(shape=(length, len(all_columns)), dtype=float), columns=all_columns)
+        tree_df["y"] = 0
+        tree_df["y"] = tree_df["y"].astype(int)
 
-        if self.root_cfg.DE.DATASET is None:
-            tree_df = DataFrame(np.zeros(shape=(X_len, col_len), dtype=float), columns=all_columns)
-            tree_df["y"] = 0
-            tree_df["y"] = tree_df["y"].astype(int)
+        print("--- Beginning training dataset creation for DE ---")
+        print(tree_df.info(verbose=True))
+        print("TRAIN SET SIZE: ", len(dataset))
 
-            print("--- Beginning training dataset creation for DE ---")
-            print(tree_df.info(verbose=True))
-            print("TRAIN SET SIZE: ", len(train_set))
+        cls = tree_df.columns.get_indexer(cos_sim)
+        histix = tree_df.columns.get_indexer(col_hist)
+        ranks_ix = tree_df.columns.get_indexer(ranks)
+        max_ix = tree_df.columns.get_loc('max')
+        std_ix = tree_df.columns.get_loc('std')
+        mean_ix = tree_df.columns.get_loc('mean')
 
-            cls = tree_df.columns.get_indexer(cos_sim)
-            histix = tree_df.columns.get_indexer(col_hist)
-            ranks_ix = tree_df.columns.get_indexer(ranks)
-            max_ix = tree_df.columns.get_loc('max')
-            std_ix = tree_df.columns.get_loc('std')
-            mean_ix = tree_df.columns.get_loc('mean')
+        y_col_ix = tree_df.columns.get_indexer(["y"])
+        out_bank = np.empty(shape=(0, self.num_classes))
+        target_bank = np.empty(shape=0, dtype=int)
 
-            y_col_ix = tree_df.columns.get_indexer(["y"])
-            out_bank = np.empty(shape=(0, self.num_classes))
-            target_bank = np.empty(shape=0, dtype=int)
-
-            ix = 0
-            self.eval()
+        ix = 0
+        self.eval()
+        try:
             with torch.no_grad():
                 for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
-                        train_set):
+                        dataset):
                     if episode_index % 100 == 0:
                         print("> Running episode: ", episode_index)
                     # Convert query and support images
@@ -268,13 +248,48 @@ class DEModel(ARCH):
                     # convert the list of histograms to a pandas DataFrame
                     tree_df.iloc[ix:ix + out_rows, histix] = histograms
                     ix += out_rows
-                    if episode_index == self.root_cfg.DE.EPISODE_TRAIN_NUM - 1:
+                    if ix == length:
                         break
-                print("STD:", out_bank.std(axis=1).mean())
+        except ValueError:
+            tree_df.to_csv(
+                f"{self.root_cfg.DATASET}_{self.root_cfg.NAME}_W{self.root_cfg.WAY_NUM}_"
+                f"S{self.root_cfg.SHOT_NUM}K_{self.k_neighbors}_"
+                f"{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_V2.csv",
+                index=False)
+            print("STD:", out_bank.std(axis=1).mean())
+        return tree_df
 
+    def _fit_tree_episodes(self):  # TODO move to DTree?
+        """
+        Create the inference dataset containing the feature set F_T for the DE and fit the DE.
+        :return: None
+        """
+        # create empty dataframe
 
+        batch_sz = self.data_loader.params.batch_sz
+        dt: DTree = self.DE
+        bins = dt.bins
+        ranks_len = dt.ranks
+
+        cos_sim = [f"cls_{i}" for i in range(0, self.num_classes)]
+        col_hist = [f'bin_{i}' for i in range(bins * 3)]
+        ranks = [f"rank_{i}" for i in range(0, ranks_len)]
+        agg = ['max', 'mean', 'std']
+
+        all_columns = cos_sim + col_hist + ranks + agg
+        # Add column IDs for the DE (required by DE for creating the inputs in inference step)
+        dt.features[dt.ALL_FT] = all_columns
+        dt.features[dt.BASE_FT] = cos_sim
+        dt.features[dt.MISC_FT] = col_hist
+        dt.features[dt.RANK_FT] = ranks
+
+        train_set = self.loaders.train_loader
+        val_set = self.loaders.val_loader
+        if self.root_cfg.DE.DATASET is None:
+            tree_df = self._create_df(dataset=train_set, length=self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz)
         else:
             tree_df = pd.read_csv(self.root_cfg.DE.DATASET, header=0)
+
         tree_df[ranks] = tree_df[ranks].astype('int')
         self.data.X = tree_df[all_columns]
         self.data.y = tree_df[['y']]
@@ -283,10 +298,12 @@ class DEModel(ARCH):
         print("Finished inference, fitting tree...")
         if self.root_cfg.DE.DATASET is None:
             tree_df.to_csv(
-                f"{self.root_cfg.DATASET}_{self.root_cfg.NAME}_W{self.root_cfg.WAY_NUM}_S{self.root_cfg.SHOT_NUM}K_{self.k_neighbors}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_V2.csv",
+                f"{self.root_cfg.DATASET}_{self.root_cfg.NAME}_W{self.root_cfg.WAY_NUM}_"
+                f"S{self.root_cfg.SHOT_NUM}K_{self.k_neighbors}_"
+                f"{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_V2.csv",
                 index=False)
-
-        dt.fit(self.data.X, self.data.y, self.data.eval_set)
+        val_df = self._create_df(dataset=val_set, length=600 * batch_sz)
+        dt.fit(self.data.X, self.data.y, [(val_df[all_columns], val_df["y"])])
 
     def get_DEngine(self) -> DecisionEngine:
         return self.DE

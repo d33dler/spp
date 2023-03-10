@@ -49,7 +49,6 @@ class RandomForestHead(DTree):
             'eta': 1,
             'seed': 123,
         }
-        [self.search_space.update({k: v}) for k, v in self.params.items() if k not in self.search_space.keys()]
 
     @staticmethod
     def get_config():

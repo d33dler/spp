@@ -42,7 +42,6 @@ class XGBHead(DTree):
             'seed': 123,
             'tree_method': self.params['tree_method'],
         }
-        [self.search_space.update({k: v}) for k, v in self.params.items() if k not in self.search_space.keys()]
         self._init_model(_type=self.config.TYPE, **self.params)
 
     @staticmethod

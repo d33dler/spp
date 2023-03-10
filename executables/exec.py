@@ -166,7 +166,7 @@ class Exec:
             ])
 
             testset = CSVLoader(
-                data_dir=opt.dataset_dir, mode=opt.mode, image_size=params.img_sz, transform=ImgTransform,
+                data_dir=opt.dataset_dir, mode='train', image_size=params.img_sz, transform=ImgTransform,
                 episode_num=params.episode_test_num, way_num=params.way_num, shot_num=params.shot_num,
                 query_num=params.query_num
             )
@@ -293,8 +293,8 @@ class Exec:
 
         if opt.mode == "test":
             if opt.dengine:
-                loaders = model.data_loader.load_data(opt.mode, opt.dataset_dir, txt_file)
-                model.enable_decision_engine(train_set=loaders.train_loader, refit=opt.refit_dengine)
+                model.load_data(opt.mode, txt_file, opt.dataset_dir)
+                model.enable_decision_engine(refit=opt.refit_dengine)
             self.test(model, F_txt=txt_file)
         else:
             self.train(model, F_txt=txt_file)

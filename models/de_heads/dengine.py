@@ -24,7 +24,7 @@ class DecisionEngine(ARCH.Child):
         self.model: Any = None
 
     @abstractmethod
-    def fit(self, x: DataFrame, y: DataFrame, eval_set: Sequence[Tuple[Any, Any]], **kwargs):
+    def fit(self, x: DataFrame, y: DataFrame, eval_set: Tuple[Any, Any], **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -36,7 +36,7 @@ class DecisionEngine(ARCH.Child):
         pass
 
     @abstractmethod
-    def optimize(self, train_X, train_Y):
+    def optimize(self, train_X, train_Y, eval_set):
         raise NotImplementedError
 
     @property

@@ -369,3 +369,322 @@ Test-(23): [500/600]	Time 0.140 (0.152)	Loss 1.225 (1.271)	Prec@1 68.0 (63.41716
  * Prec@1 63.350 Best_prec1 64.017Test accuracy= 63.349998474121094 h= 0.7342115640640259
 
 Aver_accuracy= 63.608001708984375 Aver_h= 0.7267064809799194
+Namespace(arch='DN_X', config='../models/architectures/configs/DN7_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='test', mode='test', resume='../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar' (epoch 27)
+DN_X(
+  (BACKBONE): SevenLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+      (14): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (15): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (16): LeakyReLU(negative_slope=0.2, inplace=True)
+      (17): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (18): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (19): LeakyReLU(negative_slope=0.2, inplace=True)
+      (20): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (21): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (22): LeakyReLU(negative_slope=0.2, inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+Trainset: 10000
+Valset: 600
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(27): [100/600]	Time 0.157 (0.163)	Loss 1.045 (1.246)	Prec@1 86.0 (65.92079162597656)
+Namespace(arch='DN_X', config='../models/architectures/configs/DN7_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='test', mode='test', resume='../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar' (epoch 27)
+DN_X(
+  (BACKBONE): SevenLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+      (14): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (15): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (16): LeakyReLU(negative_slope=0.2, inplace=True)
+      (17): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (18): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (19): LeakyReLU(negative_slope=0.2, inplace=True)
+      (20): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (21): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (22): LeakyReLU(negative_slope=0.2, inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+Trainset: 10000
+Valset: 600
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(27): [100/600]	Time 0.139 (0.159)	Loss 1.165 (1.244)	Prec@1 74.0 (66.07920837402344)
+
+Test-(27): [200/600]	Time 0.204 (0.158)	Loss 1.225 (1.240)	Prec@1 68.0 (66.43781280517578)
+
+Test-(27): [300/600]	Time 0.164 (0.159)	Loss 1.325 (1.242)	Prec@1 58.0 (66.24584197998047)
+Namespace(arch='DN_X', config='../models/architectures/configs/DN7_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='test', mode='test', resume='../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar' (epoch 27)
+DN_X(
+  (BACKBONE): SevenLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+      (14): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (15): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (16): LeakyReLU(negative_slope=0.2, inplace=True)
+      (17): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (18): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (19): LeakyReLU(negative_slope=0.2, inplace=True)
+      (20): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (21): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (22): LeakyReLU(negative_slope=0.2, inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): XGBHead()
+)
+Trainset: 10000
+Valset: 600
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(27): [100/600]	Time 0.134 (0.163)	Loss 1.105 (1.240)	Prec@1 80.0 (66.47525024414062)
+
+Test-(27): [200/600]	Time 0.163 (0.158)	Loss 1.245 (1.240)	Prec@1 66.0 (66.5273666381836)
+
+Test-(27): [300/600]	Time 0.146 (0.158)	Loss 1.165 (1.241)	Prec@1 74.0 (66.4186019897461)
+
+Test-(27): [400/600]	Time 0.159 (0.158)	Loss 1.185 (1.237)	Prec@1 72.0 (66.79301452636719)
+
+Test-(27): [500/600]	Time 0.164 (0.157)	Loss 1.265 (1.237)	Prec@1 64.0 (66.79840087890625)
+ * Prec@1 66.993 Best_prec1 0.000Test accuracy= 66.99333190917969 h= 0.832375168800354
+===================================== Round 1 =====================================
+Testset: 600-------------1
+Test-(27): [100/600]	Time 0.173 (0.162)	Loss 1.225 (1.228)	Prec@1 68.0 (67.66336822509766)
+
+Test-(27): [200/600]	Time 0.150 (0.160)	Loss 1.165 (1.226)	Prec@1 74.0 (67.85074615478516)
+
+Test-(27): [300/600]	Time 0.174 (0.159)	Loss 1.165 (1.230)	Prec@1 74.0 (67.50830078125)
+
+Test-(27): [400/600]	Time 0.141 (0.157)	Loss 1.325 (1.230)	Prec@1 58.0 (67.51122283935547)
+
+Test-(27): [500/600]	Time 0.178 (0.157)	Loss 1.305 (1.230)	Prec@1 60.0 (67.51297760009766)
+ * Prec@1 67.490 Best_prec1 66.993Test accuracy= 67.48999786376953 h= 0.8267345428466797
+===================================== Round 2 =====================================
+Testset: 600-------------2
+Test-(27): [100/600]	Time 0.162 (0.168)	Loss 1.325 (1.217)	Prec@1 58.0 (68.81188201904297)
+
+Test-(27): [200/600]	Time 0.206 (0.165)	Loss 1.125 (1.222)	Prec@1 78.0 (68.26866149902344)
+
+Test-(27): [300/600]	Time 0.139 (0.162)	Loss 1.325 (1.226)	Prec@1 58.0 (67.90697479248047)
+
+Test-(27): [400/600]	Time 0.246 (0.161)	Loss 1.325 (1.231)	Prec@1 58.0 (67.35660552978516)
+
+Test-(27): [500/600]	Time 0.175 (0.160)	Loss 1.465 (1.231)	Prec@1 44.0 (67.37325286865234)
+ * Prec@1 67.553 Best_prec1 67.490Test accuracy= 67.55333709716797 h= 0.8446130752563477
+===================================== Round 3 =====================================
+Testset: 600-------------3
+Test-(27): [100/600]	Time 0.136 (0.171)	Loss 1.385 (1.224)	Prec@1 52.0 (68.03960418701172)
+
+Test-(27): [200/600]	Time 0.162 (0.164)	Loss 1.205 (1.231)	Prec@1 70.0 (67.4328384399414)
+
+Test-(27): [300/600]	Time 0.140 (0.163)	Loss 1.245 (1.229)	Prec@1 66.0 (67.57474517822266)
+
+Test-(27): [400/600]	Time 0.126 (0.161)	Loss 1.325 (1.226)	Prec@1 58.0 (67.86034393310547)
+
+Test-(27): [500/600]	Time 0.161 (0.160)	Loss 1.125 (1.232)	Prec@1 78.0 (67.32534790039062)
+ * Prec@1 67.133 Best_prec1 67.553Test accuracy= 67.13333129882812 h= 0.8295167684555054
+===================================== Round 4 =====================================
+Testset: 600-------------4
+Test-(27): [100/600]	Time 0.171 (0.169)	Loss 1.245 (1.254)	Prec@1 66.0 (65.1089096069336)
+
+Test-(27): [200/600]	Time 0.133 (0.165)	Loss 1.185 (1.249)	Prec@1 72.0 (65.55223846435547)
+
+Test-(27): [300/600]	Time 0.139 (0.162)	Loss 1.365 (1.250)	Prec@1 54.0 (65.48837280273438)
+
+Test-(27): [400/600]	Time 0.141 (0.161)	Loss 1.305 (1.251)	Prec@1 60.0 (65.4314193725586)
+
+Test-(27): [500/600]	Time 0.151 (0.161)	Loss 1.085 (1.244)	Prec@1 82.0 (66.10379028320312)
+ * Prec@1 66.073 Best_prec1 67.553Test accuracy= 66.07333374023438 h= 0.8557495474815369
+
+Aver_accuracy= 67.04866790771484 Aver_h= 0.8377978205680847
+Namespace(arch='DN_X', config='../models/architectures/configs/DN7_DA.yaml', dengine=True, refit_dengine=True, dataset_dir='../dataset/StanfordDogs/', data_name='test', mode='test', resume='../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar' (epoch 27)
+DN_X(
+  (BACKBONE): SevenLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+      (14): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (15): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (16): LeakyReLU(negative_slope=0.2, inplace=True)
+      (17): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (18): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (19): LeakyReLU(negative_slope=0.2, inplace=True)
+      (20): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (21): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (22): LeakyReLU(negative_slope=0.2, inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+Trainset: 10000
+Valset: 600
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(27): [100/600]	Time 0.132 (0.165)	Loss 1.125 (1.243)	Prec@1 78.0 (66.1980209350586)
+
+Test-(27): [200/600]	Time 0.148 (0.164)	Loss 1.405 (1.230)	Prec@1 50.0 (67.49253845214844)
+
+Test-(27): [300/600]	Time 0.153 (0.163)	Loss 1.185 (1.235)	Prec@1 72.0 (66.93687438964844)
+
+Test-(27): [400/600]	Time 0.128 (0.161)	Loss 1.285 (1.239)	Prec@1 62.0 (66.5685806274414)
+
+Test-(27): [500/600]	Time 0.142 (0.161)	Loss 1.345 (1.236)	Prec@1 56.0 (66.83832550048828)
+ * Prec@1 66.810 Best_prec1 0.000Test accuracy= 66.80999755859375 h= 0.8242018818855286
+===================================== Round 1 =====================================
+Testset: 600-------------1
+Test-(27): [100/600]	Time 0.159 (0.176)	Loss 1.025 (1.240)	Prec@1 88.0 (66.47525024414062)
+
+Test-(27): [200/600]	Time 0.176 (0.170)	Loss 1.065 (1.235)	Prec@1 84.0 (67.0248794555664)
+
+Test-(27): [300/600]	Time 0.217 (0.166)	Loss 1.185 (1.232)	Prec@1 72.0 (67.2491683959961)
+
+Test-(27): [400/600]	Time 0.196 (0.165)	Loss 1.085 (1.231)	Prec@1 82.0 (67.41645812988281)
+
+Test-(27): [500/600]	Time 0.164 (0.164)	Loss 1.285 (1.232)	Prec@1 62.0 (67.29341125488281)
+ * Prec@1 67.443 Best_prec1 66.810Test accuracy= 67.4433364868164 h= 0.7920087575912476
+===================================== Round 2 =====================================
+Testset: 600-------------2
+Test-(27): [100/600]	Time 0.129 (0.171)	Loss 1.225 (1.217)	Prec@1 68.0 (68.75247192382812)
+
+Test-(27): [200/600]	Time 0.145 (0.162)	Loss 1.325 (1.218)	Prec@1 58.0 (68.66666412353516)
+
+Test-(27): [300/600]	Time 0.184 (0.161)	Loss 1.325 (1.222)	Prec@1 58.0 (68.33222198486328)
+
+Test-(27): [400/600]	Time 0.149 (0.160)	Loss 1.205 (1.222)	Prec@1 70.0 (68.31919860839844)
+
+Test-(27): [500/600]	Time 0.119 (0.160)	Loss 1.145 (1.221)	Prec@1 76.0 (68.37126159667969)
+ * Prec@1 68.120 Best_prec1 67.443Test accuracy= 68.12000274658203 h= 0.8352543115615845
+===================================== Round 3 =====================================
+Testset: 600-------------3
+Test-(27): [100/600]	Time 0.149 (0.174)	Loss 0.905 (1.214)	Prec@1 100.0 (69.12871551513672)
+
+Test-(27): [200/600]	Time 0.161 (0.165)	Loss 1.345 (1.221)	Prec@1 56.0 (68.3880615234375)
+
+Test-(27): [300/600]	Time 0.169 (0.163)	Loss 1.325 (1.227)	Prec@1 58.0 (67.8006591796875)
+
+Test-(27): [400/600]	Time 0.151 (0.162)	Loss 1.205 (1.227)	Prec@1 70.0 (67.7955093383789)
+
+Test-(27): [500/600]	Time 0.198 (0.162)	Loss 1.245 (1.230)	Prec@1 66.0 (67.44111633300781)
+ * Prec@1 67.710 Best_prec1 68.120Test accuracy= 67.70999908447266 h= 0.8419740200042725
+===================================== Round 4 =====================================
+Testset: 600-------------4
+Test-(27): [100/600]	Time 0.149 (0.170)	Loss 1.265 (1.246)	Prec@1 64.0 (65.90098571777344)
+
+Test-(27): [200/600]	Time 0.181 (0.164)	Loss 1.205 (1.236)	Prec@1 70.0 (66.90547180175781)
+
+Test-(27): [300/600]	Time 0.155 (0.161)	Loss 1.305 (1.233)	Prec@1 60.0 (67.22258758544922)
+
+Test-(27): [400/600]	Time 0.173 (0.160)	Loss 1.165 (1.234)	Prec@1 74.0 (67.09725189208984)
+
+Test-(27): [500/600]	Time 0.150 (0.160)	Loss 1.265 (1.235)	Prec@1 64.0 (67.02594757080078)
+ * Prec@1 67.287 Best_prec1 68.120Test accuracy= 67.28666687011719 h= 0.8358665704727173
+
+Aver_accuracy= 67.4739990234375 Aver_h= 0.82586110830307
+Namespace(arch='DN_X', config='../models/architectures/configs/DN7_DA.yaml', dengine=True, refit_dengine=False, dataset_dir='../dataset/StanfordDogs/', data_name='test', mode='test', resume='../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar', epochs=1, ngpu=1, print_freq=100, outf='../results/DN_X_test_DN4_5_Way_5_Shot_K5')=> loaded checkpoint '../results/models/dn7da_stanfordogs_5_5_k3_epoch_27.pth.tar' (epoch 27)
+DN_X(
+  (BACKBONE): SevenLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+      (14): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (15): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (16): LeakyReLU(negative_slope=0.2, inplace=True)
+      (17): Conv2d(32, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (18): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (19): LeakyReLU(negative_slope=0.2, inplace=True)
+      (20): Conv2d(16, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (21): BatchNorm2d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (22): LeakyReLU(negative_slope=0.2, inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+  (DE): RandomForestHead()
+)
+Trainset: 10000
+Valset: 600
+Testset: 600
+===================================== Round 0 =====================================
+Testset: 600-------------0
+Test-(27): [100/600]	Time 0.142 (0.168)	Loss 1.705 (1.705)	Prec@1 20.0 (20.0)
+
+Test-(27): [200/600]	Time 0.124 (0.163)	Loss 1.705 (1.705)	Prec@1 20.0 (20.0)
