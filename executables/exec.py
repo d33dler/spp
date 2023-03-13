@@ -53,7 +53,8 @@ This is the main execution script. For training a model simply add the config pa
 dataset path & data_name.
 
 Example:
-python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_dir your/dataset/path --data_name aName
+python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_dir your/dataset/path --data_name aName \
+--mode train --epochs 30 --dengine --refit_dengine
 """
 
 
