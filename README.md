@@ -43,7 +43,7 @@ python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_d
 python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_dir your/dataset/path --data_name aName \
 --mode test --dengine --resume your/model/path.pth.tar
 ```
-- Results:
+- Results:\
 ![](doc/res_miniImageNet.png)
 ![](doc/res_stanfordDogs.png)
 
