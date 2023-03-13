@@ -1,5 +1,6 @@
 import dataclasses
 import os
+from pathlib import Path
 
 import torch
 from torch import nn
@@ -8,11 +9,15 @@ from dataset.datasets_csv import CSVLoader
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
+from models.utilities.utils import load_config, config_exchange
+
 
 @dataclasses.dataclass
 class Parameters:
+    """
+    DataLoader parameters (extracted from model root config @see models/architectures/configs)
+    """
     img_sz: int
-    dataset_dir: str
     shot_num: int
     way_num: int
     query_num: int
@@ -26,30 +31,32 @@ class Parameters:
     batch_sz: int
 
 
-
 @dataclasses.dataclass
 class Loaders:
-    train_loader: DataLoader
-    val_loader: DataLoader
-    test_loader: DataLoader
+    train_loader: CSVLoader
+    val_loader: CSVLoader
+    test_loader: CSVLoader
 
 
 class DatasetLoader:
+    """
+    Class used for data preparation (episode construction, pre-processing, augmentation)
+    """
 
     def __init__(self, cfg, params: Parameters) -> None:
         self.transforms_ls = []
         self.params = params
-        self.cfg = cfg
+        self.cfg = load_config(Path(Path(__file__).parent / "config.yaml"))
+        self.cfg.AUGMENTOR = config_exchange(self.cfg.AUGMENTOR, cfg)
 
     def augment(self, transform: nn.Module):
         self.transforms_ls = [transform] + self.transforms_ls
 
-    def load_data(self, mode, F_txt):
+    def load_data(self, mode, dataset_directory, F_txt):
         # ======================================= Folder of Datasets =======================================
         # image transform & normalization
-        dataset_dir = self.params.dataset_dir
+        dataset_dir = dataset_directory
         img_sz = self.params.img_sz
-        dataset_dir = dataset_dir
         shot_num = self.params.shot_num
         way_num = self.params.way_num
         query_num = self.params.query_num
@@ -57,9 +64,9 @@ class DatasetLoader:
         episode_val_num = self.params.episode_val_num
         episode_test_num = self.params.episode_test_num
         transform_ls = []
-
-        for TF in self.cfg.TRANSFORMS:
-            if not TF.ENABLE:
+        cfg_aug = self.cfg.AUGMENTOR
+        for TF in cfg_aug.TRANSFORMS:
+            if TF.NAME in cfg_aug.DISABLE:
                 continue
             t = getattr(transforms, TF.NAME)
             if TF.ARGS:
@@ -67,13 +74,16 @@ class DatasetLoader:
                     t = t(**TF.ARGS)
                 else:
                     t = t(*tuple(TF.ARGS))
+            else:
+                t = t()
             transform_ls.append(t)
         transform_ls += [transforms.ToTensor(),
                          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        print(transform_ls)
         ImgTransform = transforms.Compose(transform_ls)
         self.transforms_ls = transform_ls
         trainset = CSVLoader(
-            data_dir=dataset_dir, mode=mode, image_size=img_sz, transform=ImgTransform,
+            data_dir=dataset_dir, mode='train', image_size=img_sz, transform=ImgTransform,
             episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num
         )
         valset = CSVLoader(

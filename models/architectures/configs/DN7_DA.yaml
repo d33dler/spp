@@ -1,0 +1,87 @@
+# Main params
+NAME: DN7_DA
+K_NEIGHBORS: 5
+USE_BIAS: True
+DATASET: stanfordDogs
+#Model skeleton
+TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
+  BACKBONE: 'BACKBONE_2D',
+  DE: 'DT'
+}
+TRACK_LOSS: BACKBONE
+TRACK_CRITERION: BACKBONE
+
+BACKBONE:
+  NAME: DN7_CNN2d # DN4_CNN2d | ResNet2d
+  MODE: TEST
+  GRAD: True
+  NORM: batch
+  CUDA: True
+  LEARNING_RATE: 0.005
+  BETA_ONE: [ 0.5,0.9 ]
+  INIT_WEIGHTS: kaiming
+  FREEZE_EPOCH: 1
+
+DE:
+  NAME: RandomForest # XGB | RandomForest
+  ENGINE: TREE
+  MODE: TRAIN
+  GRAD: False
+  CUDA: True
+  MODEL_NAME: __ignore__
+  OPTIMIZE: True
+  OPTIMIZATION_ROUNDS: 50
+  DATASET: stanfordDogs_DN7_DA_W5_S5K_1_2023_03_09_23_17_22_V2.csv
+  EPISODE_TRAIN_NUM: 4000
+  PARAMETERS: { tree_method: gpu_hist,
+                num_class: 5,
+                objective: 'multi:softmax',
+                eval_metric: 'mlogloss',
+                max_depth: 11,
+                min_child_weight: 3,
+                learning_rate: 0.04,
+                subsample: 0.8,
+                seed: 666,
+                reg_lambda: 1,
+  }  # add parameters here to override default settings
+
+
+AUGMENTOR:
+  DISABLE: [RandomCrop, ColorJitter, RandomHorizontalFlip]
+  TRANSFORMS: [
+    {
+      NAME: Resize,
+      ARGS: [ [ 100,100 ] ],
+    },
+    { NAME: RandomCrop,
+      ARGS: [ 84 ]
+    },
+    { NAME: ColorJitter,
+      ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 }
+    },
+    { NAME: RandomHorizontalFlip,
+      ARGS: [ ]
+    }
+  ]
+
+
+#BACKBONE & ENCODER
+
+
+# Dataloader
+
+OUTF: '../results/'
+WORKERS: 8
+IMAGE_SIZE: 84
+EPISODE_SIZE: 1
+TEST_EPISODE_SIZE: 1
+EPOCHS: 30
+EPISODE_TRAIN_NUM: 10000
+EPISODE_VAL_NUM: 600
+EPISODE_TEST_NUM: 600
+WAY_NUM: 5
+SHOT_NUM: 5
+QUERY_NUM: 10
+
+# Misc
+PRINT_FREQ: 100

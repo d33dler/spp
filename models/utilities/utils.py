@@ -1,21 +1,33 @@
-"""
-General utilities
-"""
 from __future__ import print_function
-
 import functools
 import gc
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Any
-
 import numpy as np
+import pandas as pd
 import torch
 import yaml
 from easydict import EasyDict
+from matplotlib import pyplot as plt
 from pandas import DataFrame
-from torch import Tensor, nn, nn as nn
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, ConfusionMatrixDisplay
+from torch import Tensor, nn as nn
 from torch.nn import BatchNorm2d, init
+import seaborn as sns
+"""
+General utilities
+"""
+
+
+def create_confusion_matrix(true: np.ndarray, pred: np.ndarray):
+    cm = confusion_matrix(true, pred)
+
+    fig, ax = plt.subplots(figsize=(12, 10))
+    disp = ConfusionMatrixDisplay(cm)
+    disp.plot(ax=ax)
+    ax.grid(False)
+    plt.show()
 
 
 def save_checkpoint(state, filename='checkpoint.pth.tar'):
@@ -49,22 +61,31 @@ class DataHolderBase:
     norm_layer: Any  # torch
 
 
+def config_exchange(dest: dict, src: dict):
+    [(dest.update({k: v}) if not isinstance(dest[k], dict) else dest[k].update(v))
+     and src.update({k: dest.config[k]})
+     for k, v in src.items() if k in dest]
+    return dest
+
+
 @dataclass
 class DataHolder(DataHolderBase):
     """
     Module IO specification object
+    Models can choose to employ it for sharing information explicitly among child modules.
     """
     # Classification
     num_classes: int
     # Input
+    q_in_CPU: Tensor
     q_in: Tensor
     S_in: List[Tensor]
     targets: Tensor
     # Backbone2d OUTPUT
     q: Tensor
-    S_raw: Tensor
+    DLD_topk: Tensor
     S: List[Tensor]  # CUDA
-    sim_list_BACKBONE2D: Tensor  # CUDA
+    sim_list: Tensor  # CUDA
     # Encoder OUTPUT
     q_smax: Tensor
     q_reduced: Tensor
@@ -78,6 +99,8 @@ class DataHolder(DataHolderBase):
     # Tree-out
     tree_pred: np.ndarray
 
+    output: Any
+
     def __init__(self, cfg):
         self.eval_set = None
         self.module_list: List = []
@@ -85,7 +108,7 @@ class DataHolder(DataHolderBase):
         self.k_neighbors = cfg.K_NEIGHBORS
         self.use_bias = cfg.USE_BIAS
         self.norm_layer = BatchNorm2d
-        self.num_classes = cfg.NUM_CLASSES
+        self.num_classes = cfg.WAY_NUM
 
     def clear(self):
         del self.q_in
@@ -93,6 +116,7 @@ class DataHolder(DataHolderBase):
         del self.q
         del self.S
         gc.collect()
+        torch.cuda.empty_cache()
 
 
 class AverageMeter(object):

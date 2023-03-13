@@ -5,19 +5,19 @@ import torch.nn as nn
 from torch import optim, Tensor
 
 from models.clustering import KNN_itc
-from models.interfaces.arch_module import ArchM
+from models.interfaces.arch_module import ARCH
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights
 
 
-class Encoder(ArchM.Child):
+class Encoder(ARCH.Child):
     def __init__(self, data: DataHolder):
         super().__init__()
 
         self.data = data
         num_classes = data.num_classes
         norm_layer, use_bias = get_norm_layer(data.cfg.ENCODER.NORM)
-        # Define the loss function and optimizer
-        # encoder
+
+        # FC blocks + log-softmax output
         self.encoder_smax = nn.Sequential(
             nn.Flatten(),
             nn.Linear(data.cfg.ENCODER.FLATTENED_INPUT, 512, bias=use_bias),
@@ -29,18 +29,18 @@ class Encoder(ArchM.Child):
             nn.Linear(128, num_classes, bias=use_bias),
             nn.LogSoftmax(dim=1)
         )
-
+        # Convolutional blocks for dimensionality reduction
         self.encoder_conv = nn.Sequential(
             nn.Conv2d(data.cfg.ENCODER.INPUT_SIZE, 32, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(32),
-            nn.LeakyReLU(0.2, True),  # 32 x 21 x 21
+            nn.LeakyReLU(0.2, True),  # 32 x 25 x 25
             nn.Conv2d(32, 16, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(16),
-            nn.LeakyReLU(0.2, True),  # 16 x 21 x 21
+            nn.LeakyReLU(0.2, True),  # 16 x 25 x 25
             nn.Conv2d(16, 8, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(8),
-            nn.LeakyReLU(0.2, True),  # 8 x 21 x 21
-            nn.MaxPool2d(kernel_size=3, stride=3)  # 8 x 7 x 7
+            nn.LeakyReLU(0.2, True),  # 8 x 25 x 25
+            nn.MaxPool2d(kernel_size=2, stride=2)  # 8 x 8 x 8
         )
 
         cfg = data.cfg.ENCODER
@@ -65,9 +65,14 @@ class Encoder(ArchM.Child):
         data.q_smax = encoder_sm(data.q)
         S_red = []
         data.S_reduced = S_red
-        for s in data.S_raw:
-            S_red.append(encoder_conv(s))
-        data.sim_list_REDUCED = self.knn.forward(data.q_reduced, data.S_reduced)
+        for s in data.DLD_topk:
+            support_set_sam = encoder_conv(s)
+            B, C, h, w = support_set_sam.size()
+            support_set_sam = support_set_sam.permute(1, 0, 2, 3)
+            support_set_sam = support_set_sam.contiguous().reshape((C, -1))
+            data.S.append(support_set_sam)
+            S_red.append(support_set_sam)
+        data.sim_list_REDUCED, data.DLD_topk = self.knn.forward(data.q_reduced, data.S_reduced)
 
         if self.training:
             self.backward([data.q_smax, data.sim_list_REDUCED], data.targets)

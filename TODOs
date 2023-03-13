@@ -1,0 +1,10 @@
+REFACTOR:
+
+-executable script, make DNX agonstic
+-DNX arch under one class
+-config.file importable (not location bound)
+-config override from main
+-loss return function, layer_freeze update layers function
+-CNN creation abstraction finish
+-model cfg object
+-parameterize return value from forward() call

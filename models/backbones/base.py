@@ -7,19 +7,24 @@ from typing import List, Union
 from torch import nn
 from yamldataclassconfig import YamlDataClassConfig, create_file_path_field
 from dataclasses_json import DataClassJsonMixin
-from models.interfaces.arch_module import ArchM
+from models.interfaces.arch_module import ARCH
 
 
-class BaseBackbone2d(ArchM.Child):
+class BaseBackbone2d(ARCH.Child):
     """
     Abstraction class for 2d backbones implementing using torch
+    Finished: No
+    Tested: No
     """
-    ACTIVATION_F: ArchM.ActivationFuncs
-    NORMALIZATION_F: ArchM.NormalizationFuncs
-    POOLING_F: ArchM.PoolingFuncs
+    features: nn.Sequential
+    FREEZE_LAYERS: List[int] = []
+    FREEZE_EPOCH: int = 1
+    ACTIVATION_F: ARCH.ActivationFuncs
+    NORMALIZATION_F: ARCH.NormalizationFuncs
+    POOLING_F: ARCH.PoolingFuncs
 
     @dataclass
-    class _CFG(ArchM.BaseConfig):
+    class _CFG(ARCH.BaseConfig):
 
         INP_CHANNELS: List[int] = field(default_factory=list)
         OUT_CHANNELS: List[int] = field(default_factory=list)
@@ -51,21 +56,22 @@ class BaseBackbone2d(ArchM.Child):
     class RemoteJsonConfig(_CFG, DataClassJsonMixin, ABC):
         pass
 
-    def _YamlCFG(self, config: RemoteYamlConfig, __file__):
+    def _YamlCFG(self, config: RemoteYamlConfig):
         """Yaml mapping config object class using YamlDataClassConfig."""
+        fp = config.FILE_PATH
         config.FILE_PATH = create_file_path_field(Path(
-            __file__).parent / 'config.yaml')  # os.path.join(os.path.dirname(os.path.realpath(__file__)), Path(load_cfg))
-        print(Path(__file__).parent / 'config.yaml')
-        config.load(Path(__file__).parent / 'config.yaml')  # check!
+            fp).parent / 'config.yaml')  # os.path.join(os.path.dirname(os.path.realpath(__file__)), Path(load_cfg))
+        print(Path(fp).parent / 'config.yaml')
+        config.load(Path(fp).parent / 'config.yaml')  # check!
         return config
 
-    def _JsonCFG(self, config: RemoteJsonConfig, __file__):
+    def _JsonCFG(self, config: RemoteJsonConfig):
         """Yaml mapping config object class using YamlDataClassConfig."""
-        config.FILE_PATH = create_file_path_field(Path(__file__).parent.parent / 'config.json')
+        config.FILE_PATH = create_file_path_field(Path(config.FILE_PATH).parent.parent / 'config.json')
         with open(config.FILE_PATH, 'r') as f:
             return self.from_json(json.load(f))
 
-    cfg: Union[RemoteJsonConfig, RemoteYamlConfig]
+    config: Union[RemoteJsonConfig, RemoteYamlConfig]
     blocks: nn.ModuleList
     deblocks: nn.ModuleList
 
@@ -73,28 +79,26 @@ class BaseBackbone2d(ArchM.Child):
         self.ACTIVATION_F, \
         self.NORMALIZATION_F, \
         self.POOLING_F = \
-            [ArchM.get_func(fset, name)
-             for fset, name in [(ArchM.ActivationFuncs, self.cfg.ACTIVATION),
-                                (ArchM.NormalizationFuncs, self.cfg.NORMALIZATION),
-                                (ArchM.PoolingFuncs, self.cfg.POOLING)]]
+            [ARCH.get_func(fset, name)
+             for fset, name in [(ARCH.ActivationFuncs, self.config.ACTIVATION),
+                                (ARCH.NormalizationFuncs, self.config.NORMALIZATION),
+                                (ARCH.PoolingFuncs, self.config.POOLING)]]
 
-    def __init__(self, remote_cfg: Union[RemoteJsonConfig, RemoteYamlConfig]):  # remove CFG and refer to self
+    def __init__(self, config: Union[_YamlCFG, _JsonCFG]):  # remove CFG and refer to self
         """
-
         :param config:
         :type config:
         :param args:
         :type args:
         """
-        super().__init__()
-
-        config: Union[BaseBackbone2d._YamlCFG, BaseBackbone2d._JsonCFG]  # TODO refactor this
-        if remote_cfg.FILE_TYPE == "JSON":
-            self.cfg = self._JsonCFG(remote_cfg, remote_cfg.FILE_PATH)
-        elif remote_cfg.FILE_TYPE == "YAML":
-            self.cfg = self._YamlCFG(remote_cfg, remote_cfg.FILE_PATH)
+        super().__init__(config)
+        if config.FILE_TYPE == "JSON":
+            self.config = self._JsonCFG(config)
+        elif config.FILE_TYPE == "YAML":
+            self.config = self._YamlCFG(config)
         else:
             raise AttributeError("Config file type not supported")
+
         self.collect_funcs()
         use_bias = self.ACTIVATION_F == nn.InstanceNorm2d
         # TODO finish abstraction
@@ -165,23 +169,32 @@ class BaseBackbone2d(ArchM.Child):
         pass
 
     def _conv_layer(self, lvl: List[nn.Module], ix):
-        lvl.extend(nn.Conv2d(self.cfg.NUM_FILTERS[ix], self.cfg.NUM_FILTERS[ix], kernel_size=3, padding=1, bias=False))
+        lvl.extend(
+            nn.Conv2d(self.config.NUM_FILTERS[ix], self.config.NUM_FILTERS[ix], kernel_size=3, padding=1, bias=False))
 
     def _norm_layer(self, lvl: List[nn.Module], ix):
-        if self.cfg.NORMALIZATION_F is not None:
-            lvl.extend(self.cfg.NORMALIZATION_F(self.cfg.NUM_FILTERS[ix], **self.cfg.NORM_ARGS[ix]))
+        if self.NORMALIZATION_F is not None:
+            lvl.extend(self.NORMALIZATION_F(self.config.NUM_FILTERS[ix], **self.config.NORM_ARGS[ix]))
 
     def _activation_layer(self, lvl: List[nn.Module], ix):
-        if self.cfg.ACTIVATION_F is not None:
-            lvl.extend(self.cfg.ACTIVATION_F(self.cfg.NUM_FILTERS[ix]))
+        if self.ACTIVATION_F is not None:
+            lvl.extend(self.ACTIVATION_F(self.config.NUM_FILTERS[ix]))
         raise ValueError("Missing activation function specification 'ACTIVATION' in config file!")
 
     def _pooling_layer(self, lvl: List[nn.Module], blk_ix, layer_ix):
-        if self.cfg.POOLING is not None:
+        if self.config.POOLING is not None:
             try:
-                lvl.extend(self.cfg.POOLING_F(**self.cfg.POOL_ARGS[blk_ix][layer_ix]))
+                lvl.extend(self.POOLING_F(**self.config.POOL_ARGS[blk_ix][layer_ix]))
             except KeyError:
                 return
 
+    @staticmethod
+    def get_config():
+        return None
+
     def forward(self, *args):
         raise NotImplementedError("forward() method not implemented")
+
+    def freeze_layers(self):
+        for layer_ix in self.FREEZE_LAYERS:
+            self.features[layer_ix] = self.features[layer_ix].requires_grad_(False)

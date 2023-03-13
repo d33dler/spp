@@ -1,0 +1,13 @@
+REFACTOR:
+
+-executable script, make DNX agonstic || DONE
+-config.file importable (not location bound) || DONER
+-config override from main  || DONE
+-loss return function, layer_freeze update layers function 
+-CNN creation abstraction finish
+-parameterize return value from forward() call
+
+code documentation
+- Class level (important classes)
+- priority functions
+- minor methods

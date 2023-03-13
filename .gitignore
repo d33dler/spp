@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# JetBrains PyCharm
+.idea
 # C extensions
 *.so
 
@@ -128,5 +130,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /dataset/miniImageNet/
+/dataset/StanfordDogs
 /executables/results/
 *.pth.tar
+*.csv

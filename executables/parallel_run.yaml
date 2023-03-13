@@ -1,0 +1,24 @@
+RUN: [
+  {
+    ID: DN4MK2, # RUN ID
+    MODEL: DN4DTA, # ARCH
+    CONFIG: dn4_config.yaml # ARCH CFG
+  },
+  {
+    ID: DN4MK2,
+    MODEL: DN4DTA,
+    CONFIG: dn4_config.yaml
+  },
+  { ID: DN4DAMK2,
+    MODEL: DN4DTA,
+    CONFIG: dn4_config.yaml }
+]
+
+
+SETTINGS:
+  CUDA: True
+  N_GPU: 1
+  NC: 3
+  CLAMP_LOWER: 0.01
+  CLAMP_UPPER: 0.01
+  PRINT_FREQ: 100
