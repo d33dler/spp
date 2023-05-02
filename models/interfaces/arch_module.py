@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import os
 from abc import ABC, abstractmethod
@@ -16,6 +18,7 @@ from models.utilities.utils import save_checkpoint, load_config, accuracy, init_
 import torch.nn.functional as F
 
 
+# noinspection PyUnresolvedReferences
 class ARCH(nn.Module):
     """
     Module architecture class - wraps around nn.Module and organizes necessary functions/variables and provides necessary
@@ -141,7 +144,7 @@ class ARCH(nn.Module):
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
         c = self.root_cfg
-        p = Parameters(c.IMAGE_SIZE, c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
+        p = Parameters(c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE, c.QUERY_NUM * c.WAY_NUM)
         self.data_loader = DatasetLoader(c.AUGMENTOR, p)

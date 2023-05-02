@@ -81,6 +81,7 @@ class DataHolder(DataHolderBase):
     q_in: Tensor
     S_in: List[Tensor]
     targets: Tensor
+    av_num: int
     # Backbone2d OUTPUT
     q: Tensor
     DLD_topk: Tensor
@@ -109,6 +110,7 @@ class DataHolder(DataHolderBase):
         self.use_bias = cfg.USE_BIAS
         self.norm_layer = BatchNorm2d
         self.num_classes = cfg.WAY_NUM
+        self.av_num = cfg.AUGMENTOR.AV_NUM
 
     def clear(self):
         del self.q_in

@@ -76,6 +76,6 @@ class FourLayer_64F(BaseBackbone2d):
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
-        data.sim_list, data.DLD_topk = self.knn.forward(data.q, data.S)
+        data.sim_list = self.knn.forward(data.q, data.S, data.av_num)
         self.data.output = data.sim_list
         return data

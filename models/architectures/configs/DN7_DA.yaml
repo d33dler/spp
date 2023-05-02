@@ -48,7 +48,7 @@ DE:
 
 AUGMENTOR:
   DISABLE: [RandomCrop, ColorJitter, RandomHorizontalFlip]
-  TRANSFORMS: [
+  PRE_PROCESS: [
     {
       NAME: Resize,
       ARGS: [ [ 100,100 ] ],

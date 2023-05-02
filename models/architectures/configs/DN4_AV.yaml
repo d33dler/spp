@@ -1,12 +1,13 @@
 # Main params
-NAME: DN4_Vanilla
+NAME: DN4_DA
 K_NEIGHBORS: 3
 USE_BIAS: True
 DATASET: miniImageNet
+EPOCHS: 30
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
-  DE: 'DT'
+  # DE: 'DT'
 }
 TRACK_LOSS: BACKBONE
 TRACK_CRITERION: BACKBONE
@@ -30,9 +31,9 @@ DE:
   CUDA: True
   MODEL_NAME: __ignore__
   OPTIMIZE: True
-  OPTIMIZATION_ROUNDS: 100
+  OPTIMIZATION_ROUNDS: 80
   DATASET:
-  EPISODE_TRAIN_NUM: 4000
+  EPISODE_TRAIN_NUM: 100
   PARAMETERS: { tree_method: gpu_hist,
                 num_class: 5,
                 objective: 'multi:softmax',
@@ -45,52 +46,69 @@ DE:
                 reg_lambda: 1,
   } # add parameters here to override default settings
 
-
 AUGMENTOR:
   DISABLE: [ ]
-  AV_N: 2 # number of augmented views
+  AV_NUM: 2 # number of augmented views
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
-      NAME: Resize,
-      ARGS: [ [ 100,100 ] ],
-      ENABLE: True,
+      NAME: RESIZE,
+      ARGS: { size: [ 100,100 ] },
     },
+
   ]
   AUGMENTATION:
+
     [
-      {
-        NAME: RandomErasing,
-        ARGS: { p: 0.5, scale: [ 0.02,0.33 ], ratio: [ 0.3,3.3 ] },
-      },
-      { NAME: RandomCrop,
+      { NAME: RANDOM_CROP,
         ARGS: [ 84 ]
       },
-      { NAME: ColorJitter,
-        ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
+      { NAME: COLOR_JITTER,
+        ARGS: { brightness: 0.5, contrast: 0.5, saturation: 0.5 },
       },
-      { NAME: RandomHorizontalFlip,
+      { NAME: RANDOM_HORIZONTAL_FLIP,
         ARGS: [ ],
       },
       {
-        NAME: RandomRotation,
-        ARGS: [ 10 ],
+        NAME: RANDOM_VERTICAL_FLIP,
+        ARGS: [ ],
       },
+      {
+        NAME: RANDOM_ROTATION,
+        ARGS: { degrees: [ 0, 90 ] },
+      },
+      {
+        NAME: GAUSSIAN_BLUR,
+        ARGS: { kernel_size: [ 5,9 ], sigma: [ 0.1,5 ] },
+      }
     ]
+  POST_PROCESS: [
+    {
+      NAME: RESIZE,
+      ARGS: { size: [ 84,84 ] },
+    },
+    {
+      NAME: TO_TENSOR,
+      ARGS: [ ],
+    },
+    {
+      NAME: NORMALIZE,
+      ARGS: { mean: [ 0.5, 0.5, 0.5 ], std: [ 0.5, 0.5, 0.5 ] },
+    }
+  ]
 
 
 # Dataloader
 OUTF: '../results/'
 WORKERS: 8
-IMAGE_SIZE: 84
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
-EPOCHS: 30
+
 EPISODE_TRAIN_NUM: 10000
-EPISODE_VAL_NUM: 800
+EPISODE_VAL_NUM: 900
 EPISODE_TEST_NUM: 600
 WAY_NUM: 5
-SHOT_NUM: 1
+SHOT_NUM: 5
 QUERY_NUM: 10
 
 # Misc

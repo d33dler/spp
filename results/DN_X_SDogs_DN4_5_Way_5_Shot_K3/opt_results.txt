@@ -1,0 +1,251 @@
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc(
+      (softmax): Softmax(dim=1)
+    )
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc(
+      (softmax): Softmax(dim=1)
+    )
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc(
+      (softmax): Softmax(dim=1)
+    )
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Namespace(arch='DN_X', config='../models/architectures/configs/DN4_AV.yaml', dengine=False, refit_dengine=False, dataset_dir='../dataset/StanfordDogs', data_name='SDogs', mode='train', resume='', epochs=30, ngpu=1, print_freq=100, outf='../results/DN_X_SDogs_DN4_5_Way_5_Shot_K3')DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc(
+      (softmax): Softmax(dim=1)
+    )
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10000
+Valset: 900
+Testset: 600
+Eposide-(0): [100/10000]	Time 0.372 (0.406)	Data 0.000 (0.016)	Loss 1.885 (1.957)	Prec@1 18.000 (28.356)
+Eposide-(0): [200/10000]	Time 0.367 (0.385)	Data 0.000 (0.008)	Loss 1.453 (1.763)	Prec@1 36.000 (29.721)
+Eposide-(0): [300/10000]	Time 0.346 (0.379)	Data 0.000 (0.006)	Loss 1.455 (1.695)	Prec@1 26.000 (30.040)
+Eposide-(0): [400/10000]	Time 0.375 (0.377)	Data 0.000 (0.004)	Loss 1.527 (1.650)	Prec@1 30.000 (30.923)
+Eposide-(0): [500/10000]	Time 0.372 (0.376)	Data 0.000 (0.003)	Loss 1.522 (1.623)	Prec@1 34.000 (31.449)
+Eposide-(0): [600/10000]	Time 0.390 (0.376)	Data 0.000 (0.003)	Loss 1.160 (1.596)	Prec@1 54.000 (32.286)
+Eposide-(0): [700/10000]	Time 0.374 (0.376)	Data 0.000 (0.003)	Loss 1.313 (1.576)	Prec@1 44.000 (33.033)
+Eposide-(0): [800/10000]	Time 0.371 (0.376)	Data 0.000 (0.002)	Loss 1.109 (1.554)	Prec@1 50.000 (33.915)
+Eposide-(0): [900/10000]	Time 0.363 (0.375)	Data 0.000 (0.002)	Loss 1.471 (1.540)	Prec@1 46.000 (34.431)
+Eposide-(0): [1000/10000]	Time 0.548 (0.375)	Data 0.000 (0.002)	Loss 0.979 (1.523)	Prec@1 62.000 (35.115)
+Eposide-(0): [1100/10000]	Time 0.349 (0.375)	Data 0.000 (0.002)	Loss 1.360 (1.512)	Prec@1 34.000 (35.431)
+Eposide-(0): [1200/10000]	Time 0.359 (0.375)	Data 0.000 (0.002)	Loss 1.164 (1.499)	Prec@1 50.000 (35.923)
+Eposide-(0): [1300/10000]	Time 0.374 (0.374)	Data 0.000 (0.002)	Loss 1.405 (1.491)	Prec@1 36.000 (36.188)
+Eposide-(0): [1400/10000]	Time 0.365 (0.374)	Data 0.000 (0.001)	Loss 1.293 (1.479)	Prec@1 32.000 (36.600)
+Eposide-(0): [1500/10000]	Time 0.376 (0.373)	Data 0.000 (0.001)	Loss 1.252 (1.469)	Prec@1 46.000 (36.859)
+Eposide-(0): [1600/10000]	Time 0.351 (0.373)	Data 0.000 (0.001)	Loss 1.231 (1.461)	Prec@1 40.000 (37.264)
+Eposide-(0): [1700/10000]	Time 0.371 (0.374)	Data 0.000 (0.001)	Loss 1.119 (1.452)	Prec@1 52.000 (37.624)
+Eposide-(0): [1800/10000]	Time 0.371 (0.373)	Data 0.000 (0.001)	Loss 1.404 (1.444)	Prec@1 40.000 (37.976)
+Eposide-(0): [1900/10000]	Time 0.388 (0.373)	Data 0.000 (0.001)	Loss 1.640 (1.436)	Prec@1 28.000 (38.312)
+Eposide-(0): [2000/10000]	Time 0.353 (0.373)	Data 0.000 (0.001)	Loss 1.168 (1.428)	Prec@1 60.000 (38.649)
+Eposide-(0): [2100/10000]	Time 0.385 (0.372)	Data 0.000 (0.001)	Loss 1.275 (1.422)	Prec@1 48.000 (38.832)
+Eposide-(0): [2200/10000]	Time 0.511 (0.372)	Data 0.000 (0.001)	Loss 1.253 (1.414)	Prec@1 44.000 (39.105)
+Eposide-(0): [2300/10000]	Time 0.349 (0.372)	Data 0.000 (0.001)	Loss 1.286 (1.408)	Prec@1 56.000 (39.384)
+Eposide-(0): [2400/10000]	Time 0.369 (0.372)	Data 0.000 (0.001)	Loss 1.156 (1.401)	Prec@1 46.000 (39.674)
+Eposide-(0): [2500/10000]	Time 0.347 (0.372)	Data 0.000 (0.001)	Loss 1.438 (1.395)	Prec@1 38.000 (39.980)
+Eposide-(0): [2600/10000]	Time 0.348 (0.371)	Data 0.000 (0.001)	Loss 1.401 (1.389)	Prec@1 36.000 (40.182)
+Eposide-(0): [2700/10000]	Time 0.368 (0.371)	Data 0.000 (0.001)	Loss 1.291 (1.384)	Prec@1 32.000 (40.468)
+Eposide-(0): [2800/10000]	Time 0.351 (0.371)	Data 0.000 (0.001)	Loss 1.057 (1.378)	Prec@1 58.000 (40.746)
+Eposide-(0): [2900/10000]	Time 0.359 (0.371)	Data 0.000 (0.001)	Loss 1.484 (1.374)	Prec@1 34.000 (40.938)
+Eposide-(0): [3000/10000]	Time 0.348 (0.371)	Data 0.000 (0.001)	Loss 1.719 (1.369)	Prec@1 26.000 (41.146)
+Eposide-(0): [3100/10000]	Time 0.386 (0.371)	Data 0.000 (0.001)	Loss 1.585 (1.364)	Prec@1 26.000 (41.381)
+Eposide-(0): [3200/10000]	Time 0.387 (0.371)	Data 0.000 (0.001)	Loss 1.234 (1.360)	Prec@1 48.000 (41.603)
+Eposide-(0): [3300/10000]	Time 0.392 (0.371)	Data 0.000 (0.001)	Loss 1.055 (1.355)	Prec@1 56.000 (41.867)
+Eposide-(0): [3400/10000]	Time 0.390 (0.372)	Data 0.000 (0.001)	Loss 1.456 (1.349)	Prec@1 40.000 (42.162)
+Eposide-(0): [3500/10000]	Time 0.469 (0.373)	Data 0.000 (0.001)	Loss 1.554 (1.346)	Prec@1 28.000 (42.283)
+Eposide-(0): [3600/10000]	Time 0.360 (0.374)	Data 0.000 (0.001)	Loss 1.148 (1.342)	Prec@1 50.000 (42.462)
+Eposide-(0): [3700/10000]	Time 0.398 (0.374)	Data 0.000 (0.001)	Loss 1.004 (1.338)	Prec@1 54.000 (42.680)
+Eposide-(0): [3800/10000]	Time 0.443 (0.375)	Data 0.001 (0.001)	Loss 0.924 (1.333)	Prec@1 52.000 (42.892)
+Eposide-(0): [3900/10000]	Time 0.362 (0.375)	Data 0.000 (0.001)	Loss 1.368 (1.330)	Prec@1 42.000 (43.037)

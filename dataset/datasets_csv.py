@@ -1,16 +1,17 @@
+import csv
+import dataclasses
 import os
 import os.path as path
-import json
-import torch
-import torch.utils.data as data
-import numpy as np
 import random
-from PIL import Image
-import pdb
-import csv
 import sys
+from typing import List
 
+import numpy as np
+from PIL import Image
+from torch import nn, Tensor
 from torch.utils.data import Dataset
+from torchvision import transforms as T
+from dataclasses import field
 
 sys.dont_write_bytecode = True
 
@@ -22,13 +23,13 @@ def pil_loader(path):
             return img.convert('RGB')
 
 
-def accimage_loader(path):
-    import accimage
-    try:
-        return accimage.Image(path)
-    except IOError:
-        # Potentially a decoding problem, fall back to PIL.Image
-        return pil_loader(path)
+# def accimage_loader(path):
+#     import accimage
+#     try:
+#         return accimage.Image(path)
+#     except IOError:
+#         # Potentially a decoding problem, fall back to PIL.Image
+#         return pil_loader(path)
 
 
 def gray_loader(path):
@@ -38,11 +39,7 @@ def gray_loader(path):
 
 
 def default_loader(path):
-    from torchvision import get_image_backend
-    if get_image_backend() == 'accimage':
-        return accimage_loader(path)
-    else:
-        return pil_loader(path)
+    return pil_loader(path)
 
 
 def find_classes(dir):
@@ -60,9 +57,24 @@ class CSVLoader(Dataset):
        Indexes are stored in the CSV files.
     """
 
-    def __init__(self, data_dir="", mode="train", image_size=84, data_name="miniImageNet",
-                 transform=None, loader=default_loader, gray_loader=gray_loader,
-                 episode_num=1000, way_num=5, shot_num=5, query_num=5):
+    class Batch:
+        # Light dataclass for storing episode data using __slots__ and compare=False
+        __slots__ = ['query_images', 'query_targets', 'support_images', 'support_targets']
+
+        def __init__(self, query_images: List[Tensor], query_targets: List[Tensor],
+                     support_images: List[List[Tensor]], support_targets: List[Tensor]):
+            self.query_images = query_images
+            self.query_targets = query_targets
+            self.support_images = support_images
+            self.support_targets = support_targets
+
+    def __init__(self, data_dir="", mode="train",
+                 pre_process: T.Compose = None,
+                 augmentations: List[nn.Module] = None,
+                 post_process: T.Compose = None,
+                 loader=default_loader,
+                 _gray_loader=gray_loader,
+                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=2):
 
         super(CSVLoader, self).__init__()
 
@@ -125,10 +137,12 @@ class CSVLoader(Dataset):
             data_list.append(episode)
 
         self.data_list = data_list
-        self.image_size = image_size
-        self.transform = transform
+        self.pre_process = pre_process
+        self.post_process = post_process
+        self.augmentations = augmentations
+        self.av_num = av_num
         self.loader = loader
-        self.gray_loader = gray_loader
+        self.gray_loader = _gray_loader
 
     def __len__(self):
         return len(self.data_list)
@@ -137,7 +151,6 @@ class CSVLoader(Dataset):
         '''
             Load an episode each time, including C-way K-shot and Q-query
         '''
-        image_size = self.image_size
         episode_files = self.data_list[index]
 
         query_images = []
@@ -151,23 +164,26 @@ class CSVLoader(Dataset):
             # load query images
             query_dir = data_files['query_img']
 
+            # Randomly select a subset of augmentations to apply per episode
+            augment = [None]
+            if self.augmentations is not None:
+                augment = [T.Compose(random.sample(self.augmentations, self.av_num)) for _ in range(self.av_num)]
+
             for j in range(len(query_dir)):
                 temp_img = self.loader(query_dir[j])
-
-                # Normalization
-                if self.transform is not None:
-                    temp_img = self.transform(temp_img)
-                query_images.append(temp_img)
+                # Process the image
+                temp_img = [self._process_img(aug, temp_img) for aug in augment]
+                query_images += temp_img
 
             # load support images
             temp_support = []
             support_dir = data_files['support_set']
+
             for j in range(len(support_dir)):
                 temp_img = self.loader(support_dir[j])
 
-                # Normalization
-                if self.transform is not None:
-                    temp_img = self.transform(temp_img)
+                # Process the image
+                temp_img = self._process_img(augment[0], temp_img)
                 temp_support.append(temp_img)
 
             support_images.append(temp_support)
@@ -177,8 +193,15 @@ class CSVLoader(Dataset):
             query_targets.extend(np.tile(target, len(query_dir)))
             support_targets.extend(np.tile(target, len(support_dir)))
 
-        # Shuffle the query images
-        # rand_num = torch.rand(1)
-        # random.Random(rand_num).shuffle(query_images)
-        # random.Random(rand_num).shuffle(query_targets)
-        return (query_images, query_targets, support_images, support_targets)
+        return query_images, query_targets, support_images, support_targets
+
+    def _process_img(self, augment, temp_img):
+        if self.pre_process is not None:
+            temp_img = self.pre_process(temp_img)
+        # Normalization
+        if augment is not None:
+            temp_img = augment(temp_img)
+        # Post-process
+        if self.post_process is not None:
+            temp_img = self.post_process(temp_img)
+        return temp_img
