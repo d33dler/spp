@@ -74,7 +74,7 @@ class CSVLoader(Dataset):
                  post_process: T.Compose = None,
                  loader=default_loader,
                  _gray_loader=gray_loader,
-                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=2):
+                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=1):
 
         super(CSVLoader, self).__init__()
 

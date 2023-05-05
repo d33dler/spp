@@ -111,7 +111,7 @@ class DEModel(ARCH):
         self.optimizer = optimizer
 
     def save_model(self, filename=None):
-        if self.DE.is_fit:
+        if getattr(self, 'DE', None) is not None:
             self.state.update({'DE': self.DE.dump()})
         super().save_model(filename)
 
@@ -133,9 +133,9 @@ class DEModel(ARCH):
         """
         if 'DE' not in self.root_cfg:
             raise AttributeError("Not able to enable decision engine - Missing DE module specification in config!")
-        dengine = self.DE
+        dengine = getattr(self, 'DE', None)
         if not isinstance(dengine, DecisionEngine):
-            raise ValueError(f"Wrong class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
+            raise ValueError(f"Wrong or missing class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
                              f"got: : {type(dengine)}")
         if not dengine.is_fit or refit:
             self._fit_DE()

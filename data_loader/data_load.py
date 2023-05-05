@@ -115,15 +115,13 @@ class DatasetLoader:
                 pre_process=pre_process,
                 augmentations=None,
                 post_process=post_process,
-                episode_num=episode_val_num, way_num=way_num, shot_num=shot_num, query_num=query_num, av_num=av_num
-            )
+                episode_num=episode_val_num, way_num=way_num, shot_num=shot_num, query_num=query_num)
         testset = CSVLoader(
             data_dir=dataset_dir, mode='test',
             pre_process=pre_process,
             augmentations=None,
             post_process=post_process,
-            episode_num=episode_test_num, way_num=way_num, shot_num=shot_num, query_num=query_num, av_num=av_num
-        )
+            episode_num=episode_test_num, way_num=way_num, shot_num=shot_num, query_num=query_num)
         if mode == 'train':
             print('Trainset: %d' % len(trainset))
             print('Trainset: %d' % len(trainset), file=F_txt)

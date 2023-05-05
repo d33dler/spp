@@ -107,3 +107,127 @@ Testset: 600
 Trainset: 10000
 Valset: 900
 Testset: 600
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAV', 'mode': 'train', 'resume': None, 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAV_DN4_5_Way_5_Shot_K3'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc(
+      (softmax): Softmax(dim=1)
+    )
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10
+Valset: 600
+Testset: 600
+============ Testing on the test set ============
+
+Test-(1): [100/600]	Time 0.112 (0.262)	Loss 5.629 (3.952)	Prec@1 32.0 (31.940593719482422)
+
+Test-(1): [200/600]	Time 0.117 (0.188)	Loss 3.466 (4.044)	Prec@1 30.0 (32.0796012878418)
+
+Test-(1): [300/600]	Time 0.085 (0.165)	Loss 2.604 (4.008)	Prec@1 38.0 (32.358802795410156)
+
+Test-(1): [400/600]	Time 0.100 (0.153)	Loss 3.111 (3.966)	Prec@1 20.0 (31.960098266601562)
+
+Test-(1): [500/600]	Time 0.085 (0.145)	Loss 3.168 (3.924)	Prec@1 26.0 (31.968063354492188)
+ * Prec@1 32.010 Best_prec1 0.000{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAV', 'mode': 'train', 'resume': None, 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAV_DN4_5_Way_5_Shot_K3'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc(
+      (softmax): Softmax(dim=1)
+    )
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 10
+Valset: 600
+Testset: 600
+============ Testing on the test set ============
+
+Test-(1): [100/600]	Time 0.116 (0.261)	Loss 4.265 (3.414)	Prec@1 34.0 (34.3564338684082)
+
+Test-(1): [200/600]	Time 0.128 (0.189)	Loss 3.900 (3.288)	Prec@1 34.0 (34.636817932128906)
+
+Test-(1): [300/600]	Time 0.136 (0.165)	Loss 4.442 (3.245)	Prec@1 36.0 (34.89036560058594)
+
+Test-(1): [400/600]	Time 0.200 (0.153)	Loss 3.238 (3.291)	Prec@1 34.0 (34.9476318359375)
+
+Test-(1): [500/600]	Time 0.106 (0.145)	Loss 3.122 (3.325)	Prec@1 32.0 (34.65468978881836)
+ * Prec@1 34.490 Best_prec1 0.000============ Testing on the test set ============
+
+Test-(1): [100/600]	Time 0.214 (0.267)	Loss 3.614 (4.725)	Prec@1 42.0 (35.12871170043945)
+
+Test-(1): [200/600]	Time 0.109 (0.192)	Loss 5.828 (4.450)	Prec@1 34.0 (34.73632049560547)
+
+Test-(1): [300/600]	Time 0.130 (0.169)	Loss 3.430 (4.420)	Prec@1 42.0 (34.43853759765625)
+
+Test-(1): [400/600]	Time 0.110 (0.155)	Loss 3.447 (4.337)	Prec@1 30.0 (34.22443771362305)
+
+Test-(1): [500/600]	Time 0.136 (0.148)	Loss 3.447 (4.450)	Prec@1 42.0 (34.39121627807617)
+ * Prec@1 34.267 Best_prec1 34.490===================================== Epoch 1 =====================================
+Trainset: 10
+Valset: 600
+Testset: 600
+============ Testing on the test set ============
+
+Test-(2): [100/600]	Time 0.143 (0.293)	Loss 1.567 (1.947)	Prec@1 40.0 (32.81188201904297)
+
+Test-(2): [200/600]	Time 0.090 (0.207)	Loss 1.687 (1.951)	Prec@1 48.0 (33.10447692871094)
+
+Test-(2): [300/600]	Time 0.111 (0.178)	Loss 1.697 (1.947)	Prec@1 34.0 (33.18272399902344)
+
+Test-(2): [400/600]	Time 0.130 (0.164)	Loss 2.031 (1.938)	Prec@1 34.0 (33.00249481201172)
+
+Test-(2): [500/600]	Time 0.133 (0.155)	Loss 1.700 (1.931)	Prec@1 40.0 (33.077842712402344)
+ * Prec@1 33.017 Best_prec1 34.490============ Testing on the test set ============
+
+Test-(2): [100/600]	Time 0.152 (0.277)	Loss 1.726 (2.208)	Prec@1 30.0 (31.96039581298828)
+
+Test-(2): [200/600]	Time 0.116 (0.199)	Loss 1.694 (2.234)	Prec@1 42.0 (31.890548706054688)
+
+Test-(2): [300/600]	Time 0.086 (0.173)	Loss 2.066 (2.353)	Prec@1 36.0 (32.03322219848633)
+
+Test-(2): [400/600]	Time 0.102 (0.159)	Loss 1.769 (2.321)	Prec@1 30.0 (32.52368927001953)
+
+Test-(2): [500/600]	Time 0.129 (0.151)	Loss 1.793 (2.483)	Prec@1 36.0 (32.650699615478516)
+ * Prec@1 32.633 Best_prec1 34.490===================================== Epoch 2 =====================================
+Trainset: 10
+Valset: 600
+Testset: 600
+============ Testing on the test set ============
+
+Test-(3): [100/600]	Time 0.119 (0.298)	Loss 1.602 (1.859)	Prec@1 40.0 (31.821781158447266)
+
+Test-(3): [200/600]	Time 0.158 (0.213)	Loss 1.503 (1.833)	Prec@1 44.0 (32.67661666870117)

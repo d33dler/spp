@@ -158,7 +158,7 @@ class Experiment:
             ])
 
             testset = CSVLoader(
-                data_dir=self._args.dataset_dir, mode='train', image_size=params.img_sz, augmentations=ImgTransform,
+                data_dir=self._args.dataset_dir, mode='train', pre_process=ImgTransform,
                 episode_num=params.episode_test_num, way_num=params.way_num, shot_num=params.shot_num,
                 query_num=params.query_num
             )

@@ -48,7 +48,7 @@ DE:
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 2 # number of augmented views
+  AV_NUM: 1 # number of augmented views
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
@@ -105,7 +105,7 @@ EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 
 EPISODE_TRAIN_NUM: 10000
-EPISODE_VAL_NUM: 900
+EPISODE_VAL_NUM: 600
 EPISODE_TEST_NUM: 600
 WAY_NUM: 5
 SHOT_NUM: 5
