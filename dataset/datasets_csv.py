@@ -107,33 +107,30 @@ class CSVLoader(Dataset):
         f_csv.close()
         class_list = class_img_dict.keys()
 
-        while e < episode_num:
+        for _ in range(episode_num):
 
             # construct each episode
             episode = []
-            e += 1
             temp_list = random.sample(class_list, way_num)
-            label_num = -1
 
-            for item in temp_list:
-                label_num += 1
+            for cls, item in enumerate(temp_list):  # for each class
                 imgs_set = class_img_dict[item]
-                support_imgs = random.sample(imgs_set, shot_num)
-                query_imgs = [val for val in imgs_set if val not in support_imgs]
+                support_imgs = random.sample(imgs_set, shot_num)  # sample X images from each class
+                query_imgs = [val for val in imgs_set if val not in support_imgs]  # the rest images are query images
 
-                if query_num < len(query_imgs):
-                    query_imgs = random.sample(query_imgs, query_num)
+                if query_num < len(query_imgs):  # if the number of query images is larger than query_num
+                    query_imgs = random.sample(query_imgs, query_num)  # sample X images as the query images
 
                 # the dir of support set
-                query_dir = [path.join(data_dir, 'images', i) for i in query_imgs]
-                support_dir = [path.join(data_dir, 'images', i) for i in support_imgs]
+                query_files = [loader(path.join(data_dir, 'images', i)) for i in query_imgs]
+                support_files = [loader(path.join(data_dir, 'images', i)) for i in support_imgs]
 
                 data_files = {
-                    "query_img": query_dir,
-                    "support_set": support_dir,
-                    "target": label_num
+                    "query_img": query_files,  # query_num - query images for `cls`, default(15)
+                    "support_set": support_files,  # SHOT - support images for `cls`, default(5)
+                    "target": cls
                 }
-                episode.append(data_files)
+                episode.append(data_files)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
             data_list.append(episode)
 
         self.data_list = data_list
@@ -149,9 +146,7 @@ class CSVLoader(Dataset):
         return len(self.data_list)
 
     def __getitem__(self, index):
-        '''
-            Load an episode each time, including C-way K-shot and Q-query
-        '''
+        '''Load an episode each time, including C-way K-shot and Q-query'''
         episode_files = self.data_list[index]
 
         query_images = []
@@ -159,34 +154,21 @@ class CSVLoader(Dataset):
         support_images = []
         support_targets = []
 
-        for i in range(len(episode_files)):
-            data_files = episode_files[i]
-
-            # load query images
-            query_dir = data_files['query_img']
-
-            # Randomly select a subset of augmentations to apply per episode
+        for data_files in episode_files:
             augment = [None]
+            # Randomly select a subset of augmentations to apply per episode
             if None not in [self.av_num, self.aug_num]:
                 augment = [T.Compose(random.sample(self.augmentations, self.aug_num)) for _ in range(self.av_num)]
 
-            for j in range(len(query_dir)):
-                temp_img = self.loader(query_dir[j])
-                # Process the image
-                temp_img = [self._process_img(aug, temp_img) for aug in augment]
-                query_images += temp_img
+            # load query images
+            query_dir = data_files['query_img']
+            print("Query dir length: ", len(query_dir))
+            query_images = [self._process_img(aug, temp_img) for aug in augment for temp_img in query_dir]
 
             # load support images
-            temp_support = []
             support_dir = data_files['support_set']
-
-            for j in range(len(support_dir)):
-                temp_img = self.loader(support_dir[j])
-
-                # Process the image
-                temp_img = self._process_img(None, temp_img)
-                print(temp_img)
-                temp_support.append(temp_img)
+            print("Support dir length: ", len(support_dir))
+            temp_support = [self._process_img(None, temp_img) for temp_img in support_dir]  # [self._process_img(aug, temp_img) for aug in augment for temp_img in support_dir]
 
             support_images.append(temp_support)
 

@@ -30,10 +30,7 @@ class KNN_itc(nn.Module):
         print("----END FEATURES----")
         for i in range(0, B, av_num):
             inner_sim = torch.zeros(av_num, len(S)).cuda()
-            for j in range(len(S)):
-                support_set_sam = S[j]
-                support_set_sam_norm = torch.norm(support_set_sam, 2, 0, True)
-                support_set_sam = support_set_sam / support_set_sam_norm
+            for j in range(0, len(S), av_num):
                 for av in range(av_num):
                     query_sam = q[i + av]
                     query_sam = query_sam.reshape((C, -1))
@@ -41,12 +38,15 @@ class KNN_itc(nn.Module):
                     query_sam_norm = torch.norm(query_sam, 2, 1, True)
                     query_sam = query_sam / query_sam_norm
 
+                    support_set_sam = S[j + av]
+                    support_set_sam_norm = torch.norm(support_set_sam, 2, 0, True)
+                    support_set_sam = support_set_sam / support_set_sam_norm
+
                     # cosine similarity between a query sample and a support category
                     innerproduct_matrix = query_sam @ support_set_sam
                     # choose the top-k nearest neighbors
                     topk_value, topk_index = torch.topk(innerproduct_matrix, self.neighbor_k, 1)
                     inner_sim[av, j] = torch.sum(topk_value)
-
             similarity_ls.append(self._geometric_mean(inner_sim) if av_num > 1 else inner_sim)
 
         similarity_ls = torch.cat(similarity_ls, 0)

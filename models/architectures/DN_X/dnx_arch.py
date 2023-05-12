@@ -57,7 +57,8 @@ class DN_X(DEModel):
         epochix = self.get_epoch()
         episode: CSVLoader.Batch
         for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_loader):
-
+            print("QUERY IMAGES LENGTH: ", len(query_images))
+            print("SUPPORT IMAGES LENGTH: ", len(support_images))
             # Measure data loading time
             data_time.update(time.time() - end)
             # Convert query and support images
@@ -65,8 +66,8 @@ class DN_X(DEModel):
             input_var1 = query_images.cuda()
 
             input_var2 = []
-            for i in range(len(support_images)):
-                temp_support = support_images[i]
+
+            for temp_support in support_images:
                 temp_support = torch.cat(temp_support, 0)
                 input_var2.append(temp_support)
             input_var2 = torch.cat(input_var2, 0).cuda()
