@@ -101,15 +101,16 @@ class DatasetLoader:
         augmentation = self._read_transforms(cfg_aug, cfg_aug.AUGMENTATION)
         post_process = transforms.Compose(self._read_transforms(cfg_aug, cfg_aug.POST_PROCESS))
         av_num = cfg_aug.AV_NUM
-
+        aug_num = cfg_aug.AUG_NUM
         if mode == 'train':
             trainset = CSVLoader(
                 data_dir=dataset_dir, mode='train',
                 pre_process=pre_process,
                 augmentations=augmentation,
                 post_process=post_process,
-                episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num, av_num=av_num
-            )
+                episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,
+                av_num=av_num,
+                aug_num=aug_num)
             valset = CSVLoader(
                 data_dir=dataset_dir, mode='val',
                 pre_process=pre_process,

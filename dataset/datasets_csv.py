@@ -74,7 +74,7 @@ class CSVLoader(Dataset):
                  post_process: T.Compose = None,
                  loader=default_loader,
                  _gray_loader=gray_loader,
-                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=1):
+                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None):
 
         super(CSVLoader, self).__init__()
 
@@ -141,6 +141,7 @@ class CSVLoader(Dataset):
         self.post_process = post_process
         self.augmentations = augmentations
         self.av_num = av_num
+        self.aug_num = aug_num
         self.loader = loader
         self.gray_loader = _gray_loader
 
@@ -166,8 +167,8 @@ class CSVLoader(Dataset):
 
             # Randomly select a subset of augmentations to apply per episode
             augment = [None]
-            if self.augmentations is not None:
-                augment = [T.Compose(random.sample(self.augmentations, self.av_num)) for _ in range(self.av_num)]
+            if None not in [self.av_num, self.aug_num]:
+                augment = [T.Compose(random.sample(self.augmentations, self.aug_num)) for _ in range(self.av_num)]
 
             for j in range(len(query_dir)):
                 temp_img = self.loader(query_dir[j])
@@ -183,7 +184,8 @@ class CSVLoader(Dataset):
                 temp_img = self.loader(support_dir[j])
 
                 # Process the image
-                temp_img = self._process_img(augment[0], temp_img)
+                temp_img = self._process_img(None, temp_img)
+                print(temp_img)
                 temp_support.append(temp_img)
 
             support_images.append(temp_support)

@@ -1,6 +1,7 @@
-AUGMENTOR: #TODO check cfg updating of the root cfg
+AUGMENTOR:
   DISABLE: [ ]
   AV_NUM: 2 # number of augmented views
+  AUG_NUM: 3 # number of randomly selected augmentations per view
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
@@ -16,7 +17,7 @@ AUGMENTOR: #TODO check cfg updating of the root cfg
         ARGS: [ 84 ]
       },
       { NAME: COLOR_JITTER,
-        ARGS: { brightness: 0.5, contrast: 0.5, saturation: 0.5 },
+        ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
       },
       { NAME: RANDOM_HORIZONTAL_FLIP,
         ARGS: [ ],
@@ -27,11 +28,7 @@ AUGMENTOR: #TODO check cfg updating of the root cfg
       },
       {
         NAME: RANDOM_ROTATION,
-        ARGS: { degrees: [ 0, 90 ] },
-      },
-      {
-        NAME: GAUSSIAN_BLUR,
-        ARGS: { kernel_size: [ 5,9 ], sigma: [ 0.1,5 ] },
+        ARGS: { degrees: [ -45, 45 ] },
       }
     ]
   POST_PROCESS: [

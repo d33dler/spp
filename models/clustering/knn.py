@@ -24,7 +24,10 @@ class KNN_itc(nn.Module):
     def cosine_similarity(self, q: Tensor, S: List[Tensor], av_num: int = 1):
         B, C, h, w = q.size()
         similarity_ls = []
-
+        print("FEATURES")
+        print(q.size())
+        print(S[0].size())
+        print("----END FEATURES----")
         for i in range(0, B, av_num):
             inner_sim = torch.zeros(av_num, len(S)).cuda()
             for j in range(len(S)):

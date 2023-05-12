@@ -1,6 +1,6 @@
 # Main params
 NAME: DN4_DA
-K_NEIGHBORS: 3
+K_NEIGHBORS: 1
 USE_BIAS: True
 DATASET: miniImageNet
 EPOCHS: 30
@@ -48,7 +48,8 @@ DE:
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 1 # number of augmented views
+  AV_NUM: 2 # number of augmented views
+  AUG_NUM: 3 # number of randomly selected augmentations per view
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
@@ -64,7 +65,7 @@ AUGMENTOR:
         ARGS: [ 84 ]
       },
       { NAME: COLOR_JITTER,
-        ARGS: { brightness: 0.5, contrast: 0.5, saturation: 0.5 },
+        ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
       },
       { NAME: RANDOM_HORIZONTAL_FLIP,
         ARGS: [ ],
@@ -75,11 +76,11 @@ AUGMENTOR:
       },
       {
         NAME: RANDOM_ROTATION,
-        ARGS: { degrees: [ 0, 90 ] },
+        ARGS: { degrees: [ -45, 45 ] },
       },
       {
         NAME: GAUSSIAN_BLUR,
-        ARGS: { kernel_size: [ 5,9 ], sigma: [ 0.1,5 ] },
+        ARGS: { kernel_size: [ 3,5 ], sigma: [ 0.1,0.3 ] },
       }
     ]
   POST_PROCESS: [
@@ -104,9 +105,9 @@ WORKERS: 8
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 
-EPISODE_TRAIN_NUM: 10000
-EPISODE_VAL_NUM: 600
-EPISODE_TEST_NUM: 600
+EPISODE_TRAIN_NUM: 101
+EPISODE_VAL_NUM: 1000
+EPISODE_TEST_NUM: 800
 WAY_NUM: 5
 SHOT_NUM: 5
 QUERY_NUM: 10

@@ -194,7 +194,7 @@ class Experiment:
         # ======================================== Training phase ===============================================
         print('\n............Start training............\n')
         start_time = time.time()
-        epoch = model.get_epoch()
+        epoch = model.get_epoch() + 1
         for epoch_index in range(epoch, epoch + self._args.epochs):
             print('===================================== Epoch %d =====================================' % epoch_index)
             F_txt.write(

@@ -68,8 +68,8 @@ class DN_X(DEModel):
             for i in range(len(support_images)):
                 temp_support = support_images[i]
                 temp_support = torch.cat(temp_support, 0)
-                temp_support = temp_support.cuda()
                 input_var2.append(temp_support)
+            input_var2 = torch.cat(input_var2, 0).cuda()
 
             # Deal with the targets
             target = torch.cat(query_targets, 0).cuda()
