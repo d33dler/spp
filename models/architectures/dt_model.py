@@ -1,27 +1,20 @@
-import os
-from collections import OrderedDict
 from datetime import datetime
-from typing import Iterator, List, Dict
+from typing import Iterator
 from skimage.color import rgb2hsv
 import numpy as np
 import pandas as pd
 import torch
 from pandas import DataFrame
-from pandas.io.formats.style import color
-from sklearn.decomposition import KernelPCA, PCA
 from sklearn.preprocessing import StandardScaler
-from torch import nn, Tensor
+from torch import Tensor
 from torch.nn import Parameter
 from torch.utils.data import DataLoader as TorchDataLoader
 
-from data_loader.data_load import Parameters, DatasetLoader
-from dataset.datasets_csv import CSVLoader
-from models import backbones, clustering, de_heads, necks
+from models import backbones, de_heads, necks
 from models.de_heads.dengine import DecisionEngine
 from models.de_heads.dtree import DTree
 from models.interfaces.arch_module import ARCH
-from models.utilities.utils import load_config, DataHolder, save_checkpoint, config_exchange, create_confusion_matrix
-import torch.nn.functional as F
+from models.utilities.utils import DataHolder, config_exchange
 
 
 class DEModel(ARCH):
@@ -35,9 +28,6 @@ class DEModel(ARCH):
 
     def __init__(self, cfg_path):
         super().__init__(cfg_path)
-        self.loaders = None
-        self.criterion = None
-        self.optimizer = None
         model_cfg = self.root_cfg
         self.num_classes = model_cfg.WAY_NUM
         self.k_neighbors = model_cfg.K_NEIGHBORS
@@ -45,29 +35,8 @@ class DEModel(ARCH):
         self.build()
         self._set_modules_mode()
 
-    @property
-    def mode(self):
-        return 'TRAIN' if self.training else 'TEST'
-
     def load_data(self, mode, output_file, dataset_dir=None):
         self.loaders = self.data_loader.load_data(mode, dataset_dir, output_file)
-
-    def build(self):
-        for module_name in self.module_topology.keys():
-            module = getattr(self, '_build_%s' % module_name)()
-            self.add_module(module_name, module)
-
-    def forward(self):
-        raise NotImplementedError
-
-    def _build_BACKBONE(self):
-        if self.root_cfg.get("BACKBONE", None) is None:
-            raise ValueError('Missing specification of backbone to use')
-        m: ARCH.Child = backbones.__all__[self.root_cfg.BACKBONE.NAME](self.data)
-        m.cuda() if self.root_cfg.BACKBONE.CUDA else False  # TODO may yield err?
-        self.module_topology['BACKBONE'] = m
-        self.data.module_list.append(m)
-        return m
 
     def _build_ENCODER(self):  # ENCODER | _
         if self.root_cfg.get("ENCODER", None) is None:
@@ -89,26 +58,15 @@ class DEModel(ARCH):
         self.DE = de
         return de
 
-    def sub_parameters(self, network: str, recurse: bool = True) -> Iterator[Parameter]:
-        sub_net = getattr(self, network, None)
-        return sub_net.parameters(recurse)
-
-    def verify_module(self, module):
-        if not isinstance(module, ARCH.Child):
-            raise ValueError(
-                "[CFG_OVERRIDE] Cannot override child module config. Child module doesn't subclass ARCH.Child!")
-
-    def train(self, training: bool = True) -> None:
-        [sub_mod.train(training) for sub_mod in self.module_topology.values() if isinstance(sub_mod, ARCH.Child)]
-
     def run_epoch(self, output_file):
+        """
+        Functionality: Iterate over training dataset episodes , pre-process the query and support classes and update
+        the model IO-object (DataHolder). Run inference and collect loss for performance tracking.
+        :param output_file: opened txt file for logging
+        :type output_file: IOFile
+        :return: None
+        """
         raise NotImplementedError
-
-    def set_criterion(self, criterion):
-        self.criterion = criterion
-
-    def set_optimizer(self, optimizer):
-        self.optimizer = optimizer
 
     def save_model(self, filename=None):
         if getattr(self, 'DE', None) is not None:
@@ -135,8 +93,9 @@ class DEModel(ARCH):
             raise AttributeError("Not able to enable decision engine - Missing DE module specification in config!")
         dengine = getattr(self, 'DE', None)
         if not isinstance(dengine, DecisionEngine):
-            raise ValueError(f"Wrong or missing class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
-                             f"got: : {type(dengine)}")
+            raise ValueError(
+                f"Wrong or missing class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
+                f"got: : {type(dengine)}")
         if not dengine.is_fit or refit:
             self._fit_DE()
             self.save_model(filename)

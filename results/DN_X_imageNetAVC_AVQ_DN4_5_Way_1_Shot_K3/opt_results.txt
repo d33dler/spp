@@ -1,0 +1,355 @@
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': None, 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+Eposide-(0): [100/2500]	Time 0.709 (0.897)	Data 0.000 (0.159)	Loss 1.682 (3.243)	Prec@1 25.333 (23.261)
+Eposide-(0): [200/2500]	Time 0.825 (0.819)	Data 0.000 (0.080)	Loss 1.589 (2.464)	Prec@1 29.333 (23.257)
+Eposide-(0): [300/2500]	Time 0.742 (0.823)	Data 0.000 (0.054)	Loss 1.615 (2.192)	Prec@1 25.333 (22.733)
+Eposide-(0): [400/2500]	Time 0.901 (0.837)	Data 0.000 (0.040)	Loss 1.649 (2.055)	Prec@1 18.667 (22.746)
+Eposide-(0): [500/2500]	Time 0.891 (0.835)	Data 0.000 (0.032)	Loss 1.598 (1.968)	Prec@1 17.333 (22.802)
+Eposide-(0): [600/2500]	Time 0.895 (0.837)	Data 0.000 (0.027)	Loss 1.555 (1.910)	Prec@1 29.333 (22.826)
+Eposide-(0): [700/2500]	Time 0.707 (0.835)	Data 0.000 (0.023)	Loss 1.547 (1.868)	Prec@1 29.333 (23.150)
+Eposide-(0): [800/2500]	Time 0.891 (0.823)	Data 0.000 (0.020)	Loss 1.643 (1.837)	Prec@1 33.333 (23.179)
+Eposide-(0): [900/2500]	Time 0.885 (0.826)	Data 0.000 (0.018)	Loss 1.629 (1.812)	Prec@1 22.667 (23.378)
+Eposide-(0): [1000/2500]	Time 0.919 (0.828)	Data 0.000 (0.016)	Loss 1.662 (1.791)	Prec@1 14.667 (23.510)
+Eposide-(0): [1100/2500]	Time 0.700 (0.825)	Data 0.000 (0.015)	Loss 1.717 (1.774)	Prec@1 22.667 (23.623)
+Eposide-(0): [1200/2500]	Time 0.792 (0.818)	Data 0.000 (0.014)	Loss 1.632 (1.761)	Prec@1 25.333 (23.637)
+Eposide-(0): [1300/2500]	Time 0.779 (0.811)	Data 0.000 (0.013)	Loss 1.610 (1.747)	Prec@1 24.000 (23.721)
+Eposide-(0): [1400/2500]	Time 0.716 (0.805)	Data 0.000 (0.012)	Loss 1.528 (1.737)	Prec@1 25.333 (23.893)
+Eposide-(0): [1500/2500]	Time 0.890 (0.806)	Data 0.000 (0.011)	Loss 1.543 (1.728)	Prec@1 29.333 (23.935)
+Eposide-(0): [1600/2500]	Time 0.733 (0.803)	Data 0.000 (0.010)	Loss 1.545 (1.720)	Prec@1 34.667 (24.042)
+Eposide-(0): [1700/2500]	Time 0.890 (0.805)	Data 0.000 (0.010)	Loss 1.629 (1.712)	Prec@1 32.000 (24.145)
+Eposide-(0): [1800/2500]	Time 0.824 (0.806)	Data 0.000 (0.009)	Loss 1.518 (1.705)	Prec@1 41.333 (24.280)
+Eposide-(0): [1900/2500]	Time 0.757 (0.807)	Data 0.000 (0.009)	Loss 1.588 (1.699)	Prec@1 38.667 (24.387)
+Eposide-(0): [2000/2500]	Time 0.845 (0.808)	Data 0.000 (0.008)	Loss 1.498 (1.693)	Prec@1 33.333 (24.550)
+Eposide-(0): [2100/2500]	Time 0.888 (0.809)	Data 0.000 (0.008)	Loss 1.475 (1.687)	Prec@1 36.000 (24.744)
+Eposide-(0): [2200/2500]	Time 0.862 (0.810)	Data 0.000 (0.008)	Loss 1.551 (1.683)	Prec@1 30.667 (24.892)
+Eposide-(0): [2300/2500]	Time 0.788 (0.811)	Data 0.003 (0.007)	Loss 1.550 (1.678)	Prec@1 26.667 (25.029)
+Eposide-(0): [2400/2500]	Time 0.861 (0.812)	Data 0.000 (0.007)	Loss 1.588 (1.674)	Prec@1 25.333 (25.175)
+============ Testing on the test set ============
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': None, 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+Eposide-(0): [100/2500]	Time 0.730 (0.912)	Data 0.000 (0.160)	Loss 1.623 (3.166)	Prec@1 28.000 (22.812)
+Eposide-(0): [200/2500]	Time 0.754 (0.827)	Data 0.000 (0.081)	Loss 1.641 (2.410)	Prec@1 17.333 (23.828)
+Eposide-(0): [300/2500]	Time 0.708 (0.799)	Data 0.000 (0.054)	Loss 1.667 (2.151)	Prec@1 21.333 (23.486)
+Eposide-(0): [400/2500]	Time 0.750 (0.782)	Data 0.000 (0.041)	Loss 1.568 (2.022)	Prec@1 25.333 (23.372)
+Eposide-(0): [500/2500]	Time 0.745 (0.776)	Data 0.000 (0.033)	Loss 1.673 (1.942)	Prec@1 18.667 (23.582)
+Eposide-(0): [600/2500]	Time 0.906 (0.778)	Data 0.001 (0.027)	Loss 1.597 (1.887)	Prec@1 21.333 (23.665)
+Eposide-(0): [700/2500]	Time 0.799 (0.787)	Data 0.000 (0.023)	Loss 1.555 (1.848)	Prec@1 34.667 (23.871)
+Eposide-(0): [800/2500]	Time 0.835 (0.791)	Data 0.000 (0.021)	Loss 1.585 (1.819)	Prec@1 24.000 (23.832)
+Eposide-(0): [900/2500]	Time 0.775 (0.791)	Data 0.000 (0.018)	Loss 1.692 (1.796)	Prec@1 26.667 (23.927)
+Eposide-(0): [1000/2500]	Time 0.779 (0.792)	Data 0.000 (0.016)	Loss 1.533 (1.777)	Prec@1 34.667 (24.049)
+Eposide-(0): [1100/2500]	Time 0.889 (0.790)	Data 0.000 (0.015)	Loss 1.479 (1.761)	Prec@1 44.000 (24.202)
+Eposide-(0): [1200/2500]	Time 0.811 (0.790)	Data 0.000 (0.014)	Loss 1.642 (1.749)	Prec@1 16.000 (24.234)
+Eposide-(0): [1300/2500]	Time 0.735 (0.790)	Data 0.000 (0.013)	Loss 1.674 (1.738)	Prec@1 29.333 (24.370)
+Eposide-(0): [1400/2500]	Time 0.835 (0.788)	Data 0.000 (0.012)	Loss 1.607 (1.728)	Prec@1 20.000 (24.367)
+Eposide-(0): [1500/2500]	Time 0.742 (0.786)	Data 0.000 (0.011)	Loss 1.552 (1.720)	Prec@1 25.333 (24.481)
+Eposide-(0): [1600/2500]	Time 0.746 (0.785)	Data 0.000 (0.010)	Loss 1.539 (1.712)	Prec@1 37.333 (24.537)
+Eposide-(0): [1700/2500]	Time 0.727 (0.784)	Data 0.000 (0.010)	Loss 1.499 (1.705)	Prec@1 41.333 (24.739)
+Eposide-(0): [1800/2500]	Time 0.847 (0.782)	Data 0.000 (0.009)	Loss 1.570 (1.700)	Prec@1 17.333 (24.774)
+Eposide-(0): [1900/2500]	Time 0.848 (0.780)	Data 0.000 (0.009)	Loss 1.625 (1.695)	Prec@1 22.667 (24.854)
+Eposide-(0): [2000/2500]	Time 0.795 (0.781)	Data 0.000 (0.008)	Loss 1.644 (1.689)	Prec@1 26.667 (24.868)
+Eposide-(0): [2100/2500]	Time 0.809 (0.782)	Data 0.000 (0.008)	Loss 1.534 (1.685)	Prec@1 22.667 (24.892)
+Eposide-(0): [2200/2500]	Time 0.838 (0.783)	Data 0.000 (0.008)	Loss 1.483 (1.681)	Prec@1 37.333 (24.977)
+Eposide-(0): [2300/2500]	Time 0.771 (0.783)	Data 0.003 (0.007)	Loss 1.557 (1.677)	Prec@1 21.333 (25.083)
+Eposide-(0): [2400/2500]	Time 0.773 (0.783)	Data 0.000 (0.007)	Loss 1.481 (1.673)	Prec@1 41.333 (25.156)
+============ Testing on the test set ============
+
+Test-(1): [100/800]	Time 0.197 (0.369)	Loss 6.633 (9.911)	Prec@1 22.666667938232422 (26.283828735351562)
+
+Test-(1): [200/800]	Time 0.207 (0.282)	Loss 1.715 (10.007)	Prec@1 33.333335876464844 (25.81757926940918)
+
+Test-(1): [300/800]	Time 0.237 (0.252)	Loss 5.324 (11.599)	Prec@1 30.666667938232422 (25.91362190246582)
+
+Test-(1): [400/800]	Time 0.180 (0.238)	Loss 43.160 (11.428)	Prec@1 22.666667938232422 (25.6159610748291)
+
+Test-(1): [500/800]	Time 0.148 (0.229)	Loss 1.644 (11.456)	Prec@1 25.33333396911621 (25.32801055908203)
+
+Test-(1): [600/800]	Time 0.247 (0.224)	Loss 3.145 (11.058)	Prec@1 29.33333396911621 (25.38435935974121)
+
+Test-(1): [700/800]	Time 0.297 (0.221)	Loss 2.717 (10.672)	Prec@1 21.33333396911621 (25.34284210205078)
+ * Prec@1 25.345 Best_prec1 0.000============ Testing on the test set ============
+
+Test-(1): [100/800]	Time 0.167 (0.361)	Loss 1.776 (18.374)	Prec@1 30.666667938232422 (25.174917221069336)
+
+Test-(1): [200/800]	Time 0.173 (0.277)	Loss 85.203 (16.688)	Prec@1 26.666667938232422 (25.28026580810547)
+
+Test-(1): [300/800]	Time 0.172 (0.249)	Loss 3.612 (14.838)	Prec@1 24.0 (25.04097557067871)
+
+Test-(1): [400/800]	Time 0.209 (0.234)	Loss 2.181 (13.914)	Prec@1 25.33333396911621 (24.931007385253906)
+
+Test-(1): [500/800]	Time 0.151 (0.226)	Loss 2.892 (13.499)	Prec@1 17.33333396911621 (25.01397132873535)
+
+Test-(1): [600/800]	Time 0.240 (0.221)	Loss 3.986 (12.926)	Prec@1 24.0 (24.962839126586914)
+
+Test-(1): [700/800]	Time 0.142 (0.217)	Loss 2.152 (13.241)	Prec@1 21.33333396911621 (24.93580436706543)
+ * Prec@1 24.947 Best_prec1 25.345===================================== Epoch 1 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar', 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}=> loaded checkpoint '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar' (epoch 1)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 1 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar', 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}=> loaded checkpoint '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar' (epoch 1)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 1 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar', 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}=> loaded checkpoint '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar' (epoch 1)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 1 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar', 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}=> loaded checkpoint '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar' (epoch 1)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 1 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar', 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}=> loaded checkpoint '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar' (epoch 1)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 1 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+Eposide-(1): [100/2500]	Time 0.761 (0.955)	Data 0.000 (0.175)	Loss 1.630 (2.135)	Prec@1 24.000 (29.096)
+Eposide-(1): [200/2500]	Time 0.767 (0.864)	Data 0.000 (0.088)	Loss 1.663 (1.944)	Prec@1 21.333 (29.081)
+Eposide-(1): [300/2500]	Time 0.797 (0.835)	Data 0.000 (0.059)	Loss 1.347 (1.822)	Prec@1 38.667 (29.905)
+Eposide-(1): [400/2500]	Time 0.769 (0.820)	Data 0.000 (0.044)	Loss 1.439 (1.792)	Prec@1 41.333 (30.045)
+Eposide-(1): [500/2500]	Time 0.881 (0.812)	Data 0.000 (0.036)	Loss 1.647 (1.774)	Prec@1 22.667 (29.961)
+Eposide-(1): [600/2500]	Time 0.771 (0.806)	Data 0.000 (0.030)	Loss 1.602 (1.754)	Prec@1 34.667 (29.819)
+Eposide-(1): [700/2500]	Time 0.766 (0.802)	Data 0.000 (0.025)	Loss 1.564 (1.744)	Prec@1 37.333 (29.887)
+Eposide-(1): [800/2500]	Time 0.786 (0.799)	Data 0.000 (0.022)	Loss 1.447 (1.724)	Prec@1 46.667 (30.012)
+Eposide-(1): [900/2500]	Time 0.763 (0.796)	Data 0.000 (0.020)	Loss 1.443 (1.707)	Prec@1 36.000 (30.039)
+Eposide-(1): [1000/2500]	Time 0.787 (0.797)	Data 0.000 (0.018)	Loss 1.608 (1.695)	Prec@1 28.000 (30.142)
+Eposide-(1): [1100/2500]	Time 0.786 (0.795)	Data 0.000 (0.016)	Loss 1.557 (1.685)	Prec@1 38.667 (30.343)
+Eposide-(1): [1200/2500]	Time 0.855 (0.794)	Data 0.000 (0.015)	Loss 1.333 (1.679)	Prec@1 44.000 (30.458)
+Eposide-(1): [1300/2500]	Time 0.751 (0.792)	Data 0.000 (0.014)	Loss 1.578 (1.669)	Prec@1 29.333 (30.720)
+Eposide-(1): [1400/2500]	Time 0.755 (0.791)	Data 0.000 (0.013)	Loss 1.531 (1.662)	Prec@1 46.667 (30.945)
+Eposide-(1): [1500/2500]	Time 0.748 (0.790)	Data 0.000 (0.012)	Loss 1.502 (1.654)	Prec@1 38.667 (31.170)
+Eposide-(1): [1600/2500]	Time 0.759 (0.789)	Data 0.000 (0.011)	Loss 1.502 (1.650)	Prec@1 28.000 (31.239)
+Eposide-(1): [1700/2500]	Time 0.757 (0.788)	Data 0.000 (0.011)	Loss 1.824 (1.644)	Prec@1 16.000 (31.306)
+Eposide-(1): [1800/2500]	Time 0.809 (0.788)	Data 0.000 (0.010)	Loss 1.832 (1.640)	Prec@1 38.667 (31.423)
+Eposide-(1): [1900/2500]	Time 0.851 (0.790)	Data 0.000 (0.010)	Loss 1.553 (1.635)	Prec@1 30.667 (31.510)
+Eposide-(1): [2000/2500]	Time 0.818 (0.792)	Data 0.000 (0.009)	Loss 1.495 (1.631)	Prec@1 37.333 (31.597)
+Eposide-(1): [2100/2500]	Time 0.851 (0.794)	Data 0.000 (0.009)	Loss 1.852 (1.627)	Prec@1 25.333 (31.699)
+Eposide-(1): [2200/2500]	Time 0.825 (0.795)	Data 0.000 (0.008)	Loss 1.779 (1.622)	Prec@1 13.333 (31.835)
+Eposide-(1): [2300/2500]	Time 0.820 (0.796)	Data 0.001 (0.008)	Loss 1.444 (1.618)	Prec@1 29.333 (31.981)
+Eposide-(1): [2400/2500]	Time 0.815 (0.797)	Data 0.000 (0.008)	Loss 1.485 (1.615)	Prec@1 38.667 (32.049)
+============ Testing on the test set ============
+
+Test-(2): [100/800]	Time 0.209 (0.398)	Loss 1.626 (1.766)	Prec@1 29.33333396911621 (28.726072311401367)
+
+Test-(2): [200/800]	Time 0.209 (0.303)	Loss 1.559 (1.713)	Prec@1 29.33333396911621 (28.7960205078125)
+
+Test-(2): [300/800]	Time 0.195 (0.270)	Loss 1.402 (1.703)	Prec@1 41.333335876464844 (28.31007957458496)
+
+Test-(2): [400/800]	Time 0.209 (0.255)	Loss 1.451 (1.694)	Prec@1 36.0 (28.78803062438965)
+
+Test-(2): [500/800]	Time 0.209 (0.245)	Loss 1.659 (1.700)	Prec@1 34.66666793823242 (28.763805389404297)
+
+Test-(2): [600/800]	Time 0.266 (0.238)	Loss 1.616 (1.690)	Prec@1 28.0 (29.033830642700195)
+
+Test-(2): [700/800]	Time 0.196 (0.234)	Loss 1.537 (1.692)	Prec@1 28.0 (28.91488265991211)
+ * Prec@1 28.877 Best_prec1 0.000============ Testing on the test set ============
+
+Test-(2): [100/800]	Time 0.167 (0.387)	Loss 1.756 (1.757)	Prec@1 28.0 (29.531352996826172)
+
+Test-(2): [200/800]	Time 0.260 (0.296)	Loss 1.518 (1.749)	Prec@1 34.66666793823242 (29.140962600708008)
+
+Test-(2): [300/800]	Time 0.156 (0.265)	Loss 1.613 (1.749)	Prec@1 26.666667938232422 (28.4606876373291)
+
+Test-(2): [400/800]	Time 0.185 (0.251)	Loss 1.529 (1.753)	Prec@1 28.0 (28.408979415893555)
+
+Test-(2): [500/800]	Time 0.188 (0.242)	Loss 1.747 (1.779)	Prec@1 20.0 (28.617431640625)
+
+Test-(2): [600/800]	Time 0.159 (0.236)	Loss 1.571 (1.777)	Prec@1 30.666667938232422 (28.43039321899414)
+
+Test-(2): [700/800]	Time 0.199 (0.231)	Loss 1.682 (1.769)	Prec@1 28.0 (28.401330947875977)
+ * Prec@1 28.332 Best_prec1 28.877===================================== Epoch 2 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVC_AVQ', 'mode': 'train', 'resume': None, 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVC_AVQ_DN4_5_Way_1_Shot_K3'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (criterion): CrossEntropyLoss()
+    (knn): KNN_itc()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 2500
+Valset: 800
+Testset: 800
+Eposide-(0): [100/2500]	Time 0.741 (0.926)	Data 0.000 (0.167)	Loss 1.586 (3.065)	Prec@1 24.000 (22.614)

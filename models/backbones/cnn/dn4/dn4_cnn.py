@@ -3,7 +3,6 @@ from dataclasses import field
 import torch.nn as nn
 from easydict import EasyDict
 from torch import optim
-
 from models.backbones.base import BaseBackbone2d
 from models.clustering.knn import KNN_itc
 from models.utilities.utils import DataHolder, init_weights, get_norm_layer
@@ -28,6 +27,7 @@ class FourLayer_64F(BaseBackbone2d):
 
     def __init__(self, data: DataHolder, config: EasyDict = None):
         super().__init__(self.Config())
+
         self.data = data
         model_cfg = data.cfg.BACKBONE
 
@@ -54,7 +54,7 @@ class FourLayer_64F(BaseBackbone2d):
             norm_layer(64),
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
-        self.FREEZE_LAYERS = [1, 5, 9, 12]
+        self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
         self.criterion = nn.CrossEntropyLoss().cuda()
@@ -68,14 +68,12 @@ class FourLayer_64F(BaseBackbone2d):
         data = self.data
         data.q = self.features(data.q_in)
         data.S = []
-
-        # extract features of input2--support set
         for i in range(len(data.S_in)):
             support_set_sam = self.features(data.S_in[i])
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
-        data.sim_list = self.knn.forward(data.q, data.S, data.av_num if self.training else 1)
+        data.sim_list, _ = self.knn.forward(data.q, data.S, data.av_num if data.training else 1)
         self.data.output = data.sim_list
         return data

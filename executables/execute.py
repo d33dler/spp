@@ -1,17 +1,16 @@
 from __future__ import print_function
 
 import argparse
-import concurrent
+from typing import List
+
 import torch.multiprocessing as multiprocessing
 from torch.multiprocessing import Process
 import os
 import sys
 import time
-from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 import scipy as sp
-import scipy.special
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
@@ -20,16 +19,13 @@ import torch.utils.data
 import yaml
 from PIL import ImageFile
 from easydict import EasyDict
-from sklearn.metrics import accuracy_score
 from torchvision.transforms import transforms
 
-from dataset.datasets_csv import CSVLoader
+from data_loader.datasets_csv import BatchFactory
 from models import architectures
 from models.architectures.DN_X.dnx_arch import DN_X
 from models.architectures.dt_model import DEModel
 from models.utilities.utils import AverageMeter, create_confusion_matrix
-
-from scipy.special import softmax
 
 sys.dont_write_bytecode = True
 
@@ -49,13 +45,15 @@ python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_d
 """
 
 
-class Experiment:
+class ExperimentManager:
     target_bank = np.empty(shape=0)
 
     def __init__(self):
+        self.output_dir = None
         self._args = None
         self.out_bank = None
         self.k = None
+        self.loss_tracker = AverageMeter()
 
     def mean_confidence_interval(self, data, confidence=0.95):
         a = [1.0 * np.array(data[i].cpu()) for i in range(len(data))]
@@ -64,18 +62,22 @@ class Experiment:
         h = se * sp.stats.t._ppf((1 + confidence) / 2., n - 1)
         return m, h
 
+    def write_losses_to_file(self, losses: List[float]):
+        with open(os.path.join(self.output_dir, "LOSS_LOG.txt"), 'w') as _f:
+            for loss in losses:
+                _f.write(str(loss) + '\n')
+
     def validate(self, val_loader, model: DEModel, best_prec1, F_txt, store_output=False, store_target=False):
         batch_time = AverageMeter()
         losses = AverageMeter()
         top1 = AverageMeter()
 
         # switch to evaluate mode
-        model.train(False)
-        data = model.data
+        model.eval()
         accuracies = []
 
         end = time.time()
-
+        model.data.training = False
         for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(val_loader):
 
             # Convert query and support images
@@ -101,6 +103,7 @@ class Experiment:
 
             # measure accuracy and record loss
             losses.update(loss.item(), query_images.size(0))
+
             prec1, _ = model.calculate_accuracy(out, target, topk=(1, 3))
 
             top1.update(prec1[0], query_images.size(0))
@@ -127,7 +130,8 @@ class Experiment:
                             f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                             f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
                             f'Prec@1 {top1.val} ({top1.avg})\n')
-
+        self.loss_tracker.loss_list = losses.loss_list
+        self.write_losses_to_file(self.loss_tracker.get_loss_history())
         print(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
         F_txt.write(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
 
@@ -143,7 +147,8 @@ class Experiment:
         total_accuracy_vector = []
         best_prec1 = 0
         params = model.data_loader.params
-
+        model.eval()
+        model.data.training = False
         for r in range(repeat_num):
             print('===================================== Round %d =====================================' % r)
             F_txt.write('===================================== Round %d =====================================\n' % r)
@@ -157,7 +162,7 @@ class Experiment:
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ])
 
-            testset = CSVLoader(
+            testset = BatchFactory(
                 data_dir=self._args.dataset_dir, mode='train', pre_process=ImgTransform,
                 episode_num=params.episode_test_num, way_num=params.way_num, shot_num=params.shot_num,
                 query_num=params.query_num
@@ -193,13 +198,16 @@ class Experiment:
         best_prec1 = 0
         # ======================================== Training phase ===============================================
         print('\n............Start training............\n')
-        start_time = time.time()
-        epoch = model.get_epoch() + 1
+        epoch = model.get_epoch()
+
         for epoch_index in range(epoch, epoch + self._args.epochs):
             print('===================================== Epoch %d =====================================' % epoch_index)
             F_txt.write(
                 '===================================== Epoch %d =====================================\n' % epoch_index)
-            model.adjust_learning_rate(epoch_index)
+            # ======================================= Set the model to training mode ==================================
+            model.data.training = True
+            # ======================================= Adjust learning rate =======================================
+            model.adjust_learning_rate()
 
             # ======================================= Folder of Datasets =======================================
             model.load_data(self._args.mode, F_txt, self._args.dataset_dir)
@@ -207,7 +215,10 @@ class Experiment:
             # ============================================ Training ===========================================
             # Freeze the parameters of Batch Normalization after 10000 episodes (1 epoch)
             if model.get_epoch() > 0:
+                model.eval()
                 model.BACKBONE.freeze_layers()
+            else:
+                model.train()
             # Train for 10000 episodes in each epoch
             model.run_epoch(F_txt)
 
@@ -234,20 +245,7 @@ class Experiment:
             print('============ Testing on the test set ============')
             F_txt.write('============ Testing on the test set ============\n')
             prec1, _ = self.validate(loaders.test_loader, model, best_prec1, F_txt)
-            model.train(True)
         ###############################################################################
-
-        loaders = model.data_loader.load_data(self._args.mode, self._args.dataset_dir, F_txt)
-        if self._args.dengine:
-            filename = os.path.join(self._args.outf, 'epoch_%d_DE.pth.tar' % model.get_epoch())
-            model.enable_decision_engine(loaders.train_loader, refit=True, filename=filename)
-            prec1, _ = self.validate(loaders.val_loader, model, best_prec1, F_txt)
-
-            print('============ Testing on the test set ============')
-            F_txt.write('\n============ Testing on the test set ============\n')
-            prec1, _ = self.validate(loaders.test_loader, model, best_prec1, F_txt)
-            # record the best prec@1 and save checkpoint
-            model.best_prec1 = max(prec1, best_prec1)
         F_txt.close()
 
         print('Training and evaluation completed')
@@ -262,6 +260,7 @@ class Experiment:
         _args.outf = p.outf + '_'.join([_args.arch, _args.data_name, str(model.arch), str(p.way_num), 'Way', str(
             p.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS)])
         p.outf = _args.outf
+        self.output_dir = p.outf
         if not os.path.exists(_args.outf):
             os.makedirs(_args.outf, exist_ok=True)
 
@@ -298,7 +297,7 @@ class Experiment:
 # ============================================ Training End ============================================================
 
 def launch_job(args):
-    e = Experiment()
+    e = ExperimentManager()
     e.run(args)
 
 

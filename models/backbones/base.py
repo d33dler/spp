@@ -2,7 +2,7 @@ import json
 from abc import ABC
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from torch import nn
 from yamldataclassconfig import YamlDataClassConfig, create_file_path_field
@@ -17,12 +17,12 @@ class BaseBackbone2d(ARCH.Child):
     Tested: No
     """
     features: nn.Sequential
-    FREEZE_LAYERS: List[int] = []
+    FREEZE_LAYERS: List[Tuple[nn.Module, List[int]]] = []
     FREEZE_EPOCH: int = 1
     ACTIVATION_F: ARCH.ActivationFuncs
     NORMALIZATION_F: ARCH.NormalizationFuncs
     POOLING_F: ARCH.PoolingFuncs
-
+    output_architecture = True
     @dataclass
     class _CFG(ARCH.BaseConfig):
 
@@ -193,8 +193,15 @@ class BaseBackbone2d(ARCH.Child):
         return None
 
     def forward(self, *args):
-        raise NotImplementedError("forward() method not implemented")
+        raise NotImplementedError("forward() method not implemented for Backbone 2D")
 
     def freeze_layers(self):
-        for layer_ix in self.FREEZE_LAYERS:
-            self.features[layer_ix] = self.features[layer_ix].requires_grad_(False)
+        for module, layers_ls in self.FREEZE_LAYERS:
+            for i, (name, child) in enumerate(module.named_children()):
+                if i in layers_ls:
+                    for param in child.parameters():
+                        param.requires_grad = False
+
+            for name, param in module.named_parameters():
+                print("> FROZEN_LAYER:", name, param.requires_grad)
+

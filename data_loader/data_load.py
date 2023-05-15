@@ -1,16 +1,14 @@
 import dataclasses
-import os
 from pathlib import Path
 from typing import Union
 
 import torch
-from torch import nn
 
-from dataset.datasets_csv import CSVLoader
+from data_loader.datasets_csv import BatchFactory
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-from models.utilities.utils import load_config, config_exchange
+from models.utilities.utils import load_config
 
 """
 Augmentation functions mappings from torchvision.transforms"""
@@ -65,8 +63,7 @@ class DatasetLoader:
 
     def __init__(self, cfg, params: Parameters) -> None:
         self.params = params
-        self.cfg = load_config(Path(Path(__file__).parent / "config.yaml"))
-        self.cfg.AUGMENTOR = config_exchange(self.cfg.AUGMENTOR, cfg)
+        self.cfg = load_config(Path(Path(__file__).parent / "config.yaml"), cfg)
 
     def _read_transforms(self, cfg, cfg_aug):
         transform_ls = []
@@ -103,7 +100,7 @@ class DatasetLoader:
         av_num = cfg_aug.AV_NUM
         aug_num = cfg_aug.AUG_NUM
         if mode == 'train':
-            trainset = CSVLoader(
+            trainset = BatchFactory(
                 data_dir=dataset_dir, mode='train',
                 pre_process=pre_process,
                 augmentations=augmentation,
@@ -111,13 +108,13 @@ class DatasetLoader:
                 episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,
                 av_num=av_num,
                 aug_num=aug_num)
-            valset = CSVLoader(
+            valset = BatchFactory(
                 data_dir=dataset_dir, mode='val',
                 pre_process=pre_process,
                 augmentations=None,
                 post_process=post_process,
                 episode_num=episode_val_num, way_num=way_num, shot_num=shot_num, query_num=query_num)
-        testset = CSVLoader(
+        testset = BatchFactory(
             data_dir=dataset_dir, mode='test',
             pre_process=pre_process,
             augmentations=None,

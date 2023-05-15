@@ -1,0 +1,288 @@
+import csv
+import dataclasses
+import os
+import os.path as path
+import random
+import sys
+from typing import List, Union
+from functools import lru_cache
+import numpy as np
+from PIL import Image
+from torch import nn, Tensor
+from torch.utils.data import Dataset
+from torchvision import transforms as T
+from dataclasses import field
+
+sys.dont_write_bytecode = True
+
+
+# def accimage_loader(path):
+#     import accimage
+#     try:
+#         return accimage.Image(path)
+#     except IOError:
+#         # Potentially a decoding problem, fall back to PIL.Image
+#         return pil_loader(path)
+
+
+@lru_cache(maxsize=500)
+def pil_loader(_path):
+    # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
+    with open(_path, 'rb') as f:
+        with Image.open(f) as img:
+            return np.array(img.convert('RGB'))
+
+
+@lru_cache(maxsize=1000)
+def gray_loader(_path):
+    with open(_path, 'rb') as f:
+        with Image.open(f) as img:
+            return img.convert('P')
+
+
+def find_classes(dir):
+    classes = [d for d in os.listdir(dir) if os.path.isdir(os.path.join(dir, d))]
+    classes.sort()
+    class_to_idx = {classes[i]: i for i in range(len(classes))}
+
+    return classes, class_to_idx
+
+
+class BatchFactory(Dataset):
+    """
+       Imagefolder for miniImageNet--ravi, StanfordDog, StanfordCar and CubBird datasets.
+       Images are stored in the folder of "images";
+       Indexes are stored in the CSV files.
+    """
+
+    class AbstractBuilder:
+        def build(self):
+            raise NotImplementedError("create() not implemented")
+
+        def get_item(self, index):
+            raise NotImplementedError("get_item() not implemented")
+
+    def __init__(self, builder: Union[str, AbstractBuilder] = "image_to_class", data_dir="", mode="train",
+                 pre_process: T.Compose = None,
+                 augmentations: List[nn.Module] = None,
+                 post_process: T.Compose = None,
+                 loader=None,
+                 _gray_loader=None,
+                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None):
+
+        super(BatchFactory, self).__init__()
+
+        # set the paths of the csv files
+        train_csv = os.path.join(data_dir, 'train.csv')
+        val_csv = os.path.join(data_dir, 'val.csv')
+        test_csv = os.path.join(data_dir, 'test.csv')
+        data_map = {
+            "train": train_csv,
+            "val": val_csv,
+            "test": test_csv
+        }
+        builder_map = {
+            "image_to_class": ImageToClassBuilder
+        }
+
+        if isinstance(builder, str):
+            builder = builder.lower()
+            self.builder = builder_map[builder](self) if builder in builder_map else ImageToClassBuilder(self)
+        else:
+            self.builder: BatchFactory.AbstractBuilder = ImageToClassBuilder(self) if builder or not isinstance(
+                builder, BatchFactory.AbstractBuilder) else builder
+        data_list = []
+        # store all the classes and images into a dict
+        class_img_dict = {}
+        with open(data_map[mode]) as f_csv:
+            f_train = csv.reader(f_csv, delimiter=',')
+            for row in f_train:
+                if f_train.line_num == 1:
+                    continue
+                img_name, img_class = row
+                if img_class in class_img_dict:
+                    class_img_dict[img_class].append(path.join(data_dir, 'images', img_name))
+                else:
+                    class_img_dict[img_class] = [path.join(data_dir, 'images', img_name)]
+
+        class_list = list(class_img_dict.keys())
+        self.episode_num = episode_num
+        self.way_num = way_num
+        self.shot_num = shot_num
+        self.query_num = query_num
+        self.class_list = class_list
+        self.class_img_dict = class_img_dict
+        self.data_list = data_list
+        self.pre_process = pre_process
+        self.post_process = post_process
+        self.augmentations = augmentations
+        self.av_num = av_num
+        self.aug_num = aug_num
+        self.loader = pil_loader if loader is None else loader
+        self.gray_loader = gray_loader if _gray_loader is None else _gray_loader
+
+        # Build the dataset
+        self.builder.build()
+
+    def __len__(self):
+        return len(self.data_list)
+
+    def __getitem__(self, index):
+        return self.builder.get_item(index)
+
+    def process_img(self, augment, temp_img):
+        if self.pre_process is not None:
+            temp_img = self.pre_process(temp_img)
+        # Normalization
+        if augment is not None:
+            temp_img = augment(temp_img)
+        # Post-process
+        if self.post_process is not None:
+            temp_img = self.post_process(temp_img)
+        return temp_img
+
+
+class ImageToClassBuilder(BatchFactory.AbstractBuilder):
+
+    def __init__(self, factory: BatchFactory):
+        self.factory = factory
+
+    def build(self):
+        # assign all values from self
+        builder = self.factory
+        episode_num = builder.episode_num
+        way_num = builder.way_num
+        shot_num = builder.shot_num
+        query_num = builder.query_num
+        class_list = builder.class_list
+        class_img_dict = builder.class_img_dict
+        data_list = builder.data_list
+
+        for _ in range(episode_num):
+
+            # construct each episode
+            episode = []
+            temp_list = random.sample(class_list, way_num)
+
+            for cls, item in enumerate(temp_list):  # for each class
+                imgs_set = class_img_dict[item]
+                random.shuffle(imgs_set)  # shuffle the images
+
+                # split the images into support and query sets
+                support_imgs = imgs_set[:shot_num]
+                query_imgs = imgs_set[shot_num:shot_num + query_num]
+
+                cls_subset = {
+                    "query_img": query_imgs,  # query_num - query images for `cls`, default(15)
+                    "support_set": support_imgs,  # SHOT - support images for `cls`, default(5)
+                    "target": cls
+                }
+                episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
+            data_list.append(episode)
+
+    def get_item(self, index):
+        """Load an episode each time, including C-way K-shot and Q-query"""
+        factory = self.factory
+        episode_files = factory.data_list[index]
+        loader = factory.loader
+        query_images = []
+        query_targets = []
+        support_images = []
+        support_targets = []
+
+        for cls_subset in episode_files:
+            augment = [None]
+            # Randomly select a subset of augmentations to apply per episode
+            if None not in [factory.av_num, factory.aug_num]:
+                augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)) for _ in
+                           range(factory.av_num)]
+
+            # load query images
+            query_dir = cls_subset['query_img']
+            query_images += [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
+                             temp_img in query_dir]  # Use the cached loader function
+
+            # load support images
+            support_dir = cls_subset['support_set']
+            temp_support = [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
+                            temp_img in support_dir]  # Use the cached loader function
+            support_images.append(temp_support)
+
+            # read the label
+            target = cls_subset['target']
+            query_targets.extend(np.tile(target, len(query_dir)))
+            support_targets.extend(np.tile(target, len(support_dir)))
+        return query_images, query_targets, support_images, support_targets
+
+
+class NTupleBuilder(BatchFactory.AbstractBuilder):
+
+    def __init__(self, factory: BatchFactory):
+        self.factory = factory
+
+    def get_item(self, index):
+        """Load an episode each time, including C-way K-shot and Q-query"""
+        factory = self.factory
+        episode_files = factory.data_list[index]
+        loader = factory.loader
+        query_images = []
+        query_targets = []
+        support_images = []
+        support_targets = []
+
+        for cls_subset in episode_files:
+            augment = [None]
+            # Randomly select a subset of augmentations to apply per episode
+            if None not in [factory.av_num, factory.aug_num]:
+                augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)) for _ in
+                           range(factory.av_num)]
+
+            # load query images
+            query_dir = cls_subset['query_img']
+            query_images += [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
+                             temp_img in query_dir]  # Use the cached loader function
+
+            # load support images
+            support_dir = cls_subset['support_set']
+            temp_support = [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
+                            temp_img in support_dir]  # Use the cached loader function
+            support_images.append(temp_support)
+
+            # read the label
+            target = cls_subset['target']
+            query_targets.extend(np.tile(target, len(query_dir)))
+            support_targets.extend(np.tile(target, len(support_dir)))
+        return query_images, query_targets, support_images, support_targets
+
+    def build(self):
+        # assign all values from self
+        builder = self.factory
+        episode_num = builder.episode_num
+        way_num = builder.way_num
+        shot_num = builder.shot_num
+        query_num = builder.query_num
+        class_list = builder.class_list
+        class_img_dict = builder.class_img_dict
+        data_list = builder.data_list
+
+        for _ in range(episode_num):
+
+            # construct each episode
+            episode = []
+            temp_list = random.sample(class_list, way_num)
+
+            for cls, item in enumerate(temp_list):  # for each class
+                imgs_set = class_img_dict[item]
+                random.shuffle(imgs_set)  # shuffle the images
+
+                # split the images into support and query sets
+                support_imgs = imgs_set[:shot_num]
+                query_imgs = imgs_set[shot_num:shot_num + query_num]
+
+                cls_subset = {
+                    "query_img": query_imgs,  # query_num - query images for `cls`, default(15)
+                    "support_set": support_imgs,  # SHOT - support images for `cls`, default(5)
+                    "target": cls
+                }
+                episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
+            data_list.append(episode)

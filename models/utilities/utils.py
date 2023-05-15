@@ -15,6 +15,7 @@ from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, Confu
 from torch import Tensor, nn as nn
 from torch.nn import BatchNorm2d, init
 import seaborn as sns
+
 """
 General utilities
 """
@@ -34,10 +35,13 @@ def save_checkpoint(state, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
 
 
-def load_config(config: Path):
+def load_config(config: Path, root_cfg=None):
     with open(config, mode="r") as f:
         cfg = yaml.load(f, Loader=yaml.SafeLoader)
-    return EasyDict(cfg)
+    cfg = EasyDict(cfg)
+    if root_cfg is not None:
+        config_exchange(cfg, root_cfg)
+    return cfg
 
 
 def print_network(net):
@@ -62,10 +66,16 @@ class DataHolderBase:
 
 
 def config_exchange(dest: dict, src: dict):
-    [(dest.update({k: v}) if not isinstance(dest[k], dict) else dest[k].update(v))
-     and src.update({k: dest.config[k]})
-     for k, v in src.items() if k in dest]
-    return dest
+    for k, v in src.items():
+        if k in dest:
+            if v is None:
+                src[k] = dest[k]
+            else:
+                dest[k].update(v)
+    for k, v in dest.items():
+        if k not in src:
+            src[k] = v
+    print(src)
 
 
 @dataclass
@@ -82,27 +92,29 @@ class DataHolder(DataHolderBase):
     S_in: List[Tensor]
     targets: Tensor
     av_num: int
+    cos_sim: Tensor
     # Backbone2d OUTPUT
     q: Tensor
     DLD_topk: Tensor
     S: List[Tensor]  # CUDA
     sim_list: Tensor  # CUDA
-    # Encoder OUTPUT
-    q_smax: Tensor
-    q_reduced: Tensor
-    S_reduced: List[Tensor]
-    sim_list_REDUCED: Tensor
+
     # Tree fit input
     X: DataFrame
     y: DataFrame
     eval_set: Tuple[Any, Any]
 
+    # SNX
+    snx_queries: List[Tensor]
+    snx_positives: List[Tensor]
+    snx_negatives: List[Tensor]
     # Tree-out
     tree_pred: np.ndarray
 
     output: Any
 
     def __init__(self, cfg):
+        self.training = True
         self.eval_set = None
         self.module_list: List = []
         self.cfg = cfg
@@ -125,19 +137,31 @@ class AverageMeter(object):
     """Computes and stores the average and current value"""
 
     def __init__(self):
-        self.reset()
+        self.loss_list = []
+        self.loss_history = []
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
 
     def reset(self):
+        self.loss_list = []
         self.val = 0
         self.avg = 0
         self.sum = 0
         self.count = 0
 
     def update(self, val, n=1):
+        self.loss_list.append(val)
         self.val = val
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
+
+    def get_loss_history(self):
+        self.loss_history.append(np.mean(self.loss_list))
+        self.loss_list = []
+        return self.loss_history
 
 
 def accuracy(output, target, topk=(1,)):
@@ -232,3 +256,7 @@ def get_norm_layer(norm_type='instance'):
     use_bias = norm_layer.func == nn.InstanceNorm2d
 
     return norm_layer, use_bias
+
+
+def geometric_mean(t: Tensor, dim=0, keepdim=False) -> Tensor:
+    return torch.exp(torch.mean(torch.log(t), dim=dim, keepdim=keepdim))

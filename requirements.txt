@@ -14,3 +14,4 @@ pandas~=1.5.2
 hyperopt~=0.2.7
 seaborn
 mlflow
+torchviz

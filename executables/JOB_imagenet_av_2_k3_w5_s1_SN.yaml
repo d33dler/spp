@@ -1,6 +1,6 @@
 JOB_ID: imagenet_av_2_k3_w5_s5
-arch: "DN_X"
-config: ../models/architectures/configs/DN4_AV.yaml
+arch: "SN_X"
+config: ../models/architectures/configs/SN4_AV.yaml
 dengine: False
 refit_dengine: False
 dataset_dir: ../dataset/miniImageNet

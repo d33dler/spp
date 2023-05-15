@@ -86,8 +86,6 @@ class SevenLayer_64F(BaseBackbone2d):
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
         data.sim_list, data.DLD_topk = self.knn.forward(data.q, data.S)
-        if self.training:
-            self.backward(data.sim_list, data.targets)
         return data
 
 # def define_DN4Net(pretrained=False, model_root=None, which_model='Conv64', norm='batch', init_type='normal',

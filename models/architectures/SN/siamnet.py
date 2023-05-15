@@ -7,15 +7,15 @@ from models.architectures.dt_model import DEModel
 from models.utilities.utils import AverageMeter, accuracy
 
 
-class DN_X(DEModel):
+class SN_X(DEModel):
     """
-    DN_X (4|7|X) Model
+    Siamese Network (4|7|X) Model
     Implements epoch run employing few-shot learning & performance tracking during training
     Structure:
     [Deep learning module] ⟶ [K-NN module] ⟶ [Decision Tree]
 
     """
-    arch = 'DN4'
+    arch = 'SNX'
 
     def __init__(self, cfg_path):
         """
@@ -27,22 +27,10 @@ class DN_X(DEModel):
 
     def forward(self):
         self.BACKBONE.forward()
-        # d_engine: DecisionEngine = self.DE
-        # if d_engine and d_engine.enabled:
-        #     sim_ls = d_engine.normalize(self.data.sim_list.detach().cpu().numpy())
-        #     self.data.X = d_engine.feature_engineering(sim_ls, self.data.q_in_CPU)
-        #     self.data.sim_list = one_hot(torch.from_numpy(d_engine.forward(self.data.X).astype(np.int64)),
-        #                                  self.num_classes).float().cuda()
         return self.data.sim_list
 
     def run_epoch(self, output_file):
-        """
-        Functionality: Iterate over training dataset episodes , pre-process the query and support classes and update
-        the model IO-object (DataHolder). Run inference and collect loss for performance tracking.
-        :param output_file: opened txt file for logging
-        :type output_file: IOFile
-        :return: None
-        """
+
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
@@ -74,7 +62,7 @@ class DN_X(DEModel):
 
             # Calculate the output
             out = self.forward()
-            self.backward(out, target)
+            self.backward()
             loss = self.get_loss()
             # Measure accuracy and record loss
             prec1, _ = accuracy(out, target, topk=(1, 3))
@@ -104,3 +92,6 @@ class DN_X(DEModel):
                                                                       top1=top1), file=output_file)
         self.incr_epoch()
         self.data.clear()
+
+    def backward(self):
+        self.BACKBONE.backward()

@@ -1,7 +1,8 @@
+DATA_LOADER: __ignore__
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 2 # number of augmented views
-  AUG_NUM: 3 # number of randomly selected augmentations per view
+  AV_NUM: 5 # number of augmented views
+  AUG_NUM: 1 # number of randomly selected augmentations per view
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
@@ -21,14 +22,6 @@ AUGMENTOR:
       },
       { NAME: RANDOM_HORIZONTAL_FLIP,
         ARGS: [ ],
-      },
-      {
-        NAME: RANDOM_VERTICAL_FLIP,
-        ARGS: [ ],
-      },
-      {
-        NAME: RANDOM_ROTATION,
-        ARGS: { degrees: [ -45, 45 ] },
       }
     ]
   POST_PROCESS: [

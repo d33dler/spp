@@ -5,9 +5,10 @@ import os
 from abc import ABC, abstractmethod
 from enum import Enum, EnumMeta
 from pathlib import Path
-from typing import Dict, List, Union, Any
-
+from typing import Dict, Any
+from models import backbones
 import torch
+import torch.nn.functional as F
 from easydict import EasyDict
 from torch import nn, Tensor
 from torch.nn.modules.loss import _Loss
@@ -15,7 +16,6 @@ from torch.optim import Optimizer
 
 from data_loader.data_load import Parameters, DatasetLoader
 from models.utilities.utils import save_checkpoint, load_config, accuracy, init_weights, config_exchange
-import torch.nn.functional as F
 
 
 # noinspection PyUnresolvedReferences
@@ -26,17 +26,34 @@ class ARCH(nn.Module):
     a model - ARCH stores the module instances and offers module management functionalities.
     Functionalities:
     Save & Load model
-    Override child module configuration (root config child-module sub-configs fields matching child module configuration fields)
+    Override child module configuration
+    (root config child-module sub-configs fields matching child module configuration fields)
     Return calculated loss
     Calculate accuracy
     LR tweaking
     Any model in this framework must subclass Class.ARCH !
     """
-    root_cfg: EasyDict | dict
+    root_cfg: EasyDict
     optimizers: Dict
     best_prec1 = 0
     _epochix = 0
     _loss_val: Tensor
+    loaders = None
+
+    class ActivationFuncs(Enum):
+        Relu = nn.ReLU
+        Lrelu = nn.LeakyReLU
+        Sigmoid = nn.Sigmoid
+
+    class NormalizationFuncs(Enum):
+        BatchNorm2d = functools.partial(nn.BatchNorm2d, affine=True)
+        InstanceNorm2d = functools.partial(nn.InstanceNorm2d, affine=False)
+        none = None
+
+    class PoolingFuncs(Enum):
+        MaxPool2d = nn.MaxPool2d
+        AveragePool2d = nn.AvgPool2d
+        LPPool2d = nn.LPPool2d
 
     class Child(nn.Module, ABC):
         """
@@ -49,9 +66,9 @@ class ARCH(nn.Module):
         LR adjustment
         """
         config: Dict | EasyDict
-        lr: float | List[float]
-        optimizer: Optimizer | List[Optimizer]
-        criterion: _Loss | List[_Loss]
+        lr: float
+        optimizer: Optimizer
+        criterion: _Loss | nn.Module
         loss: Tensor
         fine_tuning = True
         require_grad = False
@@ -59,7 +76,6 @@ class ARCH(nn.Module):
         def __init__(self, config: EasyDict | dict) -> None:
             super().__init__()
             self.config = config
-
 
         def calculate_loss(self, gt, pred):
             """
@@ -71,28 +87,20 @@ class ARCH(nn.Module):
             :return: loss
             :rtype: Any
             """
-            if isinstance(self.criterion, list):
-                loss_ls = []
-                for prediction, criterion, optimizer in zip(pred, self.criterion, self.optimizer):
-                    loss = criterion(prediction, gt)
-                    loss_ls.append(loss)
-                return loss_ls
             return self.criterion(pred, gt)
 
-        def backward(self, pred, gt):
-            if not (self.training and self.require_grad):
-                return
-            if isinstance(self.criterion, list):
-                loss_ls = []
-                for prediction, criterion, optimizer in zip(pred, self.criterion, self.optimizer):
-                    loss = criterion(prediction, gt)
-                    loss_ls.append(loss)
-                    optimizer.zero_grad()
-                    loss.backward(retain_graph=True)
-                    optimizer.step()
-                torch.cuda.empty_cache()
-                self.loss = loss_ls
-                return loss_ls
+        def backward(self, *args, **kwargs):
+            """
+            Calculates the gradient and runs the model DAG backward
+            Default implementation assumes args are (pred, gt)
+            :param args: arguments
+            :type args: Sequence
+            :param kwargs: keyword arguments
+            :type kwargs: Dict
+            :return: loss
+            :rtype: Any
+            """
+            pred, gt = args
             self.loss = self.criterion(pred, gt)
             self.optimizer.zero_grad()
             self.loss.backward()
@@ -100,25 +108,18 @@ class ARCH(nn.Module):
             return self.loss
 
         def adjust_learning_rate(self, epoch):
+            lr = self.lr * (0.05 ** (epoch // 10))
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = lr
 
-            if isinstance(self.optimizer, list):
-                for lr, optimizer in zip(self.lr, self.optimizer):
-                    for param_group in optimizer.param_groups:
-                        param_group['lr'] = lr * (0.05 ** (epoch // 10))
-            else:
-                lr = self.lr * (0.05 ** (epoch // 10))
-                for param_group in self.optimizer.param_groups:
-                    param_group['lr'] = lr
+        def freeze_layers(self):
+            pass
 
         def set_optimize(self, optimize=True):
             self.fine_tuning = optimize
 
         def load_optimizer_state_dict(self, optim_state_dict):
-            if isinstance(self.optimizer, list):
-                for optimizer, state in zip(self.optimizer, optim_state_dict):
-                    optimizer.load_state_dict(state)
-            else:
-                self.optimizer.load_state_dict(optim_state_dict)
+            self.optimizer.load_state_dict(optim_state_dict)
 
         @staticmethod
         @abstractmethod
@@ -147,27 +148,40 @@ class ARCH(nn.Module):
         p = Parameters(c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE, c.QUERY_NUM * c.WAY_NUM)
-        self.data_loader = DatasetLoader(c.AUGMENTOR, p)
+        self.data_loader = DatasetLoader(c, p)
 
-    class ActivationFuncs(Enum):
-        Relu = nn.ReLU
-        Lrelu = nn.LeakyReLU
-        Sigmoid = nn.Sigmoid
+    def forward(self):
+        raise NotImplementedError
 
-    class NormalizationFuncs(Enum):
-        BatchNorm2d = functools.partial(nn.BatchNorm2d, affine=True)
-        InstanceNorm2d = functools.partial(nn.InstanceNorm2d, affine=False)
-        none = None
+    def run_epoch(self, output_file):
+        raise NotImplementedError
 
-    class PoolingFuncs(Enum):
-        MaxPool2d = nn.MaxPool2d
-        AveragePool2d = nn.AvgPool2d
-        LPPool2d = nn.LPPool2d
+    @property
+    def mode(self):
+        return 'TRAIN' if self.training else 'TEST'
 
-    def backward(self, pred, gt):
+    def build(self):
+        for module_name in self.module_topology.keys():
+            module = getattr(self, '_build_%s' % module_name)()
+            self.add_module(module_name, module)
+
+    def _build_BACKBONE(self):
+        if self.root_cfg.get("BACKBONE", None) is None:
+            raise ValueError('Missing specification of backbone to use')
+        m: ARCH.Child = backbones.__all__[self.root_cfg.BACKBONE.NAME](self.data)
+        m.cuda() if self.root_cfg.BACKBONE.CUDA else False  # TODO may yield err?
+        self.module_topology['BACKBONE'] = m
+        self.data.module_list.append(m)
+        return m
+
+    def verify_module(self, module):
+        if not isinstance(module, ARCH.Child):
+            raise ValueError(
+                "[CFG_OVERRIDE] Cannot override child module config. Child module doesn't subclass ARCH.Child!")
+
+    def backward(self, *args, **kwargs):
         for m in self.module_topology.values():
-            if m.training:
-                m.backward(pred, gt)
+            m.backward(*args, **kwargs)
 
     @staticmethod
     def get_func(fset: EnumMeta, name: str):
@@ -205,8 +219,8 @@ class ARCH(nn.Module):
 
         }
         optimizers = {
-            f"{priv[k]}_optim": v.optimizer.state_dict() if not isinstance(v.optimizer, list) else
-            [o.state_dict() for o in v.optimizer] for k, v in self.module_topology.items() if v.optimizer is not None}
+            f"{priv[k]}_optim": v.optimizer.state_dict() for k, v in self.module_topology.items() if
+            v.optimizer is not None}
         state_dicts = {f"{priv[k]}_state_dict": v.state_dict() for k, v in self.module_topology.items()}
         state.update(optimizers)
         state.update(state_dicts)
@@ -291,15 +305,17 @@ class ARCH(nn.Module):
     def incr_epoch(self):
         self._epochix += 1
 
-    def get_criterion(self):
-        return self.module_topology[self.root_cfg.TRACK_CRITERION].criterion
+    def get_criterion(self, module_id: str = None):
+        if module_id is None or module_id not in self.module_topology.keys():
+            return self.module_topology[self.root_cfg.TRACK_CRITERION].criterion
+        return self.module_topology[module_id].criterion
 
     def init_weights(self):
         for _id, module in self.module_topology.items():
             init_weights(module, self.root_cfg[_id].INIT_WEIGHTS) if "INIT_WEIGHTS" in self.root_cfg[_id] else False
 
-    def adjust_learning_rate(self, epoch_num):
+    def adjust_learning_rate(self):
         """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
         for k, mod in self.module_topology.items():
-            if mod.training and mod.require_grad:
-                mod.adjust_learning_rate(epoch=epoch_num)
+            print("Adjusting learning rate for module: ", k)
+            mod.adjust_learning_rate(epoch=self._epochix)
