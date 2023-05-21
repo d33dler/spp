@@ -90,7 +90,7 @@ class NPlusOneTupletLoss(nn.Module):
         """
         # Calculate the loss as per the formula
         max_val = torch.max(negatives - positives.unsqueeze(1), dim=1, keepdim=True)[0]
-        loss = max_val + torch.log(1 + torch.sum(torch.exp(negatives - positives.unsqueeze(1) - max_val), dim=1))
+        loss = max_val + torch.log1p(torch.sum(torch.exp(negatives - positives.unsqueeze(1) - max_val), dim=1))
 
         loss = loss.mean()  # average over the batch
 

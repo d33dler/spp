@@ -216,7 +216,7 @@ class ExperimentManager:
             # Freeze the parameters of Batch Normalization after 10000 episodes (1 epoch)
             if model.get_epoch() > 0:
                 model.eval()
-                model.BACKBONE.freeze_layers()
+                # model.BACKBONE.freeze_layers()
             else:
                 model.train()
             # Train for 10000 episodes in each epoch

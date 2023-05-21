@@ -49,15 +49,17 @@ AUGMENTOR:
   DISABLE: [ ]
   AV_NUM: 2 # number of augmented views
   AUG_NUM: 3 # number of randomly selected augmentations per view
-  STRATEGY: 'N:1'
+  STRATEGY: '1:1'
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
       NAME: RESIZE,
       ARGS: { size: [ 100,100 ] },
-    }
+    },
+
   ]
   AUGMENTATION:
+
     [
       { NAME: RANDOM_CROP,
         ARGS: [ 84 ]
@@ -69,8 +71,7 @@ AUGMENTOR:
         ARGS: [ ],
       }
     ]
-  POST_PROCESS: [
-    {
+  POST_PROCESS: [    {
       NAME: RESIZE,
       ARGS: { size: [ 84,84 ] },
     },

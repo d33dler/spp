@@ -1,8 +1,10 @@
 DATA_LOADER: __ignore__
+# NOTE: This configuration can be overwritten from the model root config
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 5 # number of augmented views
+  AV_NUM: 4 # number of augmented views
   AUG_NUM: 1 # number of randomly selected augmentations per view
+  STRATEGY: "1:1"  #'1:1' = 1 AV vs 1 support class AV-subset, '1:N' - 1 query-AV vs all samples of a support class
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
@@ -21,6 +23,9 @@ AUGMENTOR:
         ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
       },
       { NAME: RANDOM_HORIZONTAL_FLIP,
+        ARGS: [ ],
+      },
+      { NAME: RANDOM_VERTICAL_FLIP,
         ARGS: [ ],
       }
     ]

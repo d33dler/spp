@@ -122,15 +122,20 @@ class DataHolder(DataHolderBase):
         self.use_bias = cfg.USE_BIAS
         self.norm_layer = BatchNorm2d
         self.num_classes = cfg.WAY_NUM
-        self.av_num = cfg.AUGMENTOR.AV_NUM
+        self.av_num = cfg.AUGMENTOR.AV_NUM or 0
 
-    def clear(self):
+    def empty_cache(self):
         del self.q_in
         del self.S_in
         del self.q
         del self.S
+        del self.output
+        del self.cos_sim
         gc.collect()
         torch.cuda.empty_cache()
+
+    def get_true_AV(self):
+        return self.av_num + 1
 
 
 class AverageMeter(object):

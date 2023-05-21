@@ -1,12 +1,12 @@
 # Main params
-NAME: DN4_Vanilla
+NAME: DN4
 K_NEIGHBORS: 3
 USE_BIAS: True
 DATASET: miniImageNet
+EPOCHS: 30
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
-  DE: 'DT'
 }
 TRACK_LOSS: BACKBONE
 TRACK_CRITERION: BACKBONE
@@ -17,81 +17,62 @@ BACKBONE:
   GRAD: True
   NORM: batch
   CUDA: True
-  LEARNING_RATE: 0.005
+  LEARNING_RATE: 0.001
   BETA_ONE: [ 0.5,0.9 ]
-  INIT_WEIGHTS: kaiming
+  INIT_WEIGHTS: normal
   FREEZE_EPOCH: 1
-
-DE:
-  NAME: RandomForest # XGB | RandomForest
-  ENGINE: TREE
-  MODE: TRAIN
-  GRAD: False
-  CUDA: True
-  MODEL_NAME: __ignore__
-  OPTIMIZE: True
-  OPTIMIZATION_ROUNDS: 100
-  DATASET:
-  EPISODE_TRAIN_NUM: 4000
-  PARAMETERS: { tree_method: gpu_hist,
-                num_class: 5,
-                objective: 'multi:softmax',
-                eval_metric: 'mlogloss',
-                max_depth: 11,
-                min_child_weight: 3,
-                learning_rate: 0.04,
-                subsample: 0.8,
-                seed: 666,
-                reg_lambda: 1,
-  } # add parameters here to override default settings
-
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_N: 2 # number of augmented views
+  AV_NUM: # number of augmented views
+  AUG_NUM:  # number of randomly selected augmentations per view
+  STRATEGY: 'N:1'
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
-      NAME: Resize,
-      ARGS: [ [ 100,100 ] ],
-      ENABLE: True,
-    },
-  ]
+      NAME: RESIZE,
+      ARGS: { size: [ 84,84 ] },
+    }]
   AUGMENTATION:
     [
-      {
-        NAME: RandomErasing,
-        ARGS: { p: 0.5, scale: [ 0.02,0.33 ], ratio: [ 0.3,3.3 ] },
-      },
-      { NAME: RandomCrop,
+      { NAME: RANDOM_CROP,
         ARGS: [ 84 ]
       },
-      { NAME: ColorJitter,
+      { NAME: COLOR_JITTER,
         ARGS: { brightness: 0.4, contrast: 0.4, saturation: 0.4 },
       },
-      { NAME: RandomHorizontalFlip,
+      { NAME: RANDOM_HORIZONTAL_FLIP,
         ARGS: [ ],
       },
-      {
-        NAME: RandomRotation,
-        ARGS: [ 10 ],
-      },
     ]
+  POST_PROCESS: [
+    {
+      NAME: RESIZE,
+      ARGS: { size: [ 84,84 ] },
+    },
+    {
+      NAME: TO_TENSOR,
+      ARGS: [ ],
+    },
+    {
+      NAME: NORMALIZE,
+      ARGS: { mean: [ 0.5, 0.5, 0.5 ], std: [ 0.5, 0.5, 0.5 ] },
+    }
+  ]
 
 
 # Dataloader
 OUTF: '../results/'
 WORKERS: 8
-IMAGE_SIZE: 84
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
-EPOCHS: 30
+
 EPISODE_TRAIN_NUM: 10000
 EPISODE_VAL_NUM: 800
-EPISODE_TEST_NUM: 600
+EPISODE_TEST_NUM: 800
 WAY_NUM: 5
 SHOT_NUM: 1
-QUERY_NUM: 10
+QUERY_NUM: 15
 
 # Misc
 PRINT_FREQ: 100

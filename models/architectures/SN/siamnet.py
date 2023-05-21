@@ -91,7 +91,7 @@ class SN_X(DEModel):
                                                                       loss=losses,
                                                                       top1=top1), file=output_file)
         self.incr_epoch()
-        self.data.clear()
+        self.data.empty_cache()
 
     def backward(self):
         self.BACKBONE.backward()

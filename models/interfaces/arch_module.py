@@ -108,7 +108,7 @@ class ARCH(nn.Module):
             return self.loss
 
         def adjust_learning_rate(self, epoch):
-            lr = self.lr * (0.05 ** (epoch // 10))
+            lr = self.lr * (0.5 ** (epoch // 10))
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = lr
 

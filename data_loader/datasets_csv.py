@@ -1,31 +1,22 @@
 import csv
-import dataclasses
 import os
 import os.path as path
 import random
 import sys
-from typing import List, Union
 from functools import lru_cache
+from typing import List, Union
 import numpy as np
 from PIL import Image
-from torch import nn, Tensor
+from torch import nn
 from torch.utils.data import Dataset
 from torchvision import transforms as T
-from dataclasses import field
 
 sys.dont_write_bytecode = True
 
-
-# def accimage_loader(path):
-#     import accimage
-#     try:
-#         return accimage.Image(path)
-#     except IOError:
-#         # Potentially a decoding problem, fall back to PIL.Image
-#         return pil_loader(path)
+maxsize = int(os.getenv("LRU_CACHE_SIZE", 1000))  # Default value is 1000 if the environment variable is not set
 
 
-@lru_cache(maxsize=500)
+@lru_cache(maxsize=maxsize)
 def pil_loader(_path):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     with open(_path, 'rb') as f:
@@ -33,7 +24,7 @@ def pil_loader(_path):
             return np.array(img.convert('RGB'))
 
 
-@lru_cache(maxsize=1000)
+@lru_cache(maxsize=maxsize)
 def gray_loader(_path):
     with open(_path, 'rb') as f:
         with Image.open(f) as img:
@@ -68,8 +59,25 @@ class BatchFactory(Dataset):
                  post_process: T.Compose = None,
                  loader=None,
                  _gray_loader=None,
-                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None):
-
+                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None):
+        """
+        :param builder: the builder to build the dataset
+        :param data_dir: the root directory of the dataset
+        :param mode: the mode of the dataset, train, val or test
+        :param pre_process: the pre-process of the dataset
+        :param augmentations: the augmentations of the dataset
+        :param post_process: the post-process of the dataset
+        :param loader: the loader of the dataset
+        :param _gray_loader: the gray_loader of the dataset
+        :param episode_num: the number of episodes
+        :param way_num: the number of classes in one episode
+        :param shot_num: the number of support samples in one class
+        :param query_num: the number of query samples in one class
+        :param av_num: the number of augmentations for each sample
+        :param aug_num: the number of augmentations for each sample
+        :param strategy: the strategy of the dataset [None, '1:1', '1:N'], '1:1' = 1 AV vs 1 support class AV-subset,
+         '1:N' - 1 query-AV vs all samples of a support class
+        """
         super(BatchFactory, self).__init__()
 
         # set the paths of the csv files
@@ -120,7 +128,7 @@ class BatchFactory(Dataset):
         self.aug_num = aug_num
         self.loader = pil_loader if loader is None else loader
         self.gray_loader = gray_loader if _gray_loader is None else _gray_loader
-
+        self.strategy = strategy
         # Build the dataset
         self.builder.build()
 
@@ -189,24 +197,30 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
-
         for cls_subset in episode_files:
             augment = [None]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
                 augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)) for _ in
                            range(factory.av_num)]
+                augment += [None]  # introduce original sample as well
 
             # load query images
             query_dir = cls_subset['query_img']
-            query_images += [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
-                             temp_img in query_dir]  # Use the cached loader function
+            temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in query_dir]
+            query_images += [factory.process_img(aug, temp_img) for aug in augment for temp_img in
+                             temp_imgs]  # Use the cached loader function
 
             # load support images
             support_dir = cls_subset['support_set']
-            temp_support = [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
-                            temp_img in support_dir]  # Use the cached loader function
-            support_images.append(temp_support)
+            temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in support_dir]
+            if factory.strategy is None or factory.strategy == 'N:1':
+                temp_support = [factory.process_img(aug, temp_img) for aug in augment for
+                                temp_img in temp_imgs]  # Use the cached loader function
+                support_images.append(temp_support)
+            elif factory.strategy:
+                for av in range(factory.av_num + 1):
+                    support_images.append([factory.process_img(aug, img) for aug in augment for img in temp_imgs])
 
             # read the label
             target = cls_subset['target']
@@ -215,7 +229,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         return query_images, query_targets, support_images, support_targets
 
 
-class NTupleBuilder(BatchFactory.AbstractBuilder):
+class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
     def __init__(self, factory: BatchFactory):
         self.factory = factory
@@ -266,7 +280,7 @@ class NTupleBuilder(BatchFactory.AbstractBuilder):
         data_list = builder.data_list
 
         for _ in range(episode_num):
-
+            # TODO rewrite this
             # construct each episode
             episode = []
             temp_list = random.sample(class_list, way_num)

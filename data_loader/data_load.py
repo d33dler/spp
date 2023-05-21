@@ -91,7 +91,6 @@ class DatasetLoader:
         episode_train_num = self.params.episode_train_num
         episode_val_num = self.params.episode_val_num
         episode_test_num = self.params.episode_test_num
-        transform_ls = []
 
         cfg_aug = self.cfg.AUGMENTOR
         pre_process = transforms.Compose(self._read_transforms(cfg_aug, cfg_aug.PRE_PROCESS))
@@ -99,6 +98,8 @@ class DatasetLoader:
         post_process = transforms.Compose(self._read_transforms(cfg_aug, cfg_aug.POST_PROCESS))
         av_num = cfg_aug.AV_NUM
         aug_num = cfg_aug.AUG_NUM
+        strategy = cfg_aug.STRATEGY
+
         if mode == 'train':
             trainset = BatchFactory(
                 data_dir=dataset_dir, mode='train',
@@ -107,7 +108,7 @@ class DatasetLoader:
                 post_process=post_process,
                 episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,
                 av_num=av_num,
-                aug_num=aug_num)
+                aug_num=aug_num, strategy=strategy)
             valset = BatchFactory(
                 data_dir=dataset_dir, mode='val',
                 pre_process=pre_process,

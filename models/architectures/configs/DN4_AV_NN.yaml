@@ -17,7 +17,7 @@ BACKBONE:
   GRAD: True
   NORM: batch
   CUDA: True
-  LEARNING_RATE: 0.001
+  LEARNING_RATE: 0.005
   BETA_ONE: [ 0.5,0.9 ]
   INIT_WEIGHTS: normal
   FREEZE_EPOCH: 1
@@ -49,15 +49,17 @@ AUGMENTOR:
   DISABLE: [ ]
   AV_NUM: 2 # number of augmented views
   AUG_NUM: 3 # number of randomly selected augmentations per view
-  STRATEGY: 'N:1'
+  STRATEGY: 'N:N'
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
       NAME: RESIZE,
       ARGS: { size: [ 100,100 ] },
-    }
+    },
+
   ]
   AUGMENTATION:
+
     [
       { NAME: RANDOM_CROP,
         ARGS: [ 84 ]
@@ -69,8 +71,7 @@ AUGMENTOR:
         ARGS: [ ],
       }
     ]
-  POST_PROCESS: [
-    {
+  POST_PROCESS: [    {
       NAME: RESIZE,
       ARGS: { size: [ 84,84 ] },
     },
@@ -91,7 +92,7 @@ WORKERS: 8
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 
-EPISODE_TRAIN_NUM: 10000
+EPISODE_TRAIN_NUM: 300
 EPISODE_VAL_NUM: 800
 EPISODE_TEST_NUM: 800
 WAY_NUM: 5

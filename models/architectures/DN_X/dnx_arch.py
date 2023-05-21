@@ -85,7 +85,7 @@ class DN_X(DEModel):
             # Measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
-
+            self.data.empty_cache()
             # ============== print the intermediate results ==============#
             if episode_index % self.root_cfg.PRINT_FREQ == 0 and episode_index != 0:
                 print(f'Eposide-({epochix}): [{episode_index}/{len(train_loader)}]\t'
@@ -103,4 +103,4 @@ class DN_X(DEModel):
                                                                       loss=losses,
                                                                       top1=top1), file=output_file)
         self.incr_epoch()
-        self.data.clear()
+

@@ -1,0 +1,26 @@
+{'JOB_ID': 'imagenet_av_2_k3_w5_s5', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV_OVO.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVQ4_AVC_OVO', 'mode': 'train', 'resume': None, 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVQ4_AVC_OVO_DN4_5_Way_1_Shot_K3'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 300
+Valset: 800
+Testset: 800

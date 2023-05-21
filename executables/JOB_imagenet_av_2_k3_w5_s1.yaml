@@ -1,0 +1,12 @@
+JOB_ID: imagenet_av_2_k3_w5_s1
+arch: "DN_X"
+config: ../models/architectures/configs/DN4_AV.yaml
+dengine: False
+refit_dengine: False
+dataset_dir: ../dataset/miniImageNet
+data_name: imageNetAVQ2_AVC
+mode: train
+resume: ../results/DN_X_imageNetAVQ2_AVC_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar
+epochs: 30
+ngpu: 1
+print_freq: 100

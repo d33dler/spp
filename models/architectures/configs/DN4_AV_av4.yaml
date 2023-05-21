@@ -47,7 +47,7 @@ DE:
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 2 # number of augmented views
+  AV_NUM: 4 # number of augmented views
   AUG_NUM: 3 # number of randomly selected augmentations per view
   STRATEGY: 'N:1'
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
@@ -55,9 +55,11 @@ AUGMENTOR:
     {
       NAME: RESIZE,
       ARGS: { size: [ 100,100 ] },
-    }
+    },
+
   ]
   AUGMENTATION:
+
     [
       { NAME: RANDOM_CROP,
         ARGS: [ 84 ]
@@ -67,13 +69,13 @@ AUGMENTOR:
       },
       { NAME: RANDOM_HORIZONTAL_FLIP,
         ARGS: [ ],
+      },
+      {
+        NAME: RANDOM_VERTICAL_FLIP,
+        ARGS: [ ],
       }
     ]
   POST_PROCESS: [
-    {
-      NAME: RESIZE,
-      ARGS: { size: [ 84,84 ] },
-    },
     {
       NAME: TO_TENSOR,
       ARGS: [ ],

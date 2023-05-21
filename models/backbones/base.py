@@ -203,5 +203,5 @@ class BaseBackbone2d(ARCH.Child):
                         param.requires_grad = False
 
             for name, param in module.named_parameters():
-                print("> FROZEN_LAYER:", name, param.requires_grad)
+                print("> FROZEN LAYER:", name, not param.requires_grad)
 

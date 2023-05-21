@@ -36,7 +36,7 @@ class SiameseNetwork(BaseBackbone2d):
         self.require_grad = model_cfg.GRAD
 
         norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
-
+        self.output_shape = 64
         self.features = nn.Sequential(  # 3*84*84
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
             norm_layer(64),
@@ -56,6 +56,7 @@ class SiameseNetwork(BaseBackbone2d):
             norm_layer(64),
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
+
         # self.fc = nn.Sequential(
         #     nn.Linear(64 * 21 * 21, 1024),
         #     nn.BatchNorm1d(1024),
@@ -64,15 +65,16 @@ class SiameseNetwork(BaseBackbone2d):
         #     nn.BatchNorm1d(1024),
         #     nn.ReLU(),
         # )
+        self.knn = KNN_itc(data.k_neighbors, True)
         # freeze batchnorm layers
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]  # , (self.fc, [1, 4])]
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
-        self.criterion = NPlusOneTupletLoss().cuda()
+
 
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
-        self.output_shape = 64
-        self.knn = KNN_itc(data.k_neighbors)
+
+        self.criterion = NPlusOneTupletLoss().cuda()
 
     def forward(self):
         query = self.data.q_in
@@ -104,7 +106,7 @@ class SiameseNetwork(BaseBackbone2d):
             positive = positive_similarities  # or positive_similarities.mean()
 
             # Get the similarities to the negative classes
-            negative_similarities = torch.cat([data.cos_sim[i, j] for j in range(L) if j != targets[i]], dim=0)
+            negative_similarities = torch.cat([data.cos_sim[i, j] for j in range(L) if j != targets[i]], dim=0) #TODO update with S-AV integration
 
             positives.append(positive)
             negatives.append(negative_similarities)
@@ -115,12 +117,6 @@ class SiameseNetwork(BaseBackbone2d):
         data.snx_positives = positives
         data.snx_negatives = negatives
         data.snx_queries = data.q
-
-        if torch.isnan(data.cos_sim).any():
-            print("ORIGINAL COS SIM IS NAN")
-        if torch.isnan(negatives).any():
-            print(negatives)
-            exit(0)
 
         return data.sim_list
 
