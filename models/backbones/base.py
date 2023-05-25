@@ -18,7 +18,6 @@ class BaseBackbone2d(ARCH.Child):
     """
     features: nn.Sequential
     FREEZE_LAYERS: List[Tuple[nn.Module, List[int]]] = []
-    FREEZE_EPOCH: int = 1
     ACTIVATION_F: ARCH.ActivationFuncs
     NORMALIZATION_F: ARCH.NormalizationFuncs
     POOLING_F: ARCH.PoolingFuncs

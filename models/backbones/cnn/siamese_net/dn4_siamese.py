@@ -57,23 +57,18 @@ class SiameseNetwork(BaseBackbone2d):
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
 
-        # self.fc = nn.Sequential(
-        #     nn.Linear(64 * 21 * 21, 1024),
-        #     nn.BatchNorm1d(1024),
-        #     nn.ReLU(),
-        #     nn.Linear(1024, 1024),
-        #     nn.BatchNorm1d(1024),
-        #     nn.ReLU(),
-        # )
+        self.fc = nn.Sequential(
+            nn.Linear(64 * 21 * 21, 4096),
+            nn.LeakyReLU(0.2, True),
+            nn.Dropout(p=0.5),
+            nn.Linear(4096, 1024),
+        )
+
         self.knn = KNN_itc(data.k_neighbors, True)
         # freeze batchnorm layers
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]  # , (self.fc, [1, 4])]
-        self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
-
-
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
-
         self.criterion = NPlusOneTupletLoss().cuda()
 
     def forward(self):

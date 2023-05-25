@@ -79,9 +79,8 @@ class NPairLoss(nn.Module):
 
 
 class NPlusOneTupletLoss(nn.Module):
-    def __init__(self, topk=5):
+    def __init__(self):
         super(NPlusOneTupletLoss, self).__init__()
-        self.topk = topk
 
     def forward(self, positives, negatives):
         """
