@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 from easydict import EasyDict
 from torch import optim, Tensor
+from torch.optim.lr_scheduler import CosineAnnealingLR
+
 from models.backbones.base import BaseBackbone2d
 from models.clustering.knn import KNN_itc
 from models.utilities.utils import DataHolder, init_weights, get_norm_layer
@@ -55,7 +57,7 @@ class FourLayer_64F(BaseBackbone2d):
             norm_layer(64),
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
-        self.knn = KNN_itc(data.k_neighbors )
+        self.knn = KNN_itc(data.k_neighbors)
 
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
@@ -63,6 +65,7 @@ class FourLayer_64F(BaseBackbone2d):
 
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.criterion = nn.CrossEntropyLoss().cuda()
+        self.scheduler = CosineAnnealingLR(self.optimizer, 30, eta_min=0.00001)
 
     def forward(self):
         # extract features of input1--query image
@@ -83,3 +86,8 @@ class FourLayer_64F(BaseBackbone2d):
                                             data.cfg.AUGMENTOR.STRATEGY if data.training else None)
         self.data.output = data.sim_list
         return data
+
+    def adjust_learning_rate(self, epoch):
+        self.scheduler.step(epoch)
+
+

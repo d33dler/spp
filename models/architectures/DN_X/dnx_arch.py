@@ -79,8 +79,9 @@ class DN_X(DEModel):
             # Measure accuracy and record loss
             prec1, _ = accuracy(out, target, topk=(1, 3))
 
-            losses.update(loss.item(), query_images.size(0))
-            top1.update(prec1[0], query_images.size(0))
+            n = query_images.size(0) // self.data.av_num if self.data.av_num not in [None, 0] else query_images.size(0)
+            losses.update(loss.item(), n)
+            top1.update(prec1[0], n)
 
             # Measure elapsed time
             batch_time.update(time.time() - end)
@@ -103,4 +104,4 @@ class DN_X(DEModel):
                                                                       loss=losses,
                                                                       top1=top1), file=output_file)
         self.incr_epoch()
-
+        self.adjust_learning_rate()

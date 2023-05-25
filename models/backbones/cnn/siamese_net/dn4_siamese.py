@@ -60,7 +60,7 @@ class SiameseNetwork(BaseBackbone2d):
         self.fc = nn.Sequential(
             nn.Linear(64 * 21 * 21, 4096),
             nn.LeakyReLU(0.2, True),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=0.3),
             nn.Linear(4096, 1024),
         )
 
@@ -72,53 +72,26 @@ class SiameseNetwork(BaseBackbone2d):
         self.criterion = NPlusOneTupletLoss().cuda()
 
     def forward(self):
-        query = self.data.q_in
-        self.data.q = self.features(query)
-        # query = query.view(query.size(0), -1)
-        # query = self.fc(query)
         data = self.data
-        data.S = []
-        for i in range(len(data.S_in)):
-            support_set_sam = self.features(data.S_in[i])
-            B, C, h, w = support_set_sam.size()
-            support_set_sam = support_set_sam.permute(1, 0, 2, 3)
-            support_set_sam = support_set_sam.contiguous().reshape((C, -1))
-            data.S.append(support_set_sam)
-        data.sim_list, data.cos_sim = self.knn.forward(data.q, data.S, data.av_num)
-        self.data.output = data.sim_list
-        B, L, _ = data.cos_sim.shape
-        # Assume targets is a 1D tensor of shape (B,)
-        targets = data.targets
-
-        positives = []
+        queries = data.snx_queries
+        data.snx_query_embeddings = self.fc(self.features(queries))
+        data.snx_positive_embeddings = self.fc(self.features(self.data.snx_positives))
+        # construct negatives out of positives for each class (N=50) so negatives = N-1
         negatives = []
-
-        for i in range(B):
-            # For each query, get the similarities to the positive class
-            positive_similarities: Tensor = data.cos_sim[i, targets[i]]
-
-            # Use the mean or median of the positive similarities as the positive instance
-            positive = positive_similarities  # or positive_similarities.mean()
-
-            # Get the similarities to the negative classes
-            negative_similarities = torch.cat([data.cos_sim[i, j] for j in range(L) if j != targets[i]], dim=0) #TODO update with S-AV integration
-
-            positives.append(positive)
-            negatives.append(negative_similarities)
-
-        # Convert the lists to tensors
-        positives = geometric_mean(torch.stack(positives), dim=1)
-        negatives = torch.stack(negatives)
-        data.snx_positives = positives
-        data.snx_negatives = negatives
-        data.snx_queries = data.q
+        positives = data.snx_positives
+        for i in range(len(positives)):
+            negatives.append(positives[torch.arange(len(positives)) != i])
+        self.data.snx_negative_embeddings = torch.stack(negatives)
 
         return data.sim_list
 
+    def _calculate_cosine_similarity(self, ):
+        pass
     def backward(self, *args, **kwargs):
-        positives = self.data.snx_positives
-        negatives = self.data.snx_negatives
-        self.loss = self.criterion(positives, negatives)
+        queries = self.data.snx_query_embeddings
+        positives = self.data.snx_positive_embeddings
+        negatives = self.data.snx_negative_embeddings
+        self.loss = self.criterion(queries, positives, negatives)
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()

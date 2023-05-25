@@ -24,8 +24,8 @@ BACKBONE:
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: # number of augmented views
-  AUG_NUM:  # number of randomly selected augmentations per view
+  AV_NUM: 2 # number of augmented views
+  AUG_NUM:  3 # number of randomly selected augmentations per view
   STRATEGY: 'N:1'
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
   PRE_PROCESS: [

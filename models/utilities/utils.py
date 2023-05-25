@@ -105,9 +105,12 @@ class DataHolder(DataHolderBase):
     eval_set: Tuple[Any, Any]
 
     # SNX
-    snx_queries: List[Tensor]
-    snx_positives: List[Tensor]
-    snx_negatives: List[Tensor]
+    snx_queries: Tensor
+    snx_positives: Tensor
+
+    snx_query_embeddings: Tensor
+    snx_positive_embeddings: Tensor
+    snx_negative_embeddings: Tensor
     # Tree-out
     tree_pred: np.ndarray
 

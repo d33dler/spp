@@ -47,7 +47,7 @@ DE:
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 2 # number of augmented views
+  AV_NUM: 1 # number of augmented views
   AUG_NUM: 3 # number of randomly selected augmentations per view
   STRATEGY: 'N:1'
   RANDOM_AUGMENT: True # whether to use random combinations of augmentations
@@ -91,9 +91,9 @@ WORKERS: 8
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
 
-EPISODE_TRAIN_NUM: 10000
-EPISODE_VAL_NUM: 800
-EPISODE_TEST_NUM: 800
+EPISODE_TRAIN_NUM: 200
+EPISODE_VAL_NUM: 200
+EPISODE_TEST_NUM: 200
 WAY_NUM: 5
 SHOT_NUM: 1
 QUERY_NUM: 15

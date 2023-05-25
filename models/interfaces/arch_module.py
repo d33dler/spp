@@ -6,6 +6,9 @@ from abc import ABC, abstractmethod
 from enum import Enum, EnumMeta
 from pathlib import Path
 from typing import Dict, Any
+
+from torch.optim.lr_scheduler import _LRScheduler, CosineAnnealingLR
+
 from models import backbones
 import torch
 import torch.nn.functional as F
@@ -69,13 +72,14 @@ class ARCH(nn.Module):
         lr: float
         optimizer: Optimizer
         criterion: _Loss | nn.Module
+        scheduler: _LRScheduler
         loss: Tensor
         fine_tuning = True
-        require_grad = False
 
         def __init__(self, config: EasyDict | dict) -> None:
             super().__init__()
             self.config = config
+            self.scheduler = None
 
         def calculate_loss(self, gt, pred):
             """
@@ -120,6 +124,9 @@ class ARCH(nn.Module):
 
         def load_optimizer_state_dict(self, optim_state_dict):
             self.optimizer.load_state_dict(optim_state_dict)
+
+        def load_scheduler_state_dict(self, scheduler_state_dict):
+            self.scheduler.load_state_dict(scheduler_state_dict)
 
         @staticmethod
         @abstractmethod
@@ -221,9 +228,14 @@ class ARCH(nn.Module):
         optimizers = {
             f"{priv[k]}_optim": v.optimizer.state_dict() for k, v in self.module_topology.items() if
             v.optimizer is not None}
+        schedulers = {
+            f"{priv[k]}_scheduler": v.scheduler.state_dict() for k, v in self.module_topology.items() if
+            v.scheduler is not None
+        }
         state_dicts = {f"{priv[k]}_state_dict": v.state_dict() for k, v in self.module_topology.items()}
         state.update(optimizers)
         state.update(state_dicts)
+        state.update(schedulers)
         state.update(self.state)
         save_checkpoint(state, filename)
         print("Saved model to:", filename)
@@ -250,7 +262,8 @@ class ARCH(nn.Module):
              if f"{priv[k]}_state_dict" in checkpoint]
             [v.load_optimizer_state_dict(checkpoint[f"{priv[k]}_optim"]) for k, v in self.module_topology.items()
              if f"{k}_optim" in checkpoint]
-
+            [v.load_scheduler_state_dict(checkpoint[f"{priv[k]}_scheduler"]) for k, v in self.module_topology.items()
+             if f"{k}_scheduler" in checkpoint]
             print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']))
             if txt_file:
                 print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']), file=txt_file)

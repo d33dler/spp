@@ -1002,3 +1002,41 @@ Eposide-(6): [4200/10000]	Time 0.932 (0.939)	Data 0.122 (0.132)	Loss 1.552 (0.92
 Eposide-(6): [4300/10000]	Time 0.931 (0.939)	Data 0.123 (0.132)	Loss 0.878 (0.926)	Prec@1 77.333 (64.418)
 Eposide-(6): [4400/10000]	Time 0.946 (0.939)	Data 0.135 (0.132)	Loss 0.946 (0.926)	Prec@1 57.333 (64.389)
 Eposide-(6): [4500/10000]	Time 0.954 (0.939)	Data 0.135 (0.132)	Loss 0.901 (0.926)	Prec@1 61.333 (64.400)
+{'JOB_ID': 'imagenet_av_2_k3_w5_s1', 'arch': 'DN_X', 'config': '../models/architectures/configs/DN4_AV.yaml', 'dengine': False, 'refit_dengine': False, 'dataset_dir': '../dataset/miniImageNet', 'data_name': 'imageNetAVQ2_AVC', 'mode': 'train', 'resume': '../results/DN_X_imageNetAVQ2_AVC_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar', 'epochs': 30, 'ngpu': 1, 'print_freq': 100, 'outf': '../results/DN_X_imageNetAVQ2_AVC_DN4_5_Way_1_Shot_K3'}=> loaded checkpoint '../results/DN_X_imageNetAVQ2_AVC_DN4_5_Way_1_Shot_K3/epoch_1_best.pth.tar' (epoch 1)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 1 =====================================
+Trainset: 200
+Valset: 200
+Testset: 200
+Eposide-(1): [100/200]	Time 0.593 (0.782)	Data 0.076 (0.223)	Loss 1.369 (1.708)	Prec@1 40.000 (40.594)
+============ Testing on the test set ============
+
+Test-(2): [100/200]	Time 0.142 (0.293)	Loss 1.654 (1.737)	Prec@1 36.0 (33.13531494140625)
+ * Prec@1 33.280 Best_prec1 0.000============ Testing on the test set ============
+
+Test-(2): [100/200]	Time 0.189 (0.313)	Loss 1.985 (1.792)	Prec@1 28.0 (33.65016555786133)
+ * Prec@1 34.147 Best_prec1 33.280===================================== Epoch 2 =====================================
+Trainset: 200
+Valset: 200
+Testset: 200

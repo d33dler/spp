@@ -129,6 +129,7 @@ class BatchFactory(Dataset):
         self.loader = pil_loader if loader is None else loader
         self.gray_loader = gray_loader if _gray_loader is None else _gray_loader
         self.strategy = strategy
+        self.mode = mode
         # Build the dataset
         self.builder.build()
 
@@ -186,6 +187,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                     "target": cls
                 }
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
+
             data_list.append(episode)
 
     def get_item(self, index):
@@ -240,10 +242,9 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         episode_files = factory.data_list[index]
         loader = factory.loader
         query_images = []
-        query_targets = []
+        targets = []
         support_images = []
-        support_targets = []
-
+        positives = []
         for cls_subset in episode_files:
             augment = [None]
             # Randomly select a subset of augmentations to apply per episode
@@ -252,29 +253,25 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
                            range(factory.av_num)]
 
             # load query images
-            query_dir = cls_subset['query_img']
+            query_dir = cls_subset['q']
             query_images += [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
                              temp_img in query_dir]  # Use the cached loader function
 
             # load support images
-            support_dir = cls_subset['support_set']
-            temp_support = [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
-                            temp_img in support_dir]  # Use the cached loader function
+            temp_support = Image.fromarray(loader(cls_subset["+"]))
             support_images.append(temp_support)
 
             # read the label
-            target = cls_subset['target']
-            query_targets.extend(np.tile(target, len(query_dir)))
-            support_targets.extend(np.tile(target, len(support_dir)))
-        return query_images, query_targets, support_images, support_targets
+            targets.append(cls_subset['target'])
+        return query_images, positives, targets
 
     def build(self):
         # assign all values from self
         builder = self.factory
         episode_num = builder.episode_num
         way_num = builder.way_num
-        shot_num = builder.shot_num
-        query_num = builder.query_num
+        # shot_num = builder.shot_num
+        # query_num = builder.query_num
         class_list = builder.class_list
         class_img_dict = builder.class_img_dict
         data_list = builder.data_list
@@ -284,18 +281,13 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
             # construct each episode
             episode = []
             temp_list = random.sample(class_list, way_num)
-
             for cls, item in enumerate(temp_list):  # for each class
                 imgs_set = class_img_dict[item]
-                random.shuffle(imgs_set)  # shuffle the images
-
                 # split the images into support and query sets
-                support_imgs = imgs_set[:shot_num]
-                query_imgs = imgs_set[shot_num:shot_num + query_num]
-
+                query, positive = random.sample(imgs_set, 2)
                 cls_subset = {
-                    "query_img": query_imgs,  # query_num - query images for `cls`, default(15)
-                    "support_set": support_imgs,  # SHOT - support images for `cls`, default(5)
+                    "q": query,  # query_num - query images for `cls`, default(15)
+                    "+": positive,
                     "target": cls
                 }
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)

@@ -207,7 +207,7 @@ class ExperimentManager:
             # ======================================= Set the model to training mode ==================================
             model.data.training = True
             # ======================================= Adjust learning rate =======================================
-            model.adjust_learning_rate()
+
 
             # ======================================= Folder of Datasets =======================================
             model.load_data(self._args.mode, F_txt, self._args.dataset_dir)

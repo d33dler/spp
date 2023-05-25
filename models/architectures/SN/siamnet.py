@@ -39,36 +39,28 @@ class SN_X(DEModel):
         end = time.time()
         epochix = self.get_epoch()
 
-        for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_loader):
+        for episode_index, queries, positives, targets in enumerate(train_loader):
             # Measure data loading time
             data_time.update(time.time() - end)
-            # Convert query and support images
-            query_images = torch.cat(query_images, 0)
-            input_var1 = query_images.cuda()
+            # Convert query, positives and targets to cuda tensors
+            positives = torch.cat(positives, 0).cuda()
+            queries = torch.cat(queries, 0).cuda()
+            targets = torch.cat(targets, 0).cuda()
 
-            input_var2 = []
-
-            for temp_support in support_images:
-                temp_support = torch.cat(temp_support, 0)
-                temp_support = temp_support.cuda()
-                input_var2.append(temp_support)
-            # Deal with the targets
-            target = torch.cat(query_targets, 0).cuda()
-
-            self.data.targets = target
-            self.data.q_CPU = query_images
-            self.data.q_in = input_var1
-            self.data.S_in = input_var2
+            self.data.targets = targets
+            self.data.snx_queries = queries
+            self.data.snx_positives = positives
 
             # Calculate the output
             out = self.forward()
             self.backward()
             loss = self.get_loss()
             # Measure accuracy and record loss
-            prec1, _ = accuracy(out, target, topk=(1, 3))
+            prec1, _ = accuracy(out, targets, topk=(1, 3))
 
-            losses.update(loss.item(), query_images.size(0))
-            top1.update(prec1[0], query_images.size(0))
+            n = queries.size(0) // self.data.av_num if self.data.av_num not in [None, 0] else queries.size(0)
+            losses.update(loss.item(), n)
+            top1.update(prec1[0], n)
 
             # Measure elapsed time
             batch_time.update(time.time() - end)
