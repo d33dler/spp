@@ -35,13 +35,14 @@ def save_checkpoint(state, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
 
 
-def load_config(config: Path, root_cfg=None):
+def load_config(config: Path, root_cfg=None, ret_dict=False):
     with open(config, mode="r") as f:
         cfg = yaml.load(f, Loader=yaml.SafeLoader)
-    cfg = EasyDict(cfg)
     if root_cfg is not None:
         config_exchange(cfg, root_cfg)
-    return cfg
+    if ret_dict:
+        return EasyDict(cfg), cfg
+    return EasyDict(cfg)
 
 
 def print_network(net):
@@ -268,3 +269,21 @@ def get_norm_layer(norm_type='instance'):
 
 def geometric_mean(t: Tensor, dim=0, keepdim=False) -> Tensor:
     return torch.exp(torch.mean(torch.log(t), dim=dim, keepdim=keepdim))
+
+
+def identity(x):
+    return x
+
+
+def deep_convert_easydict(layer):
+    to_ret = layer
+    if isinstance(layer, EasyDict):
+        to_ret = dict(layer)
+
+    try:
+        for key, value in to_ret.items():
+            to_ret[key] = deep_convert_easydict(value)
+    except AttributeError:
+        pass
+
+    return to_ret

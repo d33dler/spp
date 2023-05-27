@@ -7,18 +7,19 @@ from enum import Enum, EnumMeta
 from pathlib import Path
 from typing import Dict, Any
 
-from torch.optim.lr_scheduler import _LRScheduler, CosineAnnealingLR
-
-from models import backbones
 import torch
 import torch.nn.functional as F
+import yaml
 from easydict import EasyDict
 from torch import nn, Tensor
 from torch.nn.modules.loss import _Loss
 from torch.optim import Optimizer
+from torch.optim.lr_scheduler import _LRScheduler
 
 from data_loader.data_load import Parameters, DatasetLoader
-from models.utilities.utils import save_checkpoint, load_config, accuracy, init_weights, config_exchange
+from models import backbones
+from models.utilities.utils import save_checkpoint, load_config, accuracy, init_weights, config_exchange, \
+    deep_convert_easydict
 
 
 # noinspection PyUnresolvedReferences
@@ -146,17 +147,18 @@ class ARCH(nn.Module):
 
     def __init__(self, cfg_path) -> None:
         super().__init__()
+        self.root_cfg_dict: dict = None
         self.cfg_path = cfg_path
         self._store_path = None
         self.state = dict()
-        self.root_cfg: EasyDict = self.load_config(cfg_path)
+        self.load_config(cfg_path)
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
         c = self.root_cfg
         p = Parameters(c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE, c.QUERY_NUM * c.WAY_NUM)
-        self.data_loader = DatasetLoader(c, p)
+        self.data_loader = DatasetLoader(self.root_cfg_dict, p)
 
     def forward(self):
         raise NotImplementedError
@@ -243,8 +245,9 @@ class ARCH(nn.Module):
         print("Saved model to:", filename)
         # save config
         with open(self.cfg_path, 'w') as f:
-            self.root_cfg['RESUME'] = filename
-            yaml.dump(dict(self.root_cfg), f, default_flow_style=False)
+            self.root_cfg_dict['RESUME'] = filename
+            yaml.dump(self.root_cfg_dict, f, default_flow_style=False)
+
         print("Saved config file:", self.cfg_path)
 
     def load_model(self, path, txt_file=None):
@@ -282,8 +285,7 @@ class ARCH(nn.Module):
             return None
 
     def load_config(self, path):
-        self.root_cfg = load_config(path)
-        return self.root_cfg
+        self.root_cfg, self.root_cfg_dict = load_config(path, ret_dict=True)
 
     def override_child_cfg(self, _config: EasyDict | dict, module_id: str):
         """

@@ -11,6 +11,8 @@ from torch import nn
 from torch.utils.data import Dataset
 from torchvision import transforms as T
 
+from models.utilities.utils import identity
+
 sys.dont_write_bytecode = True
 
 maxsize = int(os.getenv("LRU_CACHE_SIZE", 1000))  # Default value is 1000 if the environment variable is not set
@@ -122,8 +124,8 @@ class BatchFactory(Dataset):
         self.class_list = class_list
         self.class_img_dict = class_img_dict
         self.data_list = data_list
-        self.pre_process = lambda _: _ if pre_process is None else pre_process
-        self.post_process = lambda _: _ if post_process is None else post_process
+        self.pre_process = identity if pre_process is None else pre_process
+        self.post_process = identity if post_process is None else post_process
         self.augmentations = augmentations
         self.av_num = av_num
         self.aug_num = aug_num
@@ -194,13 +196,13 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         support_images = []
         support_targets = []
         for cls_subset in episode_files:
-            augment = [lambda _: _]
+            augment = [identity]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
                 augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)
                                      if factory.is_random_aug
                                      else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
-                augment += [lambda _: _]  # introduce original sample as well
+                augment += [identity]  # introduce original sample as well
 
             # load query images
             query_dir = cls_subset['query_img']
@@ -241,12 +243,12 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         support_images = []
         positives = []
         for cls_subset in episode_files:
-            augment = [lambda _: _]
+            augment = [identity]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
                 augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)) for _ in
                            range(factory.av_num)]
-                augment += [lambda _: _]  # introduce original sample as well
+                augment += [identity]  # introduce original sample as well
 
             # load query images
             query_dir = cls_subset['q']

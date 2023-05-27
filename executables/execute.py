@@ -200,7 +200,7 @@ class ExperimentManager:
         print('\n............Start training............\n')
         epoch = model.get_epoch()
 
-        for epoch_index in range(epoch, epoch + self._args.epochs):
+        for epoch_index in range(epoch, epoch + self._args.EPOCHS):
             print('===================================== Epoch %d =====================================' % epoch_index)
             F_txt.write(
                 '===================================== Epoch %d =====================================\n' % epoch_index)
@@ -209,7 +209,7 @@ class ExperimentManager:
             # ======================================= Adjust learning rate =======================================
 
             # ======================================= Folder of Datasets =======================================
-            model.load_data(self._args.mode, F_txt, self._args.dataset_dir)
+            model.load_data(self._args.MODE, F_txt, self._args.DATASET_DIR)
             loaders = model.loaders
             # ============================================ Training ===========================================
             # Freeze the parameters of Batch Normalization after 10000 episodes (1 epoch)
@@ -232,12 +232,8 @@ class ExperimentManager:
             best_prec1 = max(prec1, best_prec1)
             model.best_prec1 = best_prec1
             # save the checkpoint
-            if is_best:
-                filename = os.path.join(self._args.outf, 'epoch_%d_best.pth.tar' % model.get_epoch())
-                model.save_model(filename)
-
-            if epoch_index % 2 == 0:
-                filename = os.path.join(self._args.outf, 'epoch_%d.pth.tar' % model.get_epoch())
+            if epoch_index % 2 == 0 or is_best:
+                filename = os.path.join(self._args.OUTF, 'epoch_%d.pth.tar' % model.get_epoch())
                 model.save_model(filename)
 
             # Testing Prase
@@ -313,7 +309,7 @@ if __name__ == '__main__':
     for a in arguments.jobs:
         with open(a, 'r') as f:
             job_args = (EasyDict(yaml.load(f, Loader=yaml.SafeLoader)),)
-            job_args.path = a
+            job_args[0].PATH = a
             p = Process(target=launch_job, args=job_args, daemon=False)
             p.start()
             proc_ls.append(p)

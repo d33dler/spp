@@ -1,0 +1,286 @@
+{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 25.867 Best_prec1 0.000{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 22.667 Best_prec1 0.000{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 26.400 Best_prec1 0.000{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 20.000 Best_prec1 0.000{'NAME': 'DN4', 'ARCH': 'DN_X', 'K_NEIGHBORS': 3, 'USE_BIAS': True, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_LOSS': 'BACKBONE', 'TRACK_CRITERION': 'BACKBONE', 'DENGINE': False, 'REFIT_DENGINE': False, 'DATASET_DIR': '../dataset/miniImageNet', 'MODE': 'train', 'RESUME': None, 'NGPU': 1, 'PRINT_FREQ': 100, 'EPOCHS': 30, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'WORKERS': 8, 'EPISODE_SIZE': 1, 'TEST_EPISODE_SIZE': 1, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPISODE_TEST_NUM': 5, 'WAY_NUM': 5, 'SHOT_NUM': 1, 'QUERY_NUM': 15, 'BACKBONE': {'NAME': 'DN4_CNN2d', 'MODE': 'TRAIN', 'GRAD': True, 'NORM': 'batch', 'CUDA': True, 'LEARNING_RATE': 0.001, 'BETA_ONE': [0.5, 0.9], 'INIT_WEIGHTS': 'normal', 'FREEZE_EPOCH': 1}, 'DE': {'NAME': 'RandomForest', 'ENGINE': 'TREE', 'MODE': 'TRAIN', 'GRAD': False, 'CUDA': True, 'MODEL_NAME': '__ignore__', 'OPTIMIZE': True, 'OPTIMIZATION_ROUNDS': 80, 'DATASET': None, 'EPISODE_TRAIN_NUM': 100, 'PARAMETERS': {'tree_method': 'gpu_hist', 'num_class': 5, 'objective': 'multi:softmax', 'eval_metric': 'mlogloss', 'max_depth': 11, 'min_child_weight': 3, 'learning_rate': 0.04, 'subsample': 0.8, 'seed': 666, 'reg_lambda': 1}}, 'AUGMENTOR': {'DISABLE': [], 'AV_NUM': 1, 'AUG_NUM': 3, 'STRATEGY': 'N:1', 'RANDOM_AUGMENT': False, 'PRE_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [100, 100]}}], 'AUGMENTATION': [{'NAME': 'RANDOM_CROP', 'ARGS': [84]}, {'NAME': 'COLOR_JITTER', 'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}}, {'NAME': 'RANDOM_HORIZONTAL_FLIP', 'ARGS': []}], 'POST_PROCESS': [{'NAME': 'RESIZE', 'ARGS': {'size': [84, 84]}}, {'NAME': 'TO_TENSOR', 'ARGS': []}, {'NAME': 'NORMALIZE', 'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}}]}, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 22.400 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 22.933 Best_prec1 22.400===================================== Epoch 1 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 28.267 Best_prec1 22.400============ Testing on the test set ============
+ * Prec@1 30.400 Best_prec1 28.267===================================== Epoch 2 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 27.200 Best_prec1 28.267============ Testing on the test set ============
+{'ARCH': 'DN_X', 'AUGMENTOR': {'AUGMENTATION': [{'ARGS': [84], 'NAME': 'RANDOM_CROP'}, {'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}, 'NAME': 'COLOR_JITTER'}, {'ARGS': [], 'NAME': 'RANDOM_HORIZONTAL_FLIP'}], 'AUG_NUM': 3, 'AV_NUM': 1, 'DISABLE': [], 'POST_PROCESS': [{'ARGS': {'size': [84, 84]}, 'NAME': 'RESIZE'}, {'ARGS': [], 'NAME': 'TO_TENSOR'}, {'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}, 'NAME': 'NORMALIZE'}], 'PRE_PROCESS': [{'ARGS': {'size': [100, 100]}, 'NAME': 'RESIZE'}], 'RANDOM_AUGMENT': False, 'STRATEGY': 'N:1'}, 'BACKBONE': {'BETA_ONE': [0.5, 0.9], 'CUDA': True, 'FREEZE_EPOCH': 1, 'GRAD': True, 'INIT_WEIGHTS': 'normal', 'LEARNING_RATE': 0.001, 'MODE': 'TRAIN', 'NAME': 'DN4_CNN2d', 'NORM': 'batch'}, 'DATASET_DIR': '../dataset/miniImageNet', 'DE': {'CUDA': True, 'DATASET': 'None', 'ENGINE': 'TREE', 'EPISODE_TRAIN_NUM': 100, 'GRAD': False, 'MODE': 'TRAIN', 'MODEL_NAME': '__ignore__', 'NAME': 'RandomForest', 'OPTIMIZATION_ROUNDS': 80, 'OPTIMIZE': True, 'PARAMETERS': {'eval_metric': 'mlogloss', 'learning_rate': 0.04, 'max_depth': 11, 'min_child_weight': 3, 'num_class': 5, 'objective': 'multi:softmax', 'reg_lambda': 1, 'seed': 666, 'subsample': 0.8, 'tree_method': 'gpu_hist'}}, 'DENGINE': False, 'EPISODE_SIZE': 1, 'EPISODE_TEST_NUM': 5, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPOCHS': 30, 'K_NEIGHBORS': 3, 'MODE': 'train', 'NAME': 'DN4', 'NGPU': 1, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'PRINT_FREQ': 100, 'QUERY_NUM': 15, 'REFIT_DENGINE': False, 'RESUME': None, 'SHOT_NUM': 1, 'TEST_EPISODE_SIZE': 1, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_CRITERION': 'BACKBONE', 'TRACK_LOSS': 'BACKBONE', 'USE_BIAS': True, 'WAY_NUM': 5, 'WORKERS': 8, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 0 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 26.400 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 24.800 Best_prec1 26.400===================================== Epoch 1 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 27.467 Best_prec1 26.400============ Testing on the test set ============
+{'ARCH': 'DN_X', 'AUGMENTOR': {'AUGMENTATION': [{'ARGS': [84], 'NAME': 'RANDOM_CROP'}, {'ARGS': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4}, 'NAME': 'COLOR_JITTER'}, {'ARGS': [], 'NAME': 'RANDOM_HORIZONTAL_FLIP'}], 'AUG_NUM': 3, 'AV_NUM': 1, 'DISABLE': [], 'POST_PROCESS': [{'ARGS': {'size': [84, 84]}, 'NAME': 'RESIZE'}, {'ARGS': [], 'NAME': 'TO_TENSOR'}, {'ARGS': {'mean': [0.5, 0.5, 0.5], 'std': [0.5, 0.5, 0.5]}, 'NAME': 'NORMALIZE'}], 'PRE_PROCESS': [{'ARGS': {'size': [100, 100]}, 'NAME': 'RESIZE'}], 'RANDOM_AUGMENT': False, 'STRATEGY': 'N:1'}, 'BACKBONE': {'BETA_ONE': [0.5, 0.9], 'CUDA': True, 'FREEZE_EPOCH': 1, 'GRAD': True, 'INIT_WEIGHTS': 'normal', 'LEARNING_RATE': 0.001, 'MODE': 'TRAIN', 'NAME': 'DN4_CNN2d', 'NORM': 'batch'}, 'DATASET_DIR': '../dataset/miniImageNet', 'DE': {'CUDA': True, 'DATASET': 'None', 'ENGINE': 'TREE', 'EPISODE_TRAIN_NUM': 100, 'GRAD': False, 'MODE': 'TRAIN', 'MODEL_NAME': '__ignore__', 'NAME': 'RandomForest', 'OPTIMIZATION_ROUNDS': 80, 'OPTIMIZE': True, 'PARAMETERS': {'eval_metric': 'mlogloss', 'learning_rate': 0.04, 'max_depth': 11, 'min_child_weight': 3, 'num_class': 5, 'objective': 'multi:softmax', 'reg_lambda': 1, 'seed': 666, 'subsample': 0.8, 'tree_method': 'gpu_hist'}}, 'DENGINE': False, 'EPISODE_SIZE': 1, 'EPISODE_TEST_NUM': 5, 'EPISODE_TRAIN_NUM': 5, 'EPISODE_VAL_NUM': 5, 'EPOCHS': 30, 'K_NEIGHBORS': 3, 'MODE': 'train', 'NAME': 'DN4', 'NGPU': 1, 'OUTF': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3', 'PRINT_FREQ': 100, 'QUERY_NUM': 15, 'REFIT_DENGINE': False, 'RESUME': '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3/epoch_2.pth.tar', 'SHOT_NUM': 1, 'TEST_EPISODE_SIZE': 1, 'TOPOLOGY': {'BACKBONE': 'BACKBONE_2D'}, 'TRACK_CRITERION': 'BACKBONE', 'TRACK_LOSS': 'BACKBONE', 'USE_BIAS': True, 'WAY_NUM': 5, 'WORKERS': 8, 'PATH': '../models/architectures/configs/DN4_MIN_AV1_S1_K3.yaml'}=> loaded checkpoint '../results/DN_X_miniImageNet_DN4_5_Way_1_Shot_K3/epoch_2.pth.tar' (epoch 2)
+DN_X(
+  (BACKBONE): FourLayer_64F(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): LeakyReLU(negative_slope=0.2, inplace=True)
+      (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (6): LeakyReLU(negative_slope=0.2, inplace=True)
+      (7): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (10): LeakyReLU(negative_slope=0.2, inplace=True)
+      (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (12): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (13): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+    (knn): KNN_itc()
+    (criterion): CrossEntropyLoss()
+  )
+)
+===================================== Epoch 2 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5
+============ Testing on the test set ============
+ * Prec@1 23.467 Best_prec1 0.000============ Testing on the test set ============
+ * Prec@1 26.400 Best_prec1 23.467===================================== Epoch 3 =====================================
+Trainset: 5
+Valset: 5
+Testset: 5

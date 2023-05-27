@@ -1,4 +1,3 @@
-DATA_LOADER: __ignore__
 # NOTE: This configuration can be overwritten from the model root config
 AUGMENTOR:
   DISABLE: [ ]
