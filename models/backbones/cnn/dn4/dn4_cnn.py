@@ -88,6 +88,6 @@ class FourLayer_64F(BaseBackbone2d):
         return data
 
     def adjust_learning_rate(self, epoch):
-        self.scheduler.step(epoch)
+        self.scheduler.step()
 
 
