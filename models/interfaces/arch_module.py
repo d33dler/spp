@@ -146,9 +146,10 @@ class ARCH(nn.Module):
 
     def __init__(self, cfg_path) -> None:
         super().__init__()
+        self.cfg_path = cfg_path
         self._store_path = None
         self.state = dict()
-        self.root_cfg = self.load_config(cfg_path)
+        self.root_cfg: EasyDict = self.load_config(cfg_path)
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
         c = self.root_cfg
@@ -212,6 +213,7 @@ class ARCH(nn.Module):
         :return:
         :rtype:
         """
+        # TODO add root cfg saving to state and version+parameter cross-checking
         if filename is None:
             filename = self._store_path
             if self._store_path is None:
@@ -239,6 +241,11 @@ class ARCH(nn.Module):
         state.update(self.state)
         save_checkpoint(state, filename)
         print("Saved model to:", filename)
+        # save config
+        with open(self.cfg_path, 'w') as f:
+            self.root_cfg['RESUME'] = filename
+            yaml.dump(dict(self.root_cfg), f, default_flow_style=False)
+        print("Saved config file:", self.cfg_path)
 
     def load_model(self, path, txt_file=None):
         """

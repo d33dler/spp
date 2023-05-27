@@ -1,15 +1,38 @@
 # Main params
 NAME: DN4
+ARCH: "SN_X"
 K_NEIGHBORS: 3
 USE_BIAS: True
-DATASET: miniImageNet
-EPOCHS: 30
+
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
 }
 TRACK_LOSS: BACKBONE
 TRACK_CRITERION: BACKBONE
+
+# Args
+
+DENGINE: False
+REFIT_DENGINE: False
+DATASET_DIR: ../dataset/miniImageNet
+MODE: train
+RESUME: 
+NGPU: 1
+PRINT_FREQ: 100
+EPOCHS: 30
+
+# Dataloader
+OUTF: '../results/'
+WORKERS: 8
+EPISODE_SIZE: 1
+TEST_EPISODE_SIZE: 1
+EPISODE_TRAIN_NUM: 5
+EPISODE_VAL_NUM: 5
+EPISODE_TEST_NUM: 5
+WAY_NUM: 5
+SHOT_NUM: 5
+QUERY_NUM: 10
 
 BACKBONE:
   NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
@@ -47,19 +70,17 @@ DE:
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 4 # number of augmented views
+  AV_NUM: 1 # number of augmented views
   AUG_NUM: 3 # number of randomly selected augmentations per view
   STRATEGY: 'N:1'
-  RANDOM_AUGMENT: True # whether to use random combinations of augmentations
+  RANDOM_AUGMENT: False # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
       NAME: RESIZE,
       ARGS: { size: [ 100,100 ] },
-    },
-
+    }
   ]
   AUGMENTATION:
-
     [
       { NAME: RANDOM_CROP,
         ARGS: [ 84 ]
@@ -69,13 +90,13 @@ AUGMENTOR:
       },
       { NAME: RANDOM_HORIZONTAL_FLIP,
         ARGS: [ ],
-      },
-      {
-        NAME: RANDOM_VERTICAL_FLIP,
-        ARGS: [ ],
       }
     ]
   POST_PROCESS: [
+    {
+      NAME: RESIZE,
+      ARGS: { size: [ 84,84 ] },
+    },
     {
       NAME: TO_TENSOR,
       ARGS: [ ],
@@ -86,19 +107,3 @@ AUGMENTOR:
     }
   ]
 
-
-# Dataloader
-OUTF: '../results/'
-WORKERS: 8
-EPISODE_SIZE: 1
-TEST_EPISODE_SIZE: 1
-
-EPISODE_TRAIN_NUM: 10000
-EPISODE_VAL_NUM: 800
-EPISODE_TEST_NUM: 800
-WAY_NUM: 5
-SHOT_NUM: 1
-QUERY_NUM: 15
-
-# Misc
-PRINT_FREQ: 100

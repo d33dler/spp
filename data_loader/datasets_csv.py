@@ -59,11 +59,12 @@ class BatchFactory(Dataset):
                  post_process: T.Compose = None,
                  loader=None,
                  _gray_loader=None,
-                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None):
+                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
+                 is_random_aug: bool = False):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
-        :param mode: the mode of the dataset, train, val or test
+        :param mode: the mode of the dataset, ["train", "val", "test"]
         :param pre_process: the pre-process of the dataset
         :param augmentations: the augmentations of the dataset
         :param post_process: the post-process of the dataset
@@ -121,8 +122,8 @@ class BatchFactory(Dataset):
         self.class_list = class_list
         self.class_img_dict = class_img_dict
         self.data_list = data_list
-        self.pre_process = pre_process
-        self.post_process = post_process
+        self.pre_process = lambda _: _ if pre_process is None else pre_process
+        self.post_process = lambda _: _ if post_process is None else post_process
         self.augmentations = augmentations
         self.av_num = av_num
         self.aug_num = aug_num
@@ -130,6 +131,7 @@ class BatchFactory(Dataset):
         self.gray_loader = gray_loader if _gray_loader is None else _gray_loader
         self.strategy = strategy
         self.mode = mode
+        self.is_random_aug = is_random_aug
         # Build the dataset
         self.builder.build()
 
@@ -140,15 +142,7 @@ class BatchFactory(Dataset):
         return self.builder.get_item(index)
 
     def process_img(self, augment, temp_img):
-        if self.pre_process is not None:
-            temp_img = self.pre_process(temp_img)
-        # Normalization
-        if augment is not None:
-            temp_img = augment(temp_img)
-        # Post-process
-        if self.post_process is not None:
-            temp_img = self.post_process(temp_img)
-        return temp_img
+        return self.post_process(augment(self.pre_process(temp_img)))
 
 
 class ImageToClassBuilder(BatchFactory.AbstractBuilder):
@@ -200,12 +194,13 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         support_images = []
         support_targets = []
         for cls_subset in episode_files:
-            augment = [None]
+            augment = [lambda _: _]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
-                augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)) for _ in
-                           range(factory.av_num)]
-                augment += [None]  # introduce original sample as well
+                augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)
+                                     if factory.is_random_aug
+                                     else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
+                augment += [lambda _: _]  # introduce original sample as well
 
             # load query images
             query_dir = cls_subset['query_img']
@@ -246,11 +241,12 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         support_images = []
         positives = []
         for cls_subset in episode_files:
-            augment = [None]
+            augment = [lambda _: _]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
                 augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)) for _ in
                            range(factory.av_num)]
+                augment += [lambda _: _]  # introduce original sample as well
 
             # load query images
             query_dir = cls_subset['q']

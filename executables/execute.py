@@ -120,7 +120,7 @@ class ExperimentManager:
             if store_target:
                 self.target_bank = np.concatenate([self.target_bank, target.cpu().numpy()], axis=0)
             # ============== print the intermediate results ==============#
-            if episode_index % self._args.print_freq == 0 and episode_index != 0:
+            if episode_index % self._args.PRINT_FREQ == 0 and episode_index != 0:
                 print(f'Test-({model.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
                       f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
@@ -163,7 +163,7 @@ class ExperimentManager:
             ])
 
             testset = BatchFactory(
-                data_dir=self._args.dataset_dir, mode='train', pre_process=ImgTransform,
+                data_dir=self._args.DATASET_DIR, mode='test', pre_process=ImgTransform,
                 episode_num=params.episode_test_num, way_num=params.way_num, shot_num=params.shot_num,
                 query_num=params.query_num
             )
@@ -207,7 +207,6 @@ class ExperimentManager:
             # ======================================= Set the model to training mode ==================================
             model.data.training = True
             # ======================================= Adjust learning rate =======================================
-
 
             # ======================================= Folder of Datasets =======================================
             model.load_data(self._args.mode, F_txt, self._args.dataset_dir)
@@ -255,28 +254,30 @@ class ExperimentManager:
         # ======================================== Settings of path ============================================
         self._args = _args
         ARCHITECTURE_MAP = architectures.__all__
-        model = ARCHITECTURE_MAP[_args.arch](_args.config)
-        p = model.data_loader.params
-        _args.outf = p.outf + '_'.join([_args.arch, _args.data_name, str(model.arch), str(p.way_num), 'Way', str(
-            p.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS)])
-        p.outf = _args.outf
-        self.output_dir = p.outf
-        if not os.path.exists(_args.outf):
-            os.makedirs(_args.outf, exist_ok=True)
+        model = ARCHITECTURE_MAP[_args.ARCH](_args.PATH)
+        PRMS = model.data_loader.params
+        # create path name for model checkpoints and log files
+        _args.OUTF = PRMS.outf + '_'.join(
+            [_args.ARCH, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
+                PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS)])
+        PRMS.outf = _args.OUTF
+        self.output_dir = PRMS.outf
+        if not os.path.exists(_args.OUTF):
+            os.makedirs(_args.OUTF, exist_ok=True)
 
         # save the opt and results to a txt file
-        txt_save_path = os.path.join(_args.outf, 'opt_results.txt')
+        txt_save_path = os.path.join(_args.OUTF, 'opt_results.txt')
         txt_file = open(txt_save_path, 'a+')
         txt_file.write(str(_args))
 
         # optionally resume from a checkpoint
-        if _args.resume:
-            model.load_model(_args.resume, txt_file)
+        if _args.RESUME:
+            model.load_model(_args.RESUME, txt_file)
         else:
             model.init_weights()
 
-        if _args.ngpu > 1:
-            model: DN_X = nn.DataParallel(model, range(_args.ngpu))
+        if _args.NGPU > 1:
+            model: DN_X = nn.DataParallel(model, range(_args.NGPU))
 
         # Print & log the model architecture
         print(model)
@@ -284,10 +285,10 @@ class ExperimentManager:
         self.k = model.k_neighbors
         self.out_bank = np.empty(shape=(0, model.num_classes))
 
-        if _args.mode == "test":
-            if _args.dengine:
-                model.load_data(_args.mode, txt_file, _args.dataset_dir)
-                model.enable_decision_engine(refit=_args.refit_dengine)
+        if _args.MODE == "test":
+            if _args.DENGINE:
+                model.load_data(_args.MODE, txt_file, _args.DATASET_DIR)
+                model.enable_decision_engine(refit=_args.REFIT_DENGINE)
             self.test(model, F_txt=txt_file)
         else:
             self.train(model, F_txt=txt_file)
@@ -304,7 +305,7 @@ def launch_job(args):
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--jobs', required=True, nargs='+', type=str, help='Job parameters in YAML format')
+    parser.add_argument('--jobs', required=True, nargs='+', type=str, help='PATH(s) to the model config file(s)')
     arguments = parser.parse_args()
     print(arguments.jobs)
     proc_ls = []
@@ -312,6 +313,7 @@ if __name__ == '__main__':
     for a in arguments.jobs:
         with open(a, 'r') as f:
             job_args = (EasyDict(yaml.load(f, Loader=yaml.SafeLoader)),)
+            job_args.path = a
             p = Process(target=launch_job, args=job_args, daemon=False)
             p.start()
             proc_ls.append(p)

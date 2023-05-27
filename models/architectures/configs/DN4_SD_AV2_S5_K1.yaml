@@ -1,9 +1,9 @@
 # Main params
 NAME: DN4
-K_NEIGHBORS: 3
+ARCH: "DN_X"
+K_NEIGHBORS: 1
 USE_BIAS: True
-DATASET: miniImageNet
-EPOCHS: 30
+
 #Model skeleton
 TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint modules IDs)
   BACKBONE: 'BACKBONE_2D',
@@ -11,13 +11,36 @@ TOPOLOGY: { # mapping = K (interface forced module IDs) : V (your own checkpoint
 TRACK_LOSS: BACKBONE
 TRACK_CRITERION: BACKBONE
 
+# Args
+
+DENGINE: False
+REFIT_DENGINE: False
+DATASET_DIR: ../dataset/StanfordDogs
+MODE: train
+RESUME: 
+NGPU: 1
+PRINT_FREQ: 100
+EPOCHS: 30
+
+# Dataloader
+OUTF: '../results/'
+WORKERS: 8
+EPISODE_SIZE: 1
+TEST_EPISODE_SIZE: 1
+EPISODE_TRAIN_NUM: 5
+EPISODE_VAL_NUM: 5
+EPISODE_TEST_NUM: 5
+WAY_NUM: 5
+SHOT_NUM: 5
+QUERY_NUM: 10
+
 BACKBONE:
   NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
   MODE: TRAIN
   GRAD: True
   NORM: batch
   CUDA: True
-  LEARNING_RATE: 0.005
+  LEARNING_RATE: 0.001
   BETA_ONE: [ 0.5,0.9 ]
   INIT_WEIGHTS: normal
   FREEZE_EPOCH: 1
@@ -49,17 +72,15 @@ AUGMENTOR:
   DISABLE: [ ]
   AV_NUM: 2 # number of augmented views
   AUG_NUM: 3 # number of randomly selected augmentations per view
-  STRATEGY: 'N:N'
-  RANDOM_AUGMENT: True # whether to use random combinations of augmentations
+  STRATEGY: 'N:1'
+  RANDOM_AUGMENT: False # whether to use random combinations of augmentations
   PRE_PROCESS: [
     {
       NAME: RESIZE,
       ARGS: { size: [ 100,100 ] },
-    },
-
+    }
   ]
   AUGMENTATION:
-
     [
       { NAME: RANDOM_CROP,
         ARGS: [ 84 ]
@@ -71,7 +92,8 @@ AUGMENTOR:
         ARGS: [ ],
       }
     ]
-  POST_PROCESS: [    {
+  POST_PROCESS: [
+    {
       NAME: RESIZE,
       ARGS: { size: [ 84,84 ] },
     },
@@ -85,19 +107,3 @@ AUGMENTOR:
     }
   ]
 
-
-# Dataloader
-OUTF: '../results/'
-WORKERS: 8
-EPISODE_SIZE: 1
-TEST_EPISODE_SIZE: 1
-
-EPISODE_TRAIN_NUM: 300
-EPISODE_VAL_NUM: 800
-EPISODE_TEST_NUM: 800
-WAY_NUM: 5
-SHOT_NUM: 1
-QUERY_NUM: 15
-
-# Misc
-PRINT_FREQ: 100

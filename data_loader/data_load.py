@@ -106,9 +106,8 @@ class DatasetLoader:
                 pre_process=pre_process,
                 augmentations=augmentation,
                 post_process=post_process,
-                episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,
-                av_num=av_num,
-                aug_num=aug_num, strategy=strategy)
+                episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,  # batching
+                av_num=av_num, aug_num=aug_num, strategy=strategy, is_random_aug=cfg_aug.RANDOM_AUGMENT)  # augmentation
             valset = BatchFactory(
                 data_dir=dataset_dir, mode='val',
                 pre_process=pre_process,

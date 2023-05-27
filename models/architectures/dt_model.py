@@ -24,7 +24,7 @@ class DEModel(ARCH):
     Can be used as a generic model as well.
     """
     arch = 'Missing'
-    DE: DecisionEngine
+    DE: DecisionEngine = None
 
     def __init__(self, cfg_path):
         super().__init__(cfg_path)
