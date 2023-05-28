@@ -1,3 +1,4 @@
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -130,7 +131,8 @@ dmypy.json
 .pyre/
 /dataset/miniImageNet/
 /dataset/StanfordDogs
-/executables/results/
+/results
 *.pth.tar
 *.csv
+*.out
 DN4
