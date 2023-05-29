@@ -255,7 +255,7 @@ class ExperimentManager:
         # create path name for model checkpoints and log files
         _args.OUTF = PRMS.outf + '_'.join(
             [_args.ARCH, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
-                PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS)])
+                PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS), 'AV' + str(model.root_cfg.AV_NUM)])
         PRMS.outf = _args.OUTF
         self.output_dir = PRMS.outf
         if not os.path.exists(_args.OUTF):
