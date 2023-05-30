@@ -36,7 +36,7 @@ class DEModel(ARCH):
         self._set_modules_mode()
 
     def load_data(self, mode, output_file, dataset_dir=None):
-        self.loaders = self.data_loader.load_data(mode, dataset_dir, output_file)
+        self.loaders = self.ds_loader.load_data(mode, dataset_dir, output_file)
 
     def _build_ENCODER(self):  # ENCODER | _
         if self.root_cfg.get("ENCODER", None) is None:
@@ -225,7 +225,7 @@ class DEModel(ARCH):
         """
         # create empty dataframe
 
-        batch_sz = self.data_loader.params.batch_sz
+        batch_sz = self.ds_loader.params.batch_sz
         dt: DTree = self.DE
         bins = dt.bins
         ranks_len = dt.ranks

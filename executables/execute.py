@@ -146,7 +146,7 @@ class ExperimentManager:
         total_h = np.zeros(repeat_num)
         total_accuracy_vector = []
         best_prec1 = 0
-        params = model.data_loader.params
+        params = model.ds_loader.params
         model.eval()
         model.data.training(False)
         for r in range(repeat_num):
@@ -251,11 +251,11 @@ class ExperimentManager:
         self._args = _args
         ARCHITECTURE_MAP = architectures.__all__
         model = ARCHITECTURE_MAP[_args.ARCH](_args.PATH)
-        PRMS = model.data_loader.params
+        PRMS = model.ds_loader.params
         # create path name for model checkpoints and log files
         _args.OUTF = PRMS.outf + '_'.join(
             [_args.ARCH, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
-                PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS), 'AV' + str(model.root_cfg.AV_NUM)])
+                PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS), 'AV' + str(model.root_cfg.AUGMENTOR.AV_NUM)])
         PRMS.outf = _args.OUTF
         self.output_dir = PRMS.outf
         if not os.path.exists(_args.OUTF):

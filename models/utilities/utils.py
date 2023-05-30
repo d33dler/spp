@@ -121,7 +121,7 @@ class DataHolder(DataHolderBase):
     output: Any
 
     def __init__(self, cfg):
-        self.training = True
+        self.train = True
         self.eval_set = None
         self.module_list: List = []
         self.cfg = cfg
@@ -288,6 +288,12 @@ def geometric_mean(t: Tensor, dim=0, keepdim=False) -> Tensor:
 def identity(x):
     return x
 
+
+def geometric_mean(t: Tensor) -> Tensor:
+    log_tensor = torch.log(t)
+    mean = torch.mean(log_tensor, dim=0, keepdim=True)
+    geom_mean = torch.exp(mean)
+    return geom_mean
 
 def deep_convert_easydict(layer):
     to_ret = layer

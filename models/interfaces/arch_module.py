@@ -142,7 +142,8 @@ class ARCH(nn.Module):
     class BaseConfig:
         __doc__ = "Base config class for yaml files. Override __doc__ for implementations."
 
-    module_topology: Dict[str, Child]
+    module_topology: Dict[str, Child] = None
+    ds_loader: DatasetLoader = None
 
     def __init__(self, cfg_path) -> None:
         super().__init__()
@@ -157,7 +158,9 @@ class ARCH(nn.Module):
         p = Parameters(c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE, c.QUERY_NUM * c.WAY_NUM)
-        self.data_loader = DatasetLoader(self.root_cfg_dict, p)
+        self.dataset_parameters = p
+        if self.ds_loader is None:
+            self.ds_loader = DatasetLoader(self.root_cfg_dict, p)
 
     def forward(self):
         raise NotImplementedError

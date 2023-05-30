@@ -74,9 +74,9 @@ class SiameseNetwork(BaseBackbone2d):
 
     def forward(self):
         data = self.data
+        queries = data.snx_queries
+        data.snx_query_f = self.fc(self.features(queries))
         if data.is_training():
-            queries = data.snx_queries
-            data.snx_query_f = self.fc(self.features(queries))
             data.snx_positive_f = self.fc(self.features(self.data.snx_positives))
             # construct negatives out of positives for each class (N=50) so negatives = N-1
             negatives = []
@@ -84,14 +84,24 @@ class SiameseNetwork(BaseBackbone2d):
             for i in range(len(positives)):
                 negatives.append(positives[torch.arange(len(positives)) != i])
             self.data.snx_negative_f = torch.stack(negatives)
+            print(queries.shape, positives.shape, self.data.snx_negative_f.shape)
+            data.sim_list = self._calculate_cos_similarity(queries, positives, negatives)
             return None
         else:
-            queries = data.snx_queries
-            support_sets = data.snx_positives
+
+            support_sets = data.snx_support_sets
+            data.snx_support_set_f = self.fc(self.features(support_sets))
+            data.sim_list = self._calculate_cos_similarity_support(queries, support_sets)
         return data.sim_list
 
-    def _calculate_cosine_similarity(self):
-        pass
+    def _calculate_cos_similarity(self, queries, positives, negatives):
+        sim_list = None
+
+        return sim_list
+
+    def _calculate_cos_similarity_support(self, queries, support_sets):
+        sim_list = None
+        return sim_list
 
     def backward(self, *args, **kwargs):
         queries = self.data.snx_query_f

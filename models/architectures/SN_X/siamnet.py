@@ -34,7 +34,6 @@ class SN_X(DEModel):
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
-        top1 = AverageMeter()
         train_loader = self.loaders.train_loader
         end = time.time()
         epochix = self.get_epoch()
@@ -52,15 +51,12 @@ class SN_X(DEModel):
             self.data.snx_positives = positives
 
             # Calculate the output
-            out = self.forward()
+            self.forward()
             self.backward()
             loss = self.get_loss()
-            # Measure accuracy and record loss
-            prec1, _ = accuracy(out, targets, topk=(1, 3))
-
+            # record loss
             n = queries.size(0) // self.data.av_num if self.data.av_num not in [None, 0] else queries.size(0)
             losses.update(loss.item(), n)
-            top1.update(prec1[0], n)
 
             # Measure elapsed time
             batch_time.update(time.time() - end)
@@ -70,18 +66,13 @@ class SN_X(DEModel):
             if episode_index % self.root_cfg.PRINT_FREQ == 0 and episode_index != 0:
                 print(f'Eposide-({epochix}): [{episode_index}/{len(train_loader)}]\t'
                       f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
-                      f'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                      )
-
+                      f'Loss {losses.val:.3f} ({losses.avg:.3f})\t')
                 print('Eposide-({0}): [{1}/{2}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                      'Loss {loss.val:.3f} ({loss.avg:.3f})\t'
-                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(epochix, episode_index, len(train_loader),
-                                                                      batch_time=batch_time, data_time=data_time,
-                                                                      loss=losses,
-                                                                      top1=top1), file=output_file)
+                      'Loss {loss.val:.3f} ({loss.avg:.3f})'.format(epochix, episode_index, len(train_loader),
+                                                                    batch_time=batch_time, data_time=data_time,
+                                                                    loss=losses, ), file=output_file)
         self.incr_epoch()
         self.data.empty_cache()
 

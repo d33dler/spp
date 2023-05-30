@@ -54,7 +54,7 @@ class BatchFactory(Dataset):
 
         def get_item(self, index):
             raise NotImplementedError("get_item() not implemented")
-
+    # TODO move parameters to a parameter class
     def __init__(self, builder: Union[str, AbstractBuilder] = "image_to_class", data_dir="", mode="train",
                  pre_process: T.Compose = None,
                  augmentations: List[nn.Module] = None,
@@ -62,7 +62,8 @@ class BatchFactory(Dataset):
                  loader=None,
                  _gray_loader=None,
                  episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
-                 is_random_aug: bool = False):
+                 is_random_aug: bool = False,
+                 train_class_num: int = 64):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
@@ -120,6 +121,7 @@ class BatchFactory(Dataset):
         class_list = list(class_img_dict.keys())
         self.episode_num = episode_num
         self.way_num = way_num
+        self.train_class_num = train_class_num
         self.shot_num = shot_num
         self.query_num = query_num
         self.class_list = class_list
@@ -284,7 +286,7 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         for _ in range(episode_num):
             # construct each episode
             episode = []
-            temp_list = random.sample(class_list, way_num)
+            temp_list = random.sample(class_list, self.factory.way_num)
             for cls, item in enumerate(temp_list):  # for each class
                 imgs_set = class_img_dict[item]
                 # split the images into support and query sets
