@@ -93,7 +93,8 @@ class BatchFactory(Dataset):
             "test": test_csv
         }
         builder_map = {
-            "image_to_class": ImageToClassBuilder
+            "image_to_class": ImageToClassBuilder,
+            "npair_mc": NPairMCBuilder
         }
 
         if isinstance(builder, str):
@@ -232,9 +233,12 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
     def __init__(self, factory: BatchFactory):
         self.factory = factory
+        self.val_builder = ImageToClassBuilder(factory)
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
+        if self.factory.mode != 'train':
+            return self.val_builder.get_item(index)
         factory = self.factory
         episode_files = factory.data_list[index]
         loader = factory.loader
@@ -265,6 +269,9 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
     def build(self):
         # assign all values from self
+        if self.factory.mode != 'train':
+            self.val_builder.build()
+            return
         builder = self.factory
         episode_num = builder.episode_num
         way_num = builder.way_num
@@ -275,7 +282,6 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         data_list = builder.data_list
 
         for _ in range(episode_num):
-            # TODO rewrite this
             # construct each episode
             episode = []
             temp_list = random.sample(class_list, way_num)

@@ -77,7 +77,7 @@ class ExperimentManager:
         accuracies = []
 
         end = time.time()
-        model.data.training = False
+        model.data.training(False)
         for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(val_loader):
 
             # Convert query and support images
@@ -148,7 +148,7 @@ class ExperimentManager:
         best_prec1 = 0
         params = model.data_loader.params
         model.eval()
-        model.data.training = False
+        model.data.training(False)
         for r in range(repeat_num):
             print('===================================== Round %d =====================================' % r)
             F_txt.write('===================================== Round %d =====================================\n' % r)
@@ -204,14 +204,14 @@ class ExperimentManager:
             print('===================================== Epoch %d =====================================' % epoch_index)
             F_txt.write(
                 '===================================== Epoch %d =====================================\n' % epoch_index)
-            # ======================================= Set the model to training mode ==================================
-            model.data.training = True
+            # ================================= Set the model data to training mode ==============================
+            model.data.training()
             # ======================================= Adjust learning rate =======================================
 
-            # ======================================= Folder of Datasets =======================================
+            # ======================================= Folder of Datasets =========================================
             model.load_data(self._args.MODE, F_txt, self._args.DATASET_DIR)
             loaders = model.loaders
-            # ============================================ Training ===========================================
+            # ============================================ Training ==============================================
             # Freeze the parameters of Batch Normalization after 10000 episodes (1 epoch)
             if model.get_epoch() > 0:
                 model.eval()
@@ -269,8 +269,6 @@ class ExperimentManager:
         # optionally resume from a checkpoint
         if _args.RESUME:
             model.load_model(_args.RESUME, txt_file)
-        else:
-            model.init_weights()
 
         if _args.NGPU > 1:
             model: DN_X = nn.DataParallel(model, range(_args.NGPU))

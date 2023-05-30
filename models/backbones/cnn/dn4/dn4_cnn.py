@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from models.backbones.base import BaseBackbone2d
 from models.clustering.knn import KNN_itc
-from models.utilities.utils import DataHolder, init_weights, get_norm_layer
+from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaiming
 
 
 ##############################################################################
@@ -62,7 +62,7 @@ class FourLayer_64F(BaseBackbone2d):
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
-
+        self.features.apply(init_weights_kaiming)
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.scheduler = CosineAnnealingLR(self.optimizer, 30, eta_min=0.00001)
@@ -81,7 +81,7 @@ class FourLayer_64F(BaseBackbone2d):
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
             data.S.append(support_set_sam)
-        av_num = data.get_true_AV() if data.training else 1
+        av_num = data.get_true_AV() if data.is_training() else 1
         data.sim_list, data.cos_sim = self.knn.forward(data.q, data.S, av_num, av_num,
                                             data.cfg.AUGMENTOR.STRATEGY if data.training else None)
         self.data.output = data.sim_list

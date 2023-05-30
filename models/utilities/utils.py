@@ -87,7 +87,7 @@ class DataHolder(DataHolderBase):
     """
     # Classification
     num_classes: int
-    # Input
+    # ======== DNX ==========
     q_in_CPU: Tensor
     q_in: Tensor
     S_in: List[Tensor]
@@ -98,23 +98,26 @@ class DataHolder(DataHolderBase):
     q: Tensor
     DLD_topk: Tensor
     S: List[Tensor]  # CUDA
-    sim_list: Tensor  # CUDA
 
     # Tree fit input
     X: DataFrame
     y: DataFrame
     eval_set: Tuple[Any, Any]
 
-    # SNX
+    # ======== SNX ==========
     snx_queries: Tensor
     snx_positives: Tensor
-
-    snx_query_embeddings: Tensor
-    snx_positive_embeddings: Tensor
-    snx_negative_embeddings: Tensor
+    snx_support_sets: Tensor
+    # SNX embeddings
+    snx_query_f: Tensor
+    snx_positive_f: Tensor
+    snx_negative_f: Tensor
+    snx_support_set_f: Tensor
     # Tree-out
     tree_pred: np.ndarray
 
+    # ======== Output ==========
+    sim_list: Tensor  # CUDA
     output: Any
 
     def __init__(self, cfg):
@@ -140,6 +143,12 @@ class DataHolder(DataHolderBase):
 
     def get_true_AV(self):
         return self.av_num + 1
+
+    def training(self, mode=True):
+        self.training = mode
+
+    def is_training(self):
+        return self.training
 
 
 class AverageMeter(object):
@@ -237,6 +246,11 @@ def weights_init_orthogonal(m):
         init.normal_(m.weight.data, 1.0, 0.02)
         init.constant_(m.bias.data, 0.0)
 
+def init_weights_kaiming(m):
+    if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+        nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0)
 
 def init_weights(net, init_type='normal'):
     print('initialization method [%s]' % init_type)

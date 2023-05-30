@@ -3,12 +3,11 @@ from dataclasses import field
 import torch
 import torch.nn as nn
 from easydict import EasyDict
-from torch import optim, stack, Tensor
-import torch.nn.functional as F
+from torch import optim
+
 from models.backbones.base import BaseBackbone2d
-from models.clustering.knn import KNN_itc
-from models.utilities.custom_loss import NPairLoss, NPlusOneTupletLoss
-from models.utilities.utils import DataHolder, init_weights, get_norm_layer, geometric_mean
+from models.utilities.custom_loss import NPlusOneTupletLoss
+from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaiming
 
 
 ##############################################################################
@@ -64,35 +63,45 @@ class SiameseNetwork(BaseBackbone2d):
             nn.Linear(4096, 1024),
         )
 
-        self.knn = KNN_itc(data.k_neighbors, True)
         # freeze batchnorm layers
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]  # , (self.fc, [1, 4])]
         self.lr = model_cfg.LEARNING_RATE
+        self.features.apply(init_weights_kaiming)
+        self.fc.apply(init_weights_kaiming)
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=0.0001)
         self.criterion = NPlusOneTupletLoss().cuda()
 
     def forward(self):
         data = self.data
-        queries = data.snx_queries
-        data.snx_query_embeddings = self.fc(self.features(queries))
-        data.snx_positive_embeddings = self.fc(self.features(self.data.snx_positives))
-        # construct negatives out of positives for each class (N=50) so negatives = N-1
-        negatives = []
-        positives = data.snx_positives
-        for i in range(len(positives)):
-            negatives.append(positives[torch.arange(len(positives)) != i])
-        self.data.snx_negative_embeddings = torch.stack(negatives)
-
+        if data.is_training():
+            queries = data.snx_queries
+            data.snx_query_f = self.fc(self.features(queries))
+            data.snx_positive_f = self.fc(self.features(self.data.snx_positives))
+            # construct negatives out of positives for each class (N=50) so negatives = N-1
+            negatives = []
+            positives = data.snx_positives
+            for i in range(len(positives)):
+                negatives.append(positives[torch.arange(len(positives)) != i])
+            self.data.snx_negative_f = torch.stack(negatives)
+            return None
+        else:
+            queries = data.snx_queries
+            support_sets = data.snx_positives
         return data.sim_list
 
-    def _calculate_cosine_similarity(self, ):
+    def _calculate_cosine_similarity(self):
         pass
+
     def backward(self, *args, **kwargs):
-        queries = self.data.snx_query_embeddings
-        positives = self.data.snx_positive_embeddings
-        negatives = self.data.snx_negative_embeddings
+        queries = self.data.snx_query_f
+        positives = self.data.snx_positive_f
+        negatives = self.data.snx_negative_f
         self.loss = self.criterion(queries, positives, negatives)
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()
         return self.loss
+
+    def adjust_learning_rate(self, epoch):
+        self.scheduler.step()

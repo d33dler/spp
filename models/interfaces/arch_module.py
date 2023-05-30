@@ -18,8 +18,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 from data_loader.data_load import Parameters, DatasetLoader
 from models import backbones
-from models.utilities.utils import save_checkpoint, load_config, accuracy, init_weights, config_exchange, \
-    deep_convert_easydict
+from models.utilities.utils import save_checkpoint, load_config, accuracy, config_exchange
 
 
 # noinspection PyUnresolvedReferences
@@ -331,10 +330,6 @@ class ARCH(nn.Module):
         if module_id is None or module_id not in self.module_topology.keys():
             return self.module_topology[self.root_cfg.TRACK_CRITERION].criterion
         return self.module_topology[module_id].criterion
-
-    def init_weights(self):
-        for _id, module in self.module_topology.items():
-            init_weights(module, self.root_cfg[_id].INIT_WEIGHTS) if "INIT_WEIGHTS" in self.root_cfg[_id] else False
 
     def adjust_learning_rate(self):
         """Sets the learning rate to the initial LR decayed by 0.05 every 10 epochs"""
