@@ -56,13 +56,13 @@ class Encoder(ARCH.Child):
     def forward(self):
         # Extract the encoder part of the encoders
         data = self.data
-        B, C, h, w = self.data.q.size()
+        B, C, h, w = self.data.q_F.size()
         encoder_sm = self.encoder_smax
         encoder_conv = self.encoder_conv
         # Use the encoder to transform the input data
-        data.q_reduced = encoder_conv(data.q)
+        data.q_reduced = encoder_conv(data.q_F)
 
-        data.q_smax = encoder_sm(data.q)
+        data.q_smax = encoder_sm(data.q_F)
         S_red = []
         data.S_reduced = S_red
         for s in data.DLD_topk:
@@ -70,7 +70,7 @@ class Encoder(ARCH.Child):
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
-            data.S.append(support_set_sam)
+            data.S_F.append(support_set_sam)
             S_red.append(support_set_sam)
         data.sim_list_REDUCED, data.DLD_topk = self.knn.forward(data.q_reduced, data.S_reduced)
 

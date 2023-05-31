@@ -27,15 +27,16 @@ OUTF: '../results/'
 WORKERS: 8
 EPISODE_SIZE: 1
 TEST_EPISODE_SIZE: 1
-EPISODE_TRAIN_NUM: 10000
+EPISODE_TRAIN_NUM: 300
 EPISODE_VAL_NUM: 1000
 EPISODE_TEST_NUM: 800
 WAY_NUM: 5
 SHOT_NUM: 1
 QUERY_NUM: 15
+BUILDER_TYPE: "npair_mc" # image_to_class | npair_mc
 
 BACKBONE:
-  NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
+  NAME: SN4_CNN2d # DN4_CNN2d | ResNet2d
   MODE: TRAIN
   GRAD: True
   NORM: batch
@@ -70,8 +71,8 @@ DE:
 
 AUGMENTOR:
   DISABLE: [ ]
-  AV_NUM: 1 # number of augmented views
-  AUG_NUM: 3 # number of randomly selected augmentations per view
+  AV_NUM: # number of augmented views
+  AUG_NUM: # number of randomly selected augmentations per view
   STRATEGY: 'N:1'
   RANDOM_AUGMENT: False # whether to use random combinations of augmentations
   PRE_PROCESS: [

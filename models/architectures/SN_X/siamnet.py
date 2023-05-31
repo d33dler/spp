@@ -38,7 +38,7 @@ class SN_X(DEModel):
         end = time.time()
         epochix = self.get_epoch()
 
-        for episode_index, queries, positives, targets in enumerate(train_loader):
+        for episode_index, (queries, positives, targets) in enumerate(train_loader):
             # Measure data loading time
             data_time.update(time.time() - end)
             # Convert query, positives and targets to cuda tensors

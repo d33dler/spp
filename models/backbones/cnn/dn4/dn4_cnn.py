@@ -72,18 +72,18 @@ class FourLayer_64F(BaseBackbone2d):
         data = self.data
         q_embeddings = self.features(data.q_in)
         _, C, _, _ = q_embeddings.size()
-        data.q = torch.stack(
+        data.q_F = torch.stack(
             [torch.transpose(t.reshape((C, -1)), 0, 1) for t in q_embeddings])
-        data.S = []
+        data.S_F = []
         for i in range(len(data.S_in)):
             support_set_sam = self.features(data.S_in[i])
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
-            data.S.append(support_set_sam)
+            data.S_F.append(support_set_sam)
         av_num = data.get_true_AV() if data.is_training() else 1
-        data.sim_list, data.cos_sim = self.knn.forward(data.q, data.S, av_num, av_num,
-                                            data.cfg.AUGMENTOR.STRATEGY if data.training else None)
+        data.sim_list, data.cos_sim = self.knn.forward(data.q_F, data.S_F, av_num, av_num,
+                                                       data.cfg.AUGMENTOR.STRATEGY if data.training else None)
         self.data.output = data.sim_list
         return data
 

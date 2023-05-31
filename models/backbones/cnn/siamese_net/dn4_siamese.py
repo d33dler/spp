@@ -5,8 +5,9 @@ import torch.nn as nn
 from easydict import EasyDict
 from torch import optim
 
+from torch.nn.functional import cosine_similarity
 from models.backbones.base import BaseBackbone2d
-from models.utilities.custom_loss import NPlusOneTupletLoss
+from models.utilities.custom_loss import NPairMCLoss
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaiming
 
 
@@ -70,44 +71,105 @@ class SiameseNetwork(BaseBackbone2d):
         self.fc.apply(init_weights_kaiming)
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=0.0001)
-        self.criterion = NPlusOneTupletLoss().cuda()
+        self.criterion = NPairMCLoss().cuda()
 
     def forward(self):
         data = self.data
-        queries = data.snx_queries
-        data.snx_query_f = self.fc(self.features(queries))
+
         if data.is_training():
-            data.snx_positive_f = self.fc(self.features(self.data.snx_positives))
+            queries = data.snx_queries
+            data.snx_query_f = self.fc(self.features(queries).flatten(start_dim=1))
+            data.snx_positive_f = self.fc(self.features(self.data.snx_positives).flatten(start_dim=1))
             # construct negatives out of positives for each class (N=50) so negatives = N-1
             negatives = []
-            positives = data.snx_positives
+            positives = data.snx_positive_f
             for i in range(len(positives)):
                 negatives.append(positives[torch.arange(len(positives)) != i])
             self.data.snx_negative_f = torch.stack(negatives)
-            print(queries.shape, positives.shape, self.data.snx_negative_f.shape)
-            data.sim_list = self._calculate_cos_similarity(queries, positives, negatives)
+            data.sim_list = self._calc_cosine_similarities(data.snx_query_f, data.snx_positive_f, data.snx_negative_f,
+                                                           data.av_num)
             return None
         else:
-
-            support_sets = data.snx_support_sets
-            data.snx_support_set_f = self.fc(self.features(support_sets))
-            data.sim_list = self._calculate_cos_similarity_support(queries, support_sets)
+            queries = data.q_in
+            data.q_F = self.fc(self.features(queries).flatten(start_dim=1))
+            support_sets = data.S_in
+            data.S_F = torch.cat([self.fc(self.features(s_cls).flatten(start_dim=1)) for s_cls in support_sets], dim=0)
+            data.sim_list = self._calc_cosine_similarities_support(data.q_F, data.S_F)
         return data.sim_list
 
-    def _calculate_cos_similarity(self, queries, positives, negatives):
-        sim_list = None
+    def _calc_cosine_similarities(self, queries, positives, negatives, av):
+        """
+        Compute the cosine similarity between query and positive and negatives.
 
-        return sim_list
+        Parameters
+        ----------
+        queries : torch.Tensor
+            Tensor of query embeddings of shape [batch_size, embedding_dim]
+        positives : torch.Tensor
+            Tensor of positive embeddings of shape [batch_size, embedding_dim]
+        negatives : torch.Tensor
+            Tensor of negative embeddings of shape [batch_size, num_negatives, embedding_dim]
+        av : int
+            Number of augmented views. If av = 0, then just compute the distance without averaging.
 
-    def _calculate_cos_similarity_support(self, queries, support_sets):
-        sim_list = None
-        return sim_list
+        Returns
+        -------
+        query_pos_cos_sim : torch.Tensor
+            Tensor of cosine similarities between query and positive of shape [batch_size,]
+        query_neg_cos_sim : torch.Tensor
+            Tensor of cosine similarities between query and negatives of shape [batch_size, num_negatives]
+        """
+        batch_size = queries.size(0)
+
+        # Compute cosine similarity between query and positive
+        query_pos_cos_sim = cosine_similarity(queries, positives)
+
+        # Compute cosine similarity between query and negatives
+        query_neg_cos_sim = cosine_similarity(queries.unsqueeze(1), negatives, dim=-1).squeeze(1)
+
+        if av > 0:
+            # If av > 0, we reshape the cosine similarities for each sample in the batch
+            # Then we take the geometric mean across the augmented views
+            query_pos_cos_sim = query_pos_cos_sim.view(batch_size // av, av)
+            query_neg_cos_sim = query_neg_cos_sim.view(batch_size // av, av, -1)
+
+            query_pos_cos_sim = torch.prod(query_pos_cos_sim, dim=1) ** (1.0 / av)
+            query_neg_cos_sim = torch.prod(query_neg_cos_sim, dim=1) ** (1.0 / av)
+
+        return query_pos_cos_sim, query_neg_cos_sim
+
+    def _calc_cosine_similarities_support(self, queries, support):
+        """
+        Compute the cosine similarity between query and each class in the support set.
+
+        Parameters
+        ----------
+        queries : torch.Tensor
+            Tensor of query embeddings of shape [batch_size, embedding_dim]
+        support : torch.Tensor
+            Tensor of support set embeddings of shape [num_classes, num_samples, embedding_dim]
+
+        Returns
+        -------
+        cos_sim : torch.Tensor
+            Tensor of cosine similarities between queries and support set of shape [batch_size, num_classes]
+        """
+        num_classes, num_samples, _ = support.size()
+
+        # Compute cosine similarity between queries and support set
+        cos_sim = cosine_similarity(queries.unsqueeze(1).unsqueeze(1), support, dim=-1)
+
+        # Compute geometric mean for each class
+        cos_sim = cos_sim.view(-1, num_classes, num_samples)
+        cos_sim = torch.prod(cos_sim, dim=2) ** (1.0 / num_samples)
+
+        return cos_sim
 
     def backward(self, *args, **kwargs):
         queries = self.data.snx_query_f
         positives = self.data.snx_positive_f
         negatives = self.data.snx_negative_f
-        self.loss = self.criterion(queries, positives, negatives)
+        self.loss = self.criterion(positives, negatives, torch.cat((queries, positives), 0))
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()

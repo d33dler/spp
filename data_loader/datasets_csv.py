@@ -54,14 +54,19 @@ class BatchFactory(Dataset):
 
         def get_item(self, index):
             raise NotImplementedError("get_item() not implemented")
+
     # TODO move parameters to a parameter class
-    def __init__(self, builder: Union[str, AbstractBuilder] = "image_to_class", data_dir="", mode="train",
+    def __init__(self,
+                 builder: Union[str, AbstractBuilder] = "image_to_class",
+                 data_dir="",
+                 mode="train",
                  pre_process: T.Compose = None,
                  augmentations: List[nn.Module] = None,
                  post_process: T.Compose = None,
                  loader=None,
                  _gray_loader=None,
-                 episode_num=1000, way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
+                 episode_num=1000,
+                 way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
                  train_class_num: int = 64):
         """
@@ -97,7 +102,7 @@ class BatchFactory(Dataset):
             "image_to_class": ImageToClassBuilder,
             "npair_mc": NPairMCBuilder
         }
-
+        print(builder)
         if isinstance(builder, str):
             builder = builder.lower()
             self.builder = builder_map[builder](self) if builder in builder_map else ImageToClassBuilder(self)
@@ -239,6 +244,8 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
+        # write to log file the factory mode
+
         if self.factory.mode != 'train':
             return self.val_builder.get_item(index)
         factory = self.factory
@@ -246,7 +253,6 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         loader = factory.loader
         query_images = []
         targets = []
-        support_images = []
         positives = []
         for cls_subset in episode_files:
             augment = [identity]
@@ -257,16 +263,17 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
                 augment += [identity]  # introduce original sample as well
 
             # load query images
-            query_dir = cls_subset['q']
-            query_images += [factory.process_img(aug, Image.fromarray(loader(temp_img))) for aug in augment for
-                             temp_img in query_dir]  # Use the cached loader function
+            temp_img = Image.fromarray(loader(cls_subset['q']))
+            query_images += [factory.process_img(aug, temp_img) for aug in augment]  # Use the cached loader function
 
             # load support images
             temp_support = Image.fromarray(loader(cls_subset["+"]))
-            support_images.append(temp_support)
+            [positives.append(factory.process_img(aug, temp_support)) for aug in augment]
 
             # read the label
             targets.append(cls_subset['target'])
+        with open('log.txt', 'a') as f:
+            f.write("RETURNING Q P T" + '\n')
         return query_images, positives, targets
 
     def build(self):
@@ -286,7 +293,7 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         for _ in range(episode_num):
             # construct each episode
             episode = []
-            temp_list = random.sample(class_list, self.factory.way_num)
+            temp_list = random.sample(class_list, self.factory.train_class_num)
             for cls, item in enumerate(temp_list):  # for each class
                 imgs_set = class_img_dict[item]
                 # split the images into support and query sets

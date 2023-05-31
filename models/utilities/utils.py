@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, annotations
 import functools
 import gc
 from dataclasses import dataclass
@@ -95,9 +95,9 @@ class DataHolder(DataHolderBase):
     av_num: int
     cos_sim: Tensor
     # Backbone2d OUTPUT
-    q: Tensor
+    q_F: Tensor
     DLD_topk: Tensor
-    S: List[Tensor]  # CUDA
+    S_F: List[Tensor] | Tensor  # CUDA
 
     # Tree fit input
     X: DataFrame
@@ -132,12 +132,14 @@ class DataHolder(DataHolderBase):
         self.av_num = cfg.AUGMENTOR.AV_NUM or 0
 
     def empty_cache(self):
-        del self.q_in
-        del self.S_in
-        del self.q
-        del self.S
-        del self.output
-        del self.cos_sim
+        attributes = ['q_in', 'S_in', 'q_F', 'S_F', 'output', 'cos_sim', 'sim_list', 'snx_queries', 'snx_positives',
+                      'snx_support_sets', 'snx_query_f', 'snx_positive_f', 'snx_negative_f', 'snx_support_set_f',
+                      'tree_pred', 'DLD_topk']
+        for attr in attributes:
+            try:
+                delattr(self, attr)
+            except AttributeError:
+                pass
         gc.collect()
         torch.cuda.empty_cache()
 
@@ -145,7 +147,7 @@ class DataHolder(DataHolderBase):
         return self.av_num + 1
 
     def training(self, mode=True):
-        self.training = mode
+        self.train = mode
 
     def is_training(self):
         return self.training
@@ -246,11 +248,13 @@ def weights_init_orthogonal(m):
         init.normal_(m.weight.data, 1.0, 0.02)
         init.constant_(m.bias.data, 0.0)
 
+
 def init_weights_kaiming(m):
     if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
         nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
         if m.bias is not None:
             nn.init.constant_(m.bias, 0)
+
 
 def init_weights(net, init_type='normal'):
     print('initialization method [%s]' % init_type)
@@ -294,6 +298,7 @@ def geometric_mean(t: Tensor) -> Tensor:
     mean = torch.mean(log_tensor, dim=0, keepdim=True)
     geom_mean = torch.exp(mean)
     return geom_mean
+
 
 def deep_convert_easydict(layer):
     to_ret = layer

@@ -32,10 +32,12 @@ EPISODE_VAL_NUM: 1000
 EPISODE_TEST_NUM: 800
 WAY_NUM: 5
 SHOT_NUM: 1
-QUERY_NUM: 15
+QUERY_NUM: 1
+BUILDER_TYPE: "npair_mc" # image_to_class | npair_mc
+
 
 BACKBONE:
-  NAME: DN4_CNN2d # DN4_CNN2d | ResNet2d
+  NAME: SN4_CNN2d # DN4_CNN2d | ResNet2d
   MODE: TRAIN
   GRAD: True
   NORM: batch

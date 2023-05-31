@@ -75,8 +75,8 @@ class SevenLayer_64F(BaseBackbone2d):
     def forward(self):
         # extract features of input1--query image
         data = self.data
-        data.q = self.features(data.q_in)
-        data.S= []
+        data.q_F = self.features(data.q_in)
+        data.S_F= []
 
         # extract features of input2--support set
         for i in range(len(data.S_in)):
@@ -84,8 +84,8 @@ class SevenLayer_64F(BaseBackbone2d):
             B, C, h, w = support_set_sam.size()
             support_set_sam = support_set_sam.permute(1, 0, 2, 3)
             support_set_sam = support_set_sam.contiguous().reshape((C, -1))
-            data.S.append(support_set_sam)
-        data.sim_list, data.DLD_topk = self.knn.forward(data.q, data.S)
+            data.S_F.append(support_set_sam)
+        data.sim_list, data.DLD_topk = self.knn.forward(data.q_F, data.S_F)
         return data
 
 # def define_DN4Net(pretrained=False, model_root=None, which_model='Conv64', norm='batch', init_type='normal',
