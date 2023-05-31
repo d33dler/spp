@@ -121,7 +121,7 @@ class DataHolder(DataHolderBase):
     output: Any
 
     def __init__(self, cfg):
-        self.train = True
+        self._train = True
         self.eval_set = None
         self.module_list: List = []
         self.cfg = cfg
@@ -147,10 +147,10 @@ class DataHolder(DataHolderBase):
         return self.av_num + 1
 
     def training(self, mode=True):
-        self.train = mode
+        self._train = mode
 
     def is_training(self):
-        return self.training
+        return self._train
 
 
 class AverageMeter(object):
