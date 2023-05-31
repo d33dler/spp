@@ -41,16 +41,12 @@ class NPairMCLoss(nn.Module):
         super(NPairMCLoss, self).__init__()
         self.l2_reg = l2_reg
 
-    def forward(self, positives, negatives, embeddings):
+    def forward(self, positives, negatives):
         """
         positives: 1D tensor of shape (B,)
         negatives: 2D tensor of shape (B,(L-1) * AV)
         """
         # Calculate the loss as per the formula
         loss = torch.log1p(torch.sum(torch.exp(negatives - positives.unsqueeze(1)), dim=1)).mean()
-        # Compute L2 regularization term
-        l2_reg = self.l2_reg * torch.norm(embeddings, p=2)
-        # Combine base loss with regularization
-        total_loss = loss + l2_reg
-        return total_loss
+        return loss
 

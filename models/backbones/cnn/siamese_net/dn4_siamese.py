@@ -61,7 +61,7 @@ class SiameseNetwork(BaseBackbone2d):
             nn.Linear(64 * 21 * 21, 4096),
             nn.LeakyReLU(0.2, True),
             nn.Dropout(p=0.3),
-            nn.Linear(4096, 1024),
+            nn.Linear(4096, 2048),
         )
 
         # freeze batchnorm layers
@@ -72,6 +72,7 @@ class SiameseNetwork(BaseBackbone2d):
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=0.0001)
         self.criterion = NPairMCLoss().cuda()
+        self.val_criterion = nn.CrossEntropyLoss().cuda()
 
     def forward(self):
         data = self.data
@@ -93,7 +94,8 @@ class SiameseNetwork(BaseBackbone2d):
             queries = data.q_in
             data.q_F = self.fc(self.features(queries).flatten(start_dim=1))
             support_sets = data.S_in
-            data.S_F = torch.cat([self.fc(self.features(s_cls).flatten(start_dim=1)) for s_cls in support_sets], dim=0)
+            data.S_F = torch.stack([self.fc(self.features(s_cls).flatten(start_dim=1)) for s_cls in support_sets],
+                                   dim=0)
             data.sim_list = self._calc_cosine_similarities_support(data.q_F, data.S_F)
         return data.sim_list
 
@@ -138,38 +140,37 @@ class SiameseNetwork(BaseBackbone2d):
 
         return query_pos_cos_sim, query_neg_cos_sim
 
-    def _calc_cosine_similarities_support(self, queries, support):
+    def _calc_cosine_similarities_support(self, queries, support_sets):
         """
-        Compute the cosine similarity between query and each class in the support set.
+        Compute the cosine similarity between each query and each sample of each support class.
+        Compute geometric means for each query and the support class.
 
         Parameters
         ----------
         queries : torch.Tensor
             Tensor of query embeddings of shape [batch_size, embedding_dim]
-        support : torch.Tensor
-            Tensor of support set embeddings of shape [num_classes, num_samples, embedding_dim]
+        support_sets : torch.Tensor
+            Tensor of support sets of shape [num_classes, num_samples_per_class, embedding_dim]
 
         Returns
         -------
-        cos_sim : torch.Tensor
-            Tensor of cosine similarities between queries and support set of shape [batch_size, num_classes]
+        class_cos_sim : torch.Tensor
+            Tensor of cosine similarities between each query and each support class of shape [batch_size, num_classes]
         """
-        num_classes, num_samples, _ = support.size()
+        num_classes, num_samples_per_class, embedding_dim = support_sets.size()
 
-        # Compute cosine similarity between queries and support set
-        cos_sim = cosine_similarity(queries.unsqueeze(1).unsqueeze(1), support, dim=-1)
+        # Compute cosine similarity between each query and each sample of each support class
+        class_cos_sim = cosine_similarity(queries.unsqueeze(1).unsqueeze(1), support_sets.unsqueeze(0), dim=-1)
 
-        # Compute geometric mean for each class
-        cos_sim = cos_sim.view(-1, num_classes, num_samples)
-        cos_sim = torch.prod(cos_sim, dim=2) ** (1.0 / num_samples)
-
-        return cos_sim
+        # Compute geometric mean for each query and the support class
+        class_cos_sim = torch.prod(class_cos_sim, dim=2) ** (1.0 / num_samples_per_class)
+        return class_cos_sim
 
     def backward(self, *args, **kwargs):
         queries = self.data.snx_query_f
         positives = self.data.snx_positive_f
         negatives = self.data.snx_negative_f
-        self.loss = self.criterion(positives, negatives, torch.cat((queries, positives), 0))
+        self.loss = self.criterion(self.data.sim_list[0], self.data.sim_list[1])
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()
@@ -177,3 +178,6 @@ class SiameseNetwork(BaseBackbone2d):
 
     def adjust_learning_rate(self, epoch):
         self.scheduler.step()
+
+    def calculate_loss(self, pred, gt):
+        return torch.Tensor([0.0])

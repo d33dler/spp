@@ -81,7 +81,7 @@ class ARCH(nn.Module):
             self.config = config
             self.scheduler = None
 
-        def calculate_loss(self, gt, pred):
+        def calculate_loss(self, *args):
             """
             Calculates without calculating the gradient
             :param gt: ground truth
@@ -91,7 +91,7 @@ class ARCH(nn.Module):
             :return: loss
             :rtype: Any
             """
-            return self.criterion(pred, gt)
+            return self.criterion(*args)
 
         def backward(self, *args, **kwargs):
             """
@@ -312,11 +312,11 @@ class ARCH(nn.Module):
             raise KeyError(f"Module {module_id} not found in architecture topology")
         return self.module_topology[module_id].loss
 
-    def calculate_loss(self, gt, pred):
+    def calculate_loss(self, *args):
         """
         Calculate loss (without grad!)
         """
-        return self.module_topology[self.root_cfg.TRACK_LOSS].calculate_loss(gt, pred)
+        return self.module_topology[self.root_cfg.TRACK_LOSS].calculate_loss(*args)
 
     def calculate_accuracy(self, output, target, topk=(1,)):
         prec = accuracy(F.softmax(output, dim=1), target, topk=topk)

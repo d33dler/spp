@@ -272,8 +272,6 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
             # read the label
             targets.append(cls_subset['target'])
-        with open('log.txt', 'a') as f:
-            f.write("RETURNING Q P T" + '\n')
         return query_images, positives, targets
 
     def build(self):
