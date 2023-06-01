@@ -72,7 +72,7 @@ DE:
 AUGMENTOR:
   DISABLE: [ ]
   AV_NUM: 1 # number of augmented views
-  AUG_NUM: 3 # number of randomly selected augmentations per view
+  AUG_NUM: 1 # number of randomly selected augmentations per view
   STRATEGY: 'N:1'
   RANDOM_AUGMENT: False # whether to use random combinations of augmentations
   PRE_PROCESS: [

@@ -207,9 +207,10 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
             augment = [identity]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
-                augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)
-                                     if factory.is_random_aug
-                                     else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
+                augment = [
+                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
+                              if factory.is_random_aug
+                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
                 augment += [identity]  # introduce original sample as well
 
             # load query images
@@ -258,8 +259,9 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
             augment = [identity]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
-                augment = [T.Compose(random.sample(factory.augmentations, factory.aug_num)) for _ in
-                           range(factory.av_num)]
+                augment = [
+                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations))))
+                    for _ in range(factory.av_num)]
                 augment += [identity]  # introduce original sample as well
 
             # load query images
