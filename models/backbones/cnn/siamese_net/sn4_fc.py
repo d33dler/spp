@@ -114,8 +114,8 @@ class SiameseNetwork(FourLayer_64F):
             query_pos_cos_sim = query_pos_cos_sim.view(batch_size // av, av)
             query_neg_cos_sim = query_neg_cos_sim.view(batch_size // av, av, -1)
 
-            query_pos_cos_sim = torch.prod(query_pos_cos_sim, dim=1) ** (1.0 / av)
-            query_neg_cos_sim = torch.prod(query_neg_cos_sim, dim=1) ** (1.0 / av)
+            query_pos_cos_sim = torch.exp(torch.mean(torch.log(torch.clamp(query_pos_cos_sim, min=1e-8)), dim=1))
+            query_neg_cos_sim = torch.exp(torch.mean(torch.log(torch.clamp(query_neg_cos_sim, min=1e-8)), dim=1))
 
         return query_pos_cos_sim, query_neg_cos_sim
 

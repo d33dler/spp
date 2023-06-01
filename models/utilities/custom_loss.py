@@ -34,8 +34,10 @@ class TripletMarginWithDistanceLossImageToClass(nn.Module):
 
 class NPairMCLoss(nn.Module):
     """
-    Multi-class NPair loss (K. Sohn. Improved Deep Metric Learning with Multi-class N-pair Loss Objective. NIPS 2016)
+    Original Multi-class NPair loss
+    (K. Sohn. Improved Deep Metric Learning with Multi-class N-pair Loss Objective. NIPS 2016)
     """
+
     def __init__(self, l2_reg=0.02):  # add a regularization coefficient
 
         super(NPairMCLoss, self).__init__()
@@ -50,3 +52,31 @@ class NPairMCLoss(nn.Module):
         loss = torch.log1p(torch.sum(torch.exp(negatives - positives.unsqueeze(1)), dim=1)).mean()
         return loss
 
+
+class NPairMCLossLSE(nn.Module):
+    """
+    LSE version Multi-class NPair loss (w/ Log-Sum-Exp for numerical stability)
+    based on (K. Sohn. Improved Deep Metric Learning with Multi-class N-pair Loss Objective. NIPS 2016)
+    """
+
+    def __init__(self, l2_reg=0.02):  # add a regularization coefficient
+        super(NPairMCLossLSE, self).__init__()
+        self.l2_reg = l2_reg
+
+    def forward(self, positives, negatives):
+        """
+        positives: 1D tensor of shape (B,)
+        negatives: 2D tensor of shape (B,(L-1) * AV)
+        """
+        # Maximum value for stability
+        max_val = torch.max(positives, torch.max(negatives, dim=1)[0])
+
+        # Shift the values of positives and negatives for stability
+        positives_shifted = positives - max_val
+        negatives_shifted = negatives - max_val.unsqueeze(1)
+
+        # Calculate the loss as per the formula
+        loss = max_val + torch.log1p(
+            torch.sum(torch.exp(negatives_shifted - positives_shifted.unsqueeze(1)), dim=1)).mean()
+
+        return loss

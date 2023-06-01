@@ -1,7 +1,7 @@
 # Main params
 NAME: DN4
 ARCH: "SN_X"
-K_NEIGHBORS: 3
+K_NEIGHBORS: 1
 USE_BIAS: True
 
 #Model skeleton
