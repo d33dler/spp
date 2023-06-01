@@ -1,17 +1,9 @@
 ARCH: DN_X
 AUGMENTOR:
   AUGMENTATION:
-  - ARGS:
-    - 84
-    NAME: RANDOM_CROP
-  - ARGS:
-      brightness: 0.4
-      contrast: 0.4
-      saturation: 0.4
-    NAME: COLOR_JITTER
   - ARGS: []
-    NAME: RANDOM_HORIZONTAL_FLIP
-  AUG_NUM: 3
+    NAME: AUTO_AUGMENT
+  AUG_NUM: 1
   AV_NUM: 1
   DISABLE: []
   POST_PROCESS:

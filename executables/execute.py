@@ -90,7 +90,7 @@ class ExperimentManager:
                 temp_support = torch.cat(temp_support, 0)
                 temp_support = temp_support.cuda()
                 input_var2.append(temp_support)
-
+            input_var2 = torch.stack(input_var2, dim=0)
             # Deal with the targets
             target = torch.cat(query_targets, 0)
 
@@ -255,7 +255,9 @@ class ExperimentManager:
         # create path name for model checkpoints and log files
         _args.OUTF = PRMS.outf + '_'.join(
             [_args.ARCH, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
-                PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS), 'AV' + str(model.root_cfg.AUGMENTOR.AV_NUM)])
+                PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS),
+             'AV' + str(model.root_cfg.AUGMENTOR.AV_NUM),
+             "AUG" + '_'.join([str(_aug.NAME) for _aug in model.root_cfg.AUGMENTOR.AUGMENTATION])])
         PRMS.outf = _args.OUTF
         self.output_dir = PRMS.outf
         if not os.path.exists(_args.OUTF):

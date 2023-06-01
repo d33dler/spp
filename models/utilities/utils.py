@@ -90,7 +90,7 @@ class DataHolder(DataHolderBase):
     # ======== DNX ==========
     q_in_CPU: Tensor
     q_in: Tensor
-    S_in: List[Tensor]
+    S_in: Tensor
     targets: Tensor
     av_num: int
     cos_sim: Tensor

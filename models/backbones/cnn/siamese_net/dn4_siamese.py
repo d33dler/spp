@@ -39,25 +39,6 @@ class SiameseNetwork(FourLayer_64F):
 
         # norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
         self.output_shape = 64
-        # self.features = nn.Sequential(  # 3*84*84
-        #     nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
-        #     norm_layer(64),
-        #     nn.LeakyReLU(0.2, True),
-        #     nn.MaxPool2d(kernel_size=2, stride=2),  # 64*42*42
-        #
-        #     nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
-        #     norm_layer(64),
-        #     nn.LeakyReLU(0.2, True),
-        #     nn.MaxPool2d(kernel_size=2, stride=2),  # 64*21*21
-        #
-        #     nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
-        #     norm_layer(64),
-        #     nn.LeakyReLU(0.2, True),  # 64*21*21
-        #
-        #     nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
-        #     norm_layer(64),
-        #     nn.LeakyReLU(0.2, True),  # 64*21*21
-        # )
 
         self.fc = nn.Sequential(
             nn.Linear(64 * 21 * 21, 4096),
@@ -91,15 +72,10 @@ class SiameseNetwork(FourLayer_64F):
                 negatives.append(positives[torch.arange(len(positives)) != i])
             self.data.snx_negative_f = torch.stack(negatives)
             data.sim_list = self._calc_cosine_similarities(data.snx_query_f, data.snx_positive_f, data.snx_negative_f,
-                                                           data.av_num)
-            return None
+                                                           data.get_true_AV())
+            return data.sim_list
         else:
             super().forward()
-            # data.q_F = self.fc(self.features(queries).flatten(start_dim=1))
-            # support_sets = data.S_in
-            # data.S_F = torch.stack([self.fc(self.features(s_cls).flatten(start_dim=1)) for s_cls in support_sets],
-            #                        dim=0)
-            # data.sim_list = self._calc_cosine_similarities_support(data.q_F, data.S_F)
         return data.sim_list
 
     def _calc_cosine_similarities(self, queries, positives, negatives, av):

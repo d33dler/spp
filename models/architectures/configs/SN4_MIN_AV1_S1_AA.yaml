@@ -1,18 +1,10 @@
-ARCH: DN_X
+ARCH: SN_X
 AUGMENTOR:
   AUGMENTATION:
-  - ARGS:
-    - 84
-    NAME: RANDOM_CROP
-  - ARGS:
-      brightness: 0.4
-      contrast: 0.4
-      saturation: 0.4
-    NAME: COLOR_JITTER
-  - ARGS: []
-    NAME: RANDOM_HORIZONTAL_FLIP
-  AUG_NUM: 3
-  AV_NUM: 1
+    - ARGS: [ ]
+      NAME: AUTO_AUGMENT
+  AUG_NUM: null
+  AV_NUM: null
   DISABLE: []
   POST_PROCESS:
   - ARGS:
@@ -50,12 +42,13 @@ BACKBONE:
   INIT_WEIGHTS: normal
   LEARNING_RATE: 0.001
   MODE: TRAIN
-  NAME: DN4_CNN2d
+  NAME: SN4_CNN2d
   NORM: batch
+BUILDER_TYPE: npair_mc
 DATASET_DIR: ../dataset/miniImageNet
 DE:
   CUDA: true
-  DATASET: None
+  DATASET: null
   ENGINE: TREE
   EPISODE_TRAIN_NUM: 10000
   GRAD: false
@@ -78,7 +71,7 @@ DE:
 DENGINE: false
 EPISODE_SIZE: 1
 EPISODE_TEST_NUM: 800
-EPISODE_TRAIN_NUM: 10000
+EPISODE_TRAIN_NUM: 200
 EPISODE_VAL_NUM: 1000
 EPOCHS: 30
 K_NEIGHBORS: 3
@@ -89,7 +82,7 @@ OUTF: ../results/
 PRINT_FREQ: 100
 QUERY_NUM: 15
 REFIT_DENGINE: false
-RESUME:
+RESUME: ../results/SN_X_miniImageNet_SNX_5_Way_1_Shot_K3_AVNone/epoch_2.pth.tar
 SHOT_NUM: 1
 TEST_EPISODE_SIZE: 1
 TOPOLOGY:

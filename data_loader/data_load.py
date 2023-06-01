@@ -28,6 +28,7 @@ TRANSFORM_MAP = {
     "TO_TENSOR": transforms.ToTensor,
     "NORMALIZE": transforms.Normalize,
     "GAUSSIAN_BLUR": transforms.GaussianBlur,
+    "AUTO_AUGMENT": transforms.AutoAugment,
 }
 
 

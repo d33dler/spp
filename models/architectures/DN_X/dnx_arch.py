@@ -64,6 +64,7 @@ class DN_X(DEModel):
                 temp_support = torch.cat(temp_support, 0)
                 temp_support = temp_support.cuda()
                 input_var2.append(temp_support)
+            input_var2 = torch.stack(input_var2, dim=0)
             # Deal with the targets
             target = torch.cat(query_targets, 0).cuda()
 
