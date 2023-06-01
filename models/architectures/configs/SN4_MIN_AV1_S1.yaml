@@ -90,7 +90,7 @@ OUTF: ../results/
 PRINT_FREQ: 100
 QUERY_NUM: 15
 REFIT_DENGINE: false
-RESUME: ../results/SN_X_miniImageNet_SNX_5_Way_1_Shot_K3_AVNone/epoch_1.pth.tar
+RESUME: ../results/SN_X_miniImageNet_SNX_5_Way_1_Shot_K3_AVNone/epoch_2.pth.tar
 SHOT_NUM: 1
 TEST_EPISODE_SIZE: 1
 TOPOLOGY:
