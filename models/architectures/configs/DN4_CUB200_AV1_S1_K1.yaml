@@ -39,7 +39,7 @@ BACKBONE:
   GRAD: True
   NORM: batch
   CUDA: True
-  LEARNING_RATE: 0.001
+  LEARNING_RATE: 0.01
   BETA_ONE: [ 0.5,0.9 ]
   INIT_WEIGHTS: normal
   FREEZE_EPOCH: 1
