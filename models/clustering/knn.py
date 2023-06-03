@@ -24,13 +24,6 @@ class KNN_itc(nn.Module):
     @staticmethod
     def _geometric_mean(t: Tensor) -> Tensor:
         log_tensor = torch.log(t)
-
-        if torch.isnan(log_tensor).any():  # TODO remove debug code
-            print("> HAS0: ", (t == 0).any())
-            print("> HASNAN: ", torch.isnan(t).any())
-            print("> HASINF: ", torch.isinf(t).any())
-            print("> HASNEG: ", (t < 0).any())
-            exit(0)
         mean = torch.mean(log_tensor, dim=0, keepdim=True)
         geom_mean = torch.exp(mean)
         return geom_mean
@@ -104,8 +97,8 @@ class KNN_itc(nn.Module):
                 innerproduct_matrix = self.get_cosine_similarity(query_sam, support_set_sam)
                 if self.compute_cos_N:
                     topk_cosine_sum[av, cls_ix] = self.get_topk_cosine_sum(innerproduct_matrix)
-                print(innerproduct_matrix.size())
                 topk = self.get_topk_values(innerproduct_matrix, self.neighbor_k, 1)
+
                 inner_sim[av, cls_ix] = torch.sum(topk)
         return inner_sim, topk_cosine_sum
 
@@ -131,7 +124,8 @@ class KNN_itc(nn.Module):
                 innerproduct_matrix = self.get_cosine_similarity(query_sam, support_set_sam)
                 if self.compute_cos_N:
                     topk_cosine_sum[av, j] = self.get_topk_cosine_sum(innerproduct_matrix)
-                inner_sim[av, j] = torch.sum(self.get_topk_values(innerproduct_matrix, self.neighbor_k, 1))
+                topk = self.get_topk_values(innerproduct_matrix, self.neighbor_k, 1)
+                inner_sim[av, j] = torch.sum(topk)
         return inner_sim, topk_cosine_sum
 
     def _strategy_rvr(self, q, S, qAV_num=1, SAV_num=1, i=0):

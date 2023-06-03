@@ -254,7 +254,7 @@ class ExperimentManager:
         PRMS = model.ds_loader.params
         # create path name for model checkpoints and log files
         _args.OUTF = PRMS.outf + '_'.join(
-            [_args.ARCH, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
+            [_args.ARCH, _args.BACKBONE.NAME, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
                 PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS),
              'AV' + str(model.root_cfg.AUGMENTOR.AV_NUM),
              "AUG" + '_'.join([str(_aug.NAME) for _aug in model.root_cfg.AUGMENTOR.AUGMENTATION])])

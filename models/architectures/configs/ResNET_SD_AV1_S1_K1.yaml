@@ -15,7 +15,7 @@ TRACK_CRITERION: BACKBONE
 
 DENGINE: False
 REFIT_DENGINE: False
-DATASET_DIR: ../dataset/StanfordCars
+DATASET_DIR: ../dataset/StanfordDogs
 MODE: train
 RESUME: 
 NGPU: 1
@@ -35,7 +35,7 @@ SHOT_NUM: 1
 QUERY_NUM: 15
 
 BACKBONE:
-  NAME: DN4_CNN2d # DN4_CNN2d | SN4_CNN2d | SN4_CNN2d_KNN | ResNet2d
+  NAME: ResNet2d # DN4_CNN2d | SN4_CNN2d | SN4_CNN2d_KNN | ResNet2d
   MODE: TRAIN
   GRAD: True
   NORM: batch

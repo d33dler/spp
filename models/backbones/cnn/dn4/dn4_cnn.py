@@ -77,7 +77,7 @@ class FourLayer_64F(BaseBackbone2d):
 
         # get support set embeddings
         L, S, _, _, _ = data.S_in.size()
-        S_embeddings = self.features(data.S_in.view(-1, 3, 84, 84))
+        S_embeddings = self.features(data.S_in.view(-1, 3, data.S_in.size()[-1], data.S_in.size()[-1]))
         S_embeddings = S_embeddings.view(L, S, C, -1)
 
         data.S_F = []

@@ -292,7 +292,6 @@ def geometric_mean(t: Tensor, dim=0, keepdim=False) -> Tensor:
 def identity(x):
     return x
 
-
 def geometric_mean(t: Tensor) -> Tensor:
     log_tensor = torch.log(t)
     mean = torch.mean(log_tensor, dim=0, keepdim=True)

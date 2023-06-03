@@ -68,7 +68,7 @@ class BatchFactory(Dataset):
                  episode_num=1000,
                  way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
-                 train_class_num: int = 64):
+                 train_class_num: int = 32):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
@@ -270,7 +270,7 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
             # load support images
             temp_support = Image.fromarray(loader(cls_subset["+"]))
-            [positives.append(factory.process_img(aug, temp_support)) for aug in augment]
+            positives.append(factory.process_img(identity, temp_support))
 
             # read the label
             targets.append(cls_subset['target'])

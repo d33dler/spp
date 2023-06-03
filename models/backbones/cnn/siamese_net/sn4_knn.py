@@ -3,7 +3,7 @@ from dataclasses import field
 import torch
 import torch.nn as nn
 from easydict import EasyDict
-from torch import optim
+from torch import optim, Tensor
 
 from torch.nn.functional import cosine_similarity
 from models.backbones.base import BaseBackbone2d
@@ -14,13 +14,13 @@ from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaim
 
 
 ##############################################################################
-# Class: Siamese_ResNet18
+# Class: SiameseNetworkKNN
 ##############################################################################
 
-# Model: Siamese_FourLayer_64F
-# Input: Query set, Support set
+# Model: Siamese_FourLayer_64F_KNN
+# Input: 3 x 84 x 84
 # Base_model: 4 Convolutional layers --> Image-to-Class layer
-# Dataset: 3 x 84 x 84 (miniImageNet & Stanford Dogs)
+# Dataset: 3 x 84 x 84 (miniImageNet, Stanford Dogs, Stanford Cars, CUB-200-2011)
 # Filters: 64->64->64->64
 # Mapping Sizes: 84->42->21->21->21
 
@@ -69,63 +69,74 @@ class SiameseNetworkKNN(FourLayer_64F):
             super().forward()
         return data.sim_list
 
-    def _calc_cosine_similarities(self, queries, positives, negatives, av, K):
+    @staticmethod
+    def get_topk_values(matrix: Tensor, k: int, dim: int) -> Tensor:
+        return torch.topk(matrix, k, dim)[0]
+
+    def _calc_cosine_similarities(self, queries, positives, negatives, av, neighbor_k):
         """
-        Compute the top-K cosine similarities between query and positive/negative DLDs.
+        Compute the cosine similarity between query and positive and negatives.
 
         Parameters
         ----------
         queries : torch.Tensor
-            Tensor of query embeddings of shape [batch_size, embedding_dim]
+            Tensor of query embeddings of shape [batch_size, out_channels, height, width]
         positives : torch.Tensor
-            Tensor of positive embeddings of shape [batch_size, embedding_dim]
+            Tensor of positive embeddings of shape [batch_size // av, out_channels, height, width]
         negatives : torch.Tensor
-            Tensor of negative embeddings of shape [batch_size, num_negatives, embedding_dim]
+            Tensor of negative embeddings of shape [batch_size, num_negatives, out_channels, height, width]
         av : int
-            Number of augmented views. If av = 0, then just compute the distance without averaging.
-        K : int
-            Number of top similar DLDs to consider.
+            Number of augmented views.
+        neighbor_k: int
+            Number of nearest neighbors to consider.
 
         Returns
         -------
         query_pos_cos_sim : torch.Tensor
-            Tensor of cosine similarities between top-K DLDs of query and positive of shape [batch_size,]
+            Tensor of cosine similarities between query and positive of shape [batch_size // av,]
         query_neg_cos_sim : torch.Tensor
-            Tensor of cosine similarities between top-K DLDs of query and negatives of shape [batch_size, num_negatives]
+            Tensor of cosine similarities between query and negatives of shape [batch_size, num_negatives]
         """
-        batch_size, DLDs, _, _ = queries.size()
+        batch_size, out_channels, height, width = queries.size()
+        unique_samples = batch_size // av
+        # Initialize output tensors
+        query_pos_cos_sim = torch.zeros(unique_samples).to(queries.device)
+        query_neg_cos_sim = torch.zeros(unique_samples, negatives.size(1)).to(queries.device)
 
-        # Reshape to treat each DLD as a separate instance
-        queries = queries.view(-1, queries.size(-1))
-        positives = positives.view(-1, positives.size(-1))
-        negatives = negatives.view(-1, negatives.size(-1))
+        # For each query in the batch
+        for i in range(0, batch_size, av):
+            # Compute cosine similarity with positive
+            index = i // av
+            positive_sam = positives[index, :, :, :].reshape(out_channels, -1)
+            positive_sam_norm = torch.norm(positive_sam, dim=0, keepdim=True)
+            positive_sam = positive_sam / positive_sam_norm
 
-        # Compute cosine similarity between DLDs of query and positive
-        query_pos_cos_sim = cosine_similarity(queries, positives)
-        # Keep only top-K similarities
-        _, indices = torch.topk(query_pos_cos_sim, K, dim=1)
-        query_pos_cos_sim = torch.gather(query_pos_cos_sim, 1, indices)
+            for av_i in range(av):
+                query_sam = queries[i + av_i, :, :, :].reshape(out_channels, -1)
+                query_sam_norm = torch.norm(query_sam, dim=1, keepdim=True)
+                query_sam = query_sam / query_sam_norm
 
-        # Compute cosine similarity between DLDs of query and negatives
-        query_neg_cos_sim = cosine_similarity(queries.unsqueeze(1), negatives.unsqueeze(0), dim=-1)
-        # Keep only top-K similarities
-        _, indices = torch.topk(query_neg_cos_sim, K, dim=2)
-        query_neg_cos_sim = torch.gather(query_neg_cos_sim, 2, indices)
+                innerproduct_matrix = query_sam.t() @ positive_sam
+                topk_value, _ = torch.topk(innerproduct_matrix, neighbor_k, dim=1)
+                query_pos_cos_sim[index] += torch.log(torch.sum(topk_value))
 
-        # Reshape back to original batch_size
-        query_pos_cos_sim = query_pos_cos_sim.view(batch_size, DLDs, -1)
-        query_neg_cos_sim = query_neg_cos_sim.view(batch_size, DLDs, -1)
+                # Compute cosine similarity with negatives
+                for k in range(negatives.size(1) - 1):
+                    negative_sam = negatives[index, k, :, :, :].reshape(out_channels, -1)
+                    negative_sam_norm = torch.norm(negative_sam, dim=0, keepdim=True)
+                    negative_sam = negative_sam / negative_sam_norm
 
-        if av > 0:
-            # If av > 0, we reshape the cosine similarities for each sample in the batch
-            # Then we take the geometric mean across the augmented views
-            query_pos_cos_sim = query_pos_cos_sim.view(batch_size // av, av, -1)
-            query_neg_cos_sim = query_neg_cos_sim.view(batch_size // av, av, -1, -1)
+                    innerproduct_matrix = query_sam.t() @ negative_sam
+                    topk_value, _ = torch.topk(innerproduct_matrix, neighbor_k, dim=1)
+                    query_neg_cos_sim[index, k] += torch.log(torch.sum(topk_value))
 
-            # Use log-exp trick for numerical stability
-            query_pos_cos_sim = torch.exp(torch.mean(torch.log(query_pos_cos_sim), dim=1))
-            query_neg_cos_sim = torch.exp(torch.mean(torch.log(query_neg_cos_sim), dim=1))
+        # Average the cosine similarities
+        query_pos_cos_sim /= av
+        query_neg_cos_sim /= av
 
+        # Take the exponential of the log sum to obtain the geometric mean
+        query_pos_cos_sim = torch.exp(query_pos_cos_sim)
+        query_neg_cos_sim = torch.exp(query_neg_cos_sim)
         return query_pos_cos_sim, query_neg_cos_sim
 
     def _calc_cosine_similarities_support(self, queries, support_sets):
