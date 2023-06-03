@@ -27,12 +27,6 @@ class DN_X(DEModel):
 
     def forward(self):
         self.BACKBONE.forward()
-        # d_engine: DecisionEngine = self.DE
-        # if d_engine and d_engine.enabled:
-        #     sim_ls = d_engine.normalize(self.data.sim_list.detach().cpu().numpy())
-        #     self.data.X = d_engine.feature_engineering(sim_ls, self.data.q_in_CPU)
-        #     self.data.sim_list = one_hot(torch.from_numpy(d_engine.forward(self.data.X).astype(np.int64)),
-        #                                  self.num_classes).float().cuda()
         return self.data.sim_list
 
     def run_epoch(self, output_file):

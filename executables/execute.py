@@ -92,14 +92,13 @@ class ExperimentManager:
                 input_var2.append(temp_support)
             input_var2 = torch.stack(input_var2, dim=0)
             # Deal with the targets
-            target = torch.cat(query_targets, 0)
+            target = torch.cat(query_targets, 0).cuda()
 
-            target = target.cuda()
             model.data.q_CPU = query_images
             model.data.q_in, model.data.S_in = input_var1, input_var2
 
             out = model.forward()
-            loss = model.calculate_loss(target, out)
+            loss = model.calculate_loss(out, target)
 
             # measure accuracy and record loss
             losses.update(loss.item(), query_images.size(0))
