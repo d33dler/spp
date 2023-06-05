@@ -9,6 +9,7 @@ import math
 import sys
 
 from models.backbones.base import BaseBackbone2d
+from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
 from models.clustering.knn import KNN_itc
 
 
@@ -45,7 +46,7 @@ class ResBlock(nn.Module):
         return self.skip_layer(x) + self.conv_block(x)
 
 
-class ResNetLike(BaseBackbone2d):
+class ResNetLike(BaselineBackbone2d):
     class Config(BaseBackbone2d.RemoteYamlConfig):
         FILE_PATH = __file__  # mandatory
         FILE_TYPE: str = "YAML"  # mandatory
@@ -53,22 +54,18 @@ class ResNetLike(BaseBackbone2d):
         USE_RELU = True
         DROPOUT = 0
         IN_PLANES = None
-        # LAYER_PADDINGS: list  # [1]
-        # LAYER_STRIDES: list  # [1]
-        # NUM_FILTERS: list  # [64]
-        # LAYER_NUMS: list  # [4]
 
-    def __init__(self): #neighbor_k=3
-        super(ResNetLike, self).__init__(self.Config())
+    def __init__(self, data, config):  # neighbor_k=3
+        super().__init__(data, config)
 
         self.in_planes = self.config.IN_PLANES
         self.out_planes = [64, 96, 128, 256]
         self.num_stages = 4
 
-        if type(self.config.NORMALIZATION_F) == functools.partial:
-            use_bias = self.config.NORMALIZATION_F.func == nn.InstanceNorm2d
-        else:
-            use_bias = self.config.NORMALIZATION_F == nn.InstanceNorm2d
+        # if type(self.config.NORMALIZATION_F) == functools.partial:
+        #     use_bias = self.config.NORMALIZATION_F.func == nn.InstanceNorm2d
+        # else:
+        #     use_bias = self.config.NORMALIZATION_F == nn.InstanceNorm2d
 
         if type(self.out_planes) == int:
             self.out_planes = [self.out_planes for i in range(self.num_stages)]
@@ -76,8 +73,8 @@ class ResNetLike(BaseBackbone2d):
         assert (type(self.out_planes) == list)
         assert (len(self.out_planes) == self.num_stages)
         num_planes = [self.out_planes[0], ] + self.out_planes
-        userelu = self.config.USE_RELU
-        dropout = self.config.DROPOUT
+        # userelu = self.config.USE_RELU
+        # dropout = self.config.DROPOUT
 
         self.feat_extractor = nn.Sequential()
         self.feat_extractor.add_module('ConvL0', nn.Conv2d(self.in_planes, num_planes[0], kernel_size=3, padding=1))
@@ -89,8 +86,6 @@ class ResNetLike(BaseBackbone2d):
 
         self.feat_extractor.add_module('ReluF1', nn.LeakyReLU(0.2, True))  # get Batch*256*21*21
 
-        self.imgtoclass = KNN_itc(neighbor_k=self.config.WAY_NUM)  # Batch*num_classes
-
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -99,20 +94,5 @@ class ResNetLike(BaseBackbone2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-    def forward(self, input1, input2):
-
-        # extract features of input1--query image
-        q = self.feat_extractor(input1)
-
-        # extract features of input2--support set
-        S = []
-        for i in range(len(input2)):
-            support_set_sam = self.feat_extractor(input2[i])
-            B, C, h, w = support_set_sam.size()
-            support_set_sam = support_set_sam.permute(1, 0, 2, 3)
-            support_set_sam = support_set_sam.contiguous().reshape((C, -1))
-            S.append(support_set_sam)
-
-        # x = self.imgtoclass(q, S)  # get Batch*num_classes
-
-        return q, S # change to custom IO dataclass
+    def forward(self):
+        return super().forward()

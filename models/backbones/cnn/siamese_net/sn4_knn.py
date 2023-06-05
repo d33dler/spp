@@ -7,7 +7,7 @@ from torch import optim, Tensor
 
 from torch.nn.functional import cosine_similarity
 from models.backbones.base import BaseBackbone2d
-from models.backbones.cnn.dn4.dn4_cnn import FourLayer_64F
+from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
 from models.clustering import KNN_itc
 from models.utilities.custom_loss import NPairMCLoss, NPairMCLossLSE
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaiming
@@ -24,7 +24,7 @@ from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaim
 # Filters: 64->64->64->64
 # Mapping Sizes: 84->42->21->21->21
 
-class SiameseNetworkKNN(FourLayer_64F):
+class SiameseNetworkKNN(BaselineBackbone2d):
     class Config(BaseBackbone2d.RemoteYamlConfig):
         FILE_PATH = __file__  # mandatory
         FILE_TYPE: str = "YAML"  # mandatory

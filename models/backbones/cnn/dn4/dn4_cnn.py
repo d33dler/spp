@@ -22,7 +22,7 @@ from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaim
 # Filters: 64->64->64->64
 # Mapping Sizes: 84->42->21->21->21
 
-class FourLayer_64F(BaseBackbone2d):
+class BaselineBackbone2d(BaseBackbone2d):
     class Config(BaseBackbone2d.RemoteYamlConfig):
         FILE_PATH = __file__  # mandatory
         FILE_TYPE: str = "YAML"  # mandatory
