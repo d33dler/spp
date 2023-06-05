@@ -135,5 +135,5 @@ dmypy.json
 *.pth.tar
 *.csv
 *.out
-*.yaml
+models/architecture/configs/*
 DN4

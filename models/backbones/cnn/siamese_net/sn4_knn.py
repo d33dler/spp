@@ -9,7 +9,7 @@ from torch.nn.functional import cosine_similarity
 from models.backbones.base import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import FourLayer_64F
 from models.clustering import KNN_itc
-from models.utilities.custom_loss import NPairMCLoss
+from models.utilities.custom_loss import NPairMCLoss, NPairMCLossLSE
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaiming
 
 
@@ -46,7 +46,7 @@ class SiameseNetworkKNN(FourLayer_64F):
         self.features.apply(init_weights_kaiming)
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=0.0001)
-        self.criterion = NPairMCLoss().cuda()
+        self.criterion = NPairMCLossLSE().cuda()
         self.knn = KNN_itc(self.data.cfg.K_NEIGHBORS)
 
     def forward(self):
@@ -118,7 +118,7 @@ class SiameseNetworkKNN(FourLayer_64F):
 
                 innerproduct_matrix = query_sam.t() @ positive_sam
                 topk_value, _ = torch.topk(innerproduct_matrix, neighbor_k, dim=1)
-                query_pos_cos_sim[index] += torch.log(torch.sum(topk_value))
+                query_pos_cos_sim[index] += torch.log(torch.clamp_min(torch.sum(topk_value), min=1e-8))
 
                 # Compute cosine similarity with negatives
                 for k in range(negatives.size(1) - 1):
@@ -128,7 +128,7 @@ class SiameseNetworkKNN(FourLayer_64F):
 
                     innerproduct_matrix = query_sam.t() @ negative_sam
                     topk_value, _ = torch.topk(innerproduct_matrix, neighbor_k, dim=1)
-                    query_neg_cos_sim[index, k] += torch.log(torch.sum(topk_value))
+                    query_neg_cos_sim[index, k] += torch.log(torch.clamp_min(torch.sum(topk_value), min=1e-8))
 
         # Average the cosine similarities
         query_pos_cos_sim /= av

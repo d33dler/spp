@@ -69,14 +69,8 @@ class NPairMCLossLSE(nn.Module):
         negatives: 2D tensor of shape (B,(L-1) * AV)
         """
         # Maximum value for stability
-        max_val = torch.max(positives, torch.max(negatives, dim=1)[0])
+        max_val = torch.max(negatives - positives.unsqueeze(1), dim=1, keepdim=True)[0]
+        loss = max_val + torch.log1p(torch.sum(torch.exp(negatives - positives.unsqueeze(1) - max_val), dim=1))
 
-        # Shift the values of positives and negatives for stability
-        positives_shifted = positives - max_val
-        negatives_shifted = negatives - max_val.unsqueeze(1)
-
-        # Calculate the loss as per the formula
-        loss = max_val + torch.log1p(
-            torch.sum(torch.exp(negatives_shifted - positives_shifted.unsqueeze(1)), dim=1)).mean()
-
+        loss = loss.mean()  # average over the batch
         return loss

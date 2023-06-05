@@ -68,7 +68,7 @@ class BatchFactory(Dataset):
                  episode_num=1000,
                  way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
-                 train_class_num: int = 32):
+                 train_class_num: int = 15):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
