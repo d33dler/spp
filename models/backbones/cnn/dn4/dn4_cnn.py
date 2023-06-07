@@ -37,6 +37,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.require_grad = model_cfg.GRAD
 
         norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
+        self.norm_layer = norm_layer
         self.output_channels = 64
         self.features = nn.Sequential(  # 3*84*84
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),

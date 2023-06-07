@@ -75,6 +75,7 @@ class ARCH(nn.Module):
         scheduler: _LRScheduler
         loss: Tensor
         fine_tuning = True
+        freeze_epoch = 1
 
         def __init__(self, config: EasyDict | dict) -> None:
             super().__init__()
@@ -154,6 +155,7 @@ class ARCH(nn.Module):
         self.load_config(cfg_path)
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
+        self._freeze_epoch = self.root_cfg.BACKBONE.FREEZE_EPOCH
         c = self.root_cfg
         p = Parameters(c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
@@ -339,3 +341,10 @@ class ARCH(nn.Module):
         for k, mod in self.module_topology.items():
             print("Adjusting learning rate for module: ", k)
             mod.adjust_learning_rate(epoch=self._epochix)
+
+    def freeze_auxiliary(self):
+        """
+        Freeze auxiliary layers and modules (e.g. Dropout, BatchNorm, etc.)
+        """
+        if self._epochix >= self._freeze_epoch:
+            self.eval()

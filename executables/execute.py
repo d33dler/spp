@@ -211,12 +211,9 @@ class ExperimentManager:
             model.load_data(self._args.MODE, F_txt, self._args.DATASET_DIR)
             loaders = model.loaders
             # ============================================ Training ==============================================
-            # Freeze the parameters of Batch Normalization after 10000 episodes (1 epoch)
-            if model.get_epoch() > 0:
-                model.eval()
-                # model.BACKBONE.freeze_layers()
-            else:
-                model.train()
+            model.train()
+            # Freeze the parameters of Batch Normalization after X epochs (root configuration defined)
+            model.freeze_auxiliary()
             # Train for 10000 episodes in each epoch
             model.run_epoch(F_txt)
 

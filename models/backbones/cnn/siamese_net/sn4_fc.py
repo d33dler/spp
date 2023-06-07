@@ -40,13 +40,13 @@ class SiameseNetwork(BaselineBackbone2d):
 
         # norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
         self.output_shape = 64
-
-        self.fc = nn.Sequential(
-            nn.Linear(64 * 21 * 21, 4096),
-            nn.LeakyReLU(0.2, True),
-            nn.Dropout(p=0.2),
-            nn.Linear(4096, 1024),
-        )
+        self.fc = nn.Sequential(nn.Linear(64 * 21 * 21, 4096),
+                                nn.BatchNorm1d(4096),
+                                nn.LeakyReLU(0.2, True),
+                                nn.Dropout(p=0.3),
+                                nn.Linear(4096, 1600),
+                                nn.BatchNorm1d(1600),
+                                nn.LeakyReLU(0.2, True))
 
         # freeze batchnorm layers
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]  # , (self.fc, [1, 4])]
@@ -54,13 +54,11 @@ class SiameseNetwork(BaselineBackbone2d):
         self.features.apply(init_weights_kaiming)
         self.fc.apply(init_weights_kaiming)
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=0.0001)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=10, eta_min=0.0001)
         self.criterion = NPairMCLoss().cuda()
-        self.knn = KNN_itc(self.data.cfg.K_NEIGHBORS)
 
     def forward(self):
         data = self.data
-
         if data.is_training():
             queries = data.snx_queries
 
@@ -70,8 +68,11 @@ class SiameseNetwork(BaselineBackbone2d):
             # construct negatives out of positives for each class (N=50) so negatives = N-1
             negatives = []
             positives = data.snx_positive_f
-            for i in range(len(positives)):
-                negatives.append(positives[torch.arange(len(positives)) != i])
+            nbatch = data.snx_queries.size(0) // self.data.cfg.EPISODE_SIZE
+            for i in range(self.data.cfg.EPISODE_SIZE):
+                batch_slice = positives[i * nbatch: i * nbatch + nbatch]
+                for j in range(nbatch):
+                    negatives.append(batch_slice[torch.arange(len(batch_slice)) != j])
             self.data.snx_negative_f = torch.stack(negatives)
             # data.sim_list = self._calc_cosine_similarities(data.snx_query_f, data.snx_positive_f, data.snx_negative_f,
             #                                                data.get_true_AV())
@@ -85,8 +86,6 @@ class SiameseNetwork(BaselineBackbone2d):
                                    dim=0)
             data.sim_list = self._calc_cosine_similarities_support(data.q_F, data.S_F)
         return data.sim_list
-
-
 
     def _calc_cosine_similarities_support(self, queries, support_sets):
         """
