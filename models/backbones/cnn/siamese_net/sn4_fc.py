@@ -40,13 +40,13 @@ class SiameseNetwork(BaselineBackbone2d):
 
         # norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
         self.output_shape = 64
-        self.fc = nn.Sequential(nn.Linear(64 * 21 * 21, 4096),
-                                nn.BatchNorm1d(4096),
-                                nn.LeakyReLU(0.2, True),
-                                nn.Dropout(p=0.3),
-                                nn.Linear(4096, 1600),
-                                nn.BatchNorm1d(1600),
-                                nn.LeakyReLU(0.2, True))
+        self.fc = nn.Sequential(nn.Linear(64 * 21 * 21, 2048))
+                                # nn.BatchNorm1d(4096),
+                                # nn.LeakyReLU(0.2, True),
+                                # nn.Dropout(p=0.3),
+                                # nn.Linear(4096, 1600),
+                                # nn.BatchNorm1d(1600),
+                                # nn.LeakyReLU(0.2, True))
 
         # freeze batchnorm layers
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]  # , (self.fc, [1, 4])]
@@ -68,12 +68,16 @@ class SiameseNetwork(BaselineBackbone2d):
             # construct negatives out of positives for each class (N=50) so negatives = N-1
             negatives = []
             positives = data.snx_positive_f
-            nbatch = data.snx_queries.size(0) // self.data.cfg.EPISODE_SIZE
-            for i in range(self.data.cfg.EPISODE_SIZE):
-                batch_slice = positives[i * nbatch: i * nbatch + nbatch]
-                for j in range(nbatch):
-                    negatives.append(batch_slice[torch.arange(len(batch_slice)) != j])
+            # nbatch = data.snx_queries.size(0) // self.data.cfg.EPISODE_SIZE
+            # for i in range(self.data.cfg.EPISODE_SIZE):
+            #     batch_slice = positives[i * nbatch: i * nbatch + nbatch]
+
+            for j in range(0, len(positives), data.get_true_AV()):
+                mask = torch.tensor([i not in range(j, j + data.get_true_AV()) for i in range(len(positives))])
+                for _ in range(data.get_true_AV()):
+                    negatives.append(positives[mask])
             self.data.snx_negative_f = torch.stack(negatives)
+
             # data.sim_list = self._calc_cosine_similarities(data.snx_query_f, data.snx_positive_f, data.snx_negative_f,
             #                                                data.get_true_AV())
             self.data.sim_list = None
@@ -104,13 +108,11 @@ class SiameseNetwork(BaselineBackbone2d):
         class_cos_sim : torch.Tensor
             Tensor of cosine similarities between each query and each support class of shape [batch_size, num_classes]
         """
-        num_classes, num_samples_per_class, embedding_dim = support_sets.size()
-
         # Compute cosine similarity between each query and each sample of each support class
         class_cos_sim = cosine_similarity(queries.unsqueeze(1).unsqueeze(1), support_sets.unsqueeze(0), dim=-1)
 
-        # Compute geometric mean for each query and the support class
-        class_cos_sim = torch.prod(class_cos_sim, dim=2) ** (1.0 / num_samples_per_class)
+        # Compute arithmetic mean for each query and the support class
+        class_cos_sim = torch.mean(class_cos_sim, dim=2)
         return class_cos_sim
 
     def backward(self, *args, **kwargs):

@@ -347,4 +347,5 @@ class ARCH(nn.Module):
         Freeze auxiliary layers and modules (e.g. Dropout, BatchNorm, etc.)
         """
         if self._epochix >= self._freeze_epoch:
+            print(" => Freezing auxiliary layers")
             self.eval()

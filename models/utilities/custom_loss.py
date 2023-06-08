@@ -53,37 +53,41 @@ class NPairMCLoss(nn.Module):
         queries : torch.Tensor
             Tensor of query embeddings of shape [batch_size, embedding_dim]
         positives : torch.Tensor
-            Tensor of positive embeddings of shape [batch_size, embedding_dim]
+            Tensor of positive embeddings of shape [batch_size // av, embedding_dim]
         negatives : torch.Tensor
-            Tensor of negative embeddings of shape [batch_size, num_negatives, embedding_dim]
+            Tensor of negative embeddings of shape [batch_size // av, num_negatives, embedding_dim]
         av : int
             Number of augmented views. If av = 0, then just compute the distance without averaging.
 
         Returns
         -------
         query_pos_cos_sim : torch.Tensor
-            Tensor of cosine similarities between query and positive of shape [batch_size,]
+            Tensor of cosine similarities between query and positive of shape [batch_size // av,]
         query_neg_cos_sim : torch.Tensor
-            Tensor of cosine similarities between query and negatives of shape [batch_size, num_negatives]
+            Tensor of cosine similarities between query and negatives of shape [batch_size // av, num_negatives]
         """
         batch_size = queries.size(0)
 
-        # Compute cosine similarity between query and positive
-        query_pos_cos_sim = cosine_similarity(queries, positives)
+        # Reshape queries, positives, and negatives tensor to compute cosine similarity for each view
+        queries = queries.view(batch_size // av, av, -1)
+        positives = positives.view(batch_size // av, av, -1)
+        negatives = negatives.view(batch_size // av, av, -1, negatives.size(-2), negatives.size(-1))
 
-        # Compute cosine similarity between query and negatives
-        query_neg_cos_sim = cosine_similarity(queries.unsqueeze(1), negatives, dim=-1).squeeze(1)
+        # Compute cosine similarity between each view of each query and each view of its corresponding positive
+        query_pos_cos_sim = torch.stack(
+            [cosine_similarity(queries[:, i, :], positives[:, j, :]) for j in range(av) for i in range(av)])
+
+        # Compute cosine similarity between each view of each query and each view of its corresponding negatives
+        query_neg_cos_sim = torch.stack(
+            [cosine_similarity(queries[:, i, :].unsqueeze(1), negatives[:, j, :, :, :], dim=-1) for j in range(av) for i
+             in range(av)])
 
         if av > 0:
-            # If av > 0, we reshape the cosine similarities for each sample in the batch
-            # Then we take the geometric mean across the augmented views
-            query_pos_cos_sim = query_pos_cos_sim.view(batch_size // av, av)
-            query_neg_cos_sim = query_neg_cos_sim.view(batch_size // av, av, -1)
+            # Compute arithmetic mean across the augmented views
+            query_pos_cos_sim = torch.mean(query_pos_cos_sim, dim=0)
+            query_neg_cos_sim = torch.mean(query_neg_cos_sim, dim=0)
 
-            query_pos_cos_sim = torch.exp(torch.mean(torch.log(torch.clamp(query_pos_cos_sim, min=1e-8)), dim=1))
-            query_neg_cos_sim = torch.exp(torch.mean(torch.log(torch.clamp(query_neg_cos_sim, min=1e-8)), dim=1))
-
-        return query_pos_cos_sim, query_neg_cos_sim
+        return query_pos_cos_sim.squeeze(), query_neg_cos_sim.squeeze()
 
     def forward(self, anchors, positives, negatives, av=0):
         """
@@ -97,12 +101,13 @@ class NPairMCLoss(nn.Module):
 
     def l2_loss(self, anchors, positives):
         """
-        Calculates L2 norm regularization loss
+        Calculates L2 norm regularization loss on flattened tensors
         :param anchors: A torch.Tensor, (n, embedding_size)
-        :param positives: A torch.Tensor, (n, embedding_size)
+        :param positives: A torch.Tensor, (m, embedding_size)
         :return: A scalar
         """
-        return torch.sum(anchors ** 2 + positives ** 2) / anchors.shape[0] + self.l2_reg
+        total_elements = torch.numel(anchors) + torch.numel(positives)
+        return (torch.sum(anchors ** 2) + torch.sum(positives ** 2)) / total_elements + self.l2_reg
 
 
 class NPairMCLossLSE(NPairMCLoss):

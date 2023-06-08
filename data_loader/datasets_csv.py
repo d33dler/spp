@@ -65,10 +65,10 @@ class BatchFactory(Dataset):
                  post_process: T.Compose = None,
                  loader=None,
                  _gray_loader=None,
-                 episode_num=1000,
+                 episode_num=10000,
                  way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
-                 train_class_num: int = 32):
+                 train_class_num: int = 16):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
@@ -265,12 +265,12 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
                 augment += [identity]  # introduce original sample as well
 
             # load query images
-            temp_img = Image.fromarray(loader(cls_subset['q']))
-            query_images += [factory.process_img(aug, temp_img) for aug in augment]  # Use the cached loader function
+            temp_q = Image.fromarray(loader(cls_subset['q']))
+            query_images += [factory.process_img(aug, temp_q) for aug in augment]  # Use the cached loader function
 
             # load support images
             temp_support = Image.fromarray(loader(cls_subset["+"]))
-            positives.append(factory.process_img(identity, temp_support))
+            positives += [factory.process_img(aug, temp_support) for aug in augment]  # Use the cached loader function
 
             # read the label
             targets.append(cls_subset['target'])
