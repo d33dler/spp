@@ -40,7 +40,6 @@ class NPairMCLoss(nn.Module):
     """
 
     def __init__(self, l2_reg=0.02):  # add a regularization coefficient
-
         super(NPairMCLoss, self).__init__()
         self.l2_reg = l2_reg
 
@@ -89,15 +88,25 @@ class NPairMCLoss(nn.Module):
 
         return query_pos_cos_sim.squeeze(), query_neg_cos_sim.squeeze()
 
-    def forward(self, anchors, positives, negatives, av=0):
+    def forward(self, anchors, positives, negatives, av=0, pos_sim=None, neg_sim=None):
         """
         positives: 1D tensor of shape (B,)
         negatives: 2D tensor of shape (B,(L-1) * AV)
         """
-        pos_sim, neg_sim = self._calc_cosine_similarities(anchors, positives, negatives, av)
-        loss = torch.log1p(torch.sum(torch.exp(neg_sim - pos_sim.unsqueeze(1)), dim=1)).mean() + self.l2_loss(anchors,
-                                                                                                              positives)
+        pos_sim, neg_sim = self._check_calc_csim(anchors, positives, negatives, av, pos_sim, neg_sim)
+
+        loss = torch.log1p(torch.sum(torch.exp(neg_sim - pos_sim.unsqueeze(1)), dim=1)).mean() \
+               + self.l2_loss(anchors, positives) * self.l2_reg
         return loss
+
+    def _check_calc_csim(self, anchors, positives, negatives, av=0, pos_sim=None, neg_sim=None):
+        """
+        positives: 1D tensor of shape (B,)
+        negatives: 2D tensor of shape (B,(L-1) * AV)
+        """
+        if pos_sim is None or neg_sim is None:
+            pos_sim, neg_sim = self._calc_cosine_similarities(anchors, positives, negatives, av)
+        return pos_sim, neg_sim
 
     def l2_loss(self, anchors, positives):
         """
@@ -107,7 +116,7 @@ class NPairMCLoss(nn.Module):
         :return: A scalar
         """
         total_elements = torch.numel(anchors) + torch.numel(positives)
-        return (torch.sum(anchors ** 2) + torch.sum(positives ** 2)) / total_elements + self.l2_reg
+        return (torch.sum(anchors ** 2) + torch.sum(positives ** 2)) / total_elements
 
 
 class NPairMCLossLSE(NPairMCLoss):
@@ -120,17 +129,16 @@ class NPairMCLossLSE(NPairMCLoss):
         super(NPairMCLossLSE, self).__init__()
         self.l2_reg = l2_reg
 
-    def forward(self, anchors, positives, negatives, av=0):
+    def forward(self, anchors, positives, negatives, av=0, pos_sim=None, neg_sim=None):
         """
         positives: 1D tensor of shape (B,)
         negatives: 2D tensor of shape (B,(L-1) * AV)
         """
         # Maximum value for stability
-        # TODO update or remove
-        max_val = torch.max(negatives - positives.unsqueeze(1), dim=1, keepdim=True)[0]
-        loss = max_val + torch.log1p(
-            torch.sum(torch.exp(negatives - positives.unsqueeze(1) - max_val), dim=1)) + self.l2_loss(
-            anchors, positives)
-
+        pos_sim, neg_sim = self._check_calc_csim(anchors, positives, negatives, av, pos_sim, neg_sim)
+        max_val = torch.max(neg_sim - pos_sim.unsqueeze(1), dim=1, keepdim=True)[0]
+        loss = max_val + torch.log(
+            torch.sum(torch.exp(neg_sim - pos_sim.unsqueeze(1) - max_val), dim=1)) \
+               + self.l2_loss(anchors, pos_sim) * self.l2_reg
         loss = loss.mean()  # average over the batch
         return loss

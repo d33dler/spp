@@ -91,8 +91,8 @@ class KNN_itc(nn.Module):
             cls_ix = j // SAV_num
             for av in range(qAV_num):
                 support_set_sam = self.normalize_tensor(S[j + av], 0)  # support set AV
-                query_sam = self.normalize_tensor(q[i + av], 1)  # query sample AV
 
+                query_sam = self.normalize_tensor(q[i + av], 1)  # query sample AV
                 # cosine similarity between a query sample and a support category
                 innerproduct_matrix = self.get_cosine_similarity(query_sam, support_set_sam)
                 if self.compute_cos_N:
@@ -117,7 +117,6 @@ class KNN_itc(nn.Module):
             topk_cosine_sum = torch.zeros(qAV_num, len(S), S[0].size(1) // 441).cuda()
         for j in range(len(S)):
             support_set_sam = self.normalize_tensor(S[j], 0)  # support set AV
-
             for av in range(qAV_num):
                 query_sam = self.normalize_tensor(q[i + av], 1)  # query sample AV
                 # cosine similarity between a query sample and a support category
@@ -151,6 +150,7 @@ class KNN_itc(nn.Module):
                 for av in range(SAV_num):
                     support_set_sam = self.normalize_tensor(S[j + av], 0)
                     # cosine similarity between a query sample and a support category
+
                     innerproduct_matrix = self.get_cosine_similarity(query_sam, support_set_sam)
                     if self.compute_cos_N:
                         topk_cosine_sum[index[cls_ix], cls_ix] = self.get_topk_cosine_sum(innerproduct_matrix)

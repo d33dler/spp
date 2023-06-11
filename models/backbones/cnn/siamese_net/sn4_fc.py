@@ -41,12 +41,6 @@ class SiameseNetwork(BaselineBackbone2d):
         # norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
         self.output_shape = 64
         self.fc = nn.Sequential(nn.Linear(64 * 21 * 21, 2048))
-                                # nn.BatchNorm1d(4096),
-                                # nn.LeakyReLU(0.2, True),
-                                # nn.Dropout(p=0.3),
-                                # nn.Linear(4096, 1600),
-                                # nn.BatchNorm1d(1600),
-                                # nn.LeakyReLU(0.2, True))
 
         # freeze batchnorm layers
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]  # , (self.fc, [1, 4])]
@@ -77,17 +71,13 @@ class SiameseNetwork(BaselineBackbone2d):
                 for _ in range(data.get_true_AV()):
                     negatives.append(positives[mask])
             self.data.snx_negative_f = torch.stack(negatives)
-
-            # data.sim_list = self._calc_cosine_similarities(data.snx_query_f, data.snx_positive_f, data.snx_negative_f,
-            #                                                data.get_true_AV())
             self.data.sim_list = None
             return None
         else:
             queries = data.q_in
             data.q_F = self.fc(self.features(queries).flatten(start_dim=1))
             support_sets = data.S_in
-            data.S_F = torch.stack([self.fc(self.features(s_cls).flatten(start_dim=1)) for s_cls in support_sets],
-                                   dim=0)
+            data.S_F = torch.stack([self.fc(self.features(s_cls).flatten(start_dim=1)) for s_cls in support_sets])
             data.sim_list = self._calc_cosine_similarities_support(data.q_F, data.S_F)
         return data.sim_list
 
