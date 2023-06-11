@@ -285,7 +285,7 @@ class ARCH(nn.Module):
         else:
             print("=> no checkpoint found at '{}'".format(path))
             if txt_file:
-                print("=> no checkpoint found at '{}'".format(path), file=self.p)
+                print("=> no checkpoint found at '{}'".format(path), file=txt_file)
             return None
 
     def load_config(self, path):

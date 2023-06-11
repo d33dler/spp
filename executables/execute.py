@@ -194,7 +194,7 @@ class ExperimentManager:
         # ============================================== Testing end ==========================================
 
     def train(self, model: DEModel, F_txt):
-        best_prec1 = 0
+        best_prec1 = model.best_prec1
         # ======================================== Training phase ===============================================
         print('\n............Start training............\n')
         epoch = model.get_epoch()
@@ -267,6 +267,7 @@ class ExperimentManager:
         # optionally resume from a checkpoint
         if _args.RESUME:
             model.load_model(_args.RESUME, txt_file)
+
 
         if _args.NGPU > 1:
             model: DN_X = nn.DataParallel(model, range(_args.NGPU))

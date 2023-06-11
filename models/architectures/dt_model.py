@@ -75,8 +75,9 @@ class DEModel(ARCH):
 
     def load_model(self, path, txt_file=None):
         checkpoint = super().load_model(path, txt_file)
-        if 'DE' in checkpoint and 'DE' in self.root_cfg:
-            self.DE.load(checkpoint['DE'])
+        if checkpoint is not None:
+            if 'DE' in checkpoint and 'DE' in self.root_cfg:
+                self.DE.load(checkpoint['DE'])
 
     def enable_decision_engine(self, refit=False, filename=None):
         """
