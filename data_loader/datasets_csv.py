@@ -213,16 +213,19 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                               else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
                 augment += [identity]  # introduce original sample as well
 
-            # load query images
+            # load query images, use the cached loader function
             query_dir = cls_subset['query_img']
             temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in query_dir]
-            query_images += [factory.process_img(aug, temp_img) for aug in augment for temp_img in
-                             temp_imgs]  # Use the cached loader function
+            query_images += [factory.process_img(aug, temp_img) for aug in augment for temp_img in temp_imgs]
 
             # load support images
             support_dir = cls_subset['support_set']
             temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in support_dir]
             if factory.strategy is None or factory.strategy == 'N:1':
+                if factory.mode == 'train' and factory.shot_num > 2:
+                    augment = [
+                        T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
+                                  if factory.is_random_aug else factory.augmentations[:factory.aug_num])]
                 temp_support = [factory.process_img(aug, temp_img) for aug in augment for
                                 temp_img in temp_imgs]  # Use the cached loader function
                 support_images.append(temp_support)

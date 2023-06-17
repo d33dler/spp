@@ -62,9 +62,6 @@ class SiameseNetwork(BaselineBackbone2d):
             # construct negatives out of positives for each class (N=50) so negatives = N-1
             negatives = []
             positives = data.snx_positive_f
-            # nbatch = data.snx_queries.size(0) // self.data.cfg.EPISODE_SIZE
-            # for i in range(self.data.cfg.EPISODE_SIZE):
-            #     batch_slice = positives[i * nbatch: i * nbatch + nbatch]
 
             for j in range(0, len(positives), data.get_true_AV()):
                 mask = torch.tensor([i not in range(j, j + data.get_true_AV()) for i in range(len(positives))])
