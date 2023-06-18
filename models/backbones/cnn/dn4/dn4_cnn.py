@@ -66,7 +66,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.features.apply(init_weights_kaiming)
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
         self.criterion = nn.CrossEntropyLoss().cuda()
-        self.scheduler = CosineAnnealingLR(self.optimizer, 10, eta_min=0.001)
+        self.scheduler = CosineAnnealingLR(self.optimizer, 10, eta_min=0.0005)
 
     def forward(self):
         # extract features of input1--query image
