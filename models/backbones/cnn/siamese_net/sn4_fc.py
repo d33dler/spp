@@ -48,7 +48,7 @@ class SiameseNetwork(BaselineBackbone2d):
         self.features.apply(init_weights_kaiming)
         self.fc.apply(init_weights_kaiming)
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=10, eta_min=0.0005)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=0.00005)
         self.criterion = NPairMCLoss().cuda()
 
     def forward(self):
