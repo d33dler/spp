@@ -40,21 +40,21 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.norm_layer = norm_layer
         self.output_channels = 64
         self.features = nn.Sequential(  # 3*84*84
-            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
+            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
             norm_layer(64),
             nn.LeakyReLU(0.2, True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # 64*42*42
 
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
             norm_layer(64),
             nn.LeakyReLU(0.2, True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # 64*21*21
 
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
             norm_layer(64),
             nn.LeakyReLU(0.2, True),  # 64*21*21
 
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
             norm_layer(64),
             nn.LeakyReLU(0.2, True),  # 64*21*21
         )
@@ -64,9 +64,10 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
         self.features.apply(init_weights_kaiming)
-        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
+        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE),
+                                    weight_decay=0.0005)
         self.criterion = nn.CrossEntropyLoss().cuda()
-        self.scheduler = CosineAnnealingLR(self.optimizer, T_max=100, eta_min=0.00005)
+        self.scheduler = CosineAnnealingLR(self.optimizer, T_max=10, eta_min=0.0001)
 
     def forward(self):
         # extract features of input1--query image

@@ -156,7 +156,7 @@ class ExperimentManager:
 
             # image transform & normalization
             ImgTransform = transforms.Compose([
-                transforms.Resize((params.img_sz, params.img_sz)),
+                transforms.Resize((84,84)),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ])

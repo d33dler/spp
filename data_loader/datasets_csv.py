@@ -68,7 +68,7 @@ class BatchFactory(Dataset):
                  episode_num=10000,
                  way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
-                 train_class_num: int = 20):
+                 train_class_num: int = 15):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
@@ -222,7 +222,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
             support_dir = cls_subset['support_set']
             temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in support_dir]
             if factory.strategy is None or factory.strategy == 'N:1':
-                if factory.mode == 'train' and factory.shot_num > 2:
+                if factory.mode == 'train' and factory.shot_num > 1:
                     augment = [
                         T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                                   if factory.is_random_aug else factory.augmentations[:factory.aug_num])]
@@ -272,8 +272,13 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
             query_images += [factory.process_img(aug, temp_q) for aug in augment]  # Use the cached loader function
 
             # load support images
-            temp_support = Image.fromarray(loader(cls_subset["+"]))
-            positives += [factory.process_img(aug, temp_support) for aug in augment]  # Use the cached loader function
+
+            temp_support = [Image.fromarray(loader(pos_img)) for pos_img in cls_subset['+']]
+            if factory.mode == 'train' and factory.shot_num > 1:
+                augment = [
+                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
+                              if factory.is_random_aug else factory.augmentations[:factory.aug_num])]
+            positives += [factory.process_img(aug, temp_img) for aug in augment for temp_img in temp_support]  # Use the cached loader function
 
             # read the label
             targets.append(cls_subset['target'])
@@ -300,10 +305,10 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
             for cls, item in enumerate(temp_list):  # for each class
                 imgs_set = class_img_dict[item]
                 # split the images into support and query sets
-                query, positive = random.sample(imgs_set, 2)
+                query, *positives = random.sample(imgs_set, 1 + self.factory.shot_num)
                 cls_subset = {
                     "q": query,  # query_num - query images for `cls`, default(15)
-                    "+": positive,
+                    "+": positives,
                     "target": cls
                 }
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)

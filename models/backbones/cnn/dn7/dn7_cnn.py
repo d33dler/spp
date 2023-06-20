@@ -68,7 +68,7 @@ class SevenLayer_64F(BaseBackbone2d):
         self.norm_layers = [1, 5, 9, 12, 15, 18, 21, 24]
         self.lr = model_cfg.LEARNING_RATE
         self.criterion = nn.CrossEntropyLoss().cuda()
-        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE))
+        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE), weight_decay=0.0005)
         self.output_shape = 64
         self.knn = KNN_itc(data.k_neighbors)
 
