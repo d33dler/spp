@@ -6,6 +6,7 @@ import sys
 from functools import lru_cache
 from typing import List, Union
 import numpy as np
+import torch
 from PIL import Image
 from torch import nn
 from torch.utils.data import Dataset
@@ -226,9 +227,9 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                     augment = [
                         T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                                   if factory.is_random_aug else factory.augmentations[:factory.aug_num])]
-                temp_support = [factory.process_img(aug, temp_img) for aug in augment for
+                temp_support = [factory.process_img(aug, temp_img).unsqueeze(0) for aug in augment for
                                 temp_img in temp_imgs]  # Use the cached loader function
-                support_images.append(temp_support)
+                support_images.append(torch.cat(temp_support, 0))
             elif factory.strategy:
                 for av in range(factory.av_num + 1):
                     support_images.append([factory.process_img(aug, img) for aug in augment for img in temp_imgs])

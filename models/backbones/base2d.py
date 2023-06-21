@@ -4,7 +4,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Union, Tuple
 
-from torch import nn
+from torch import nn, optim
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from yamldataclassconfig import YamlDataClassConfig, create_file_path_field
 from dataclasses_json import DataClassJsonMixin
 from models.interfaces.arch_module import ARCH
@@ -97,7 +98,6 @@ class BaseBackbone2d(ARCH.Child):
             self.config = self._YamlCFG(config)
         else:
             raise AttributeError("Config file type not supported")
-
         self.collect_funcs()
         use_bias = self.ACTIVATION_F == nn.InstanceNorm2d
         # TODO finish abstraction
@@ -164,6 +164,12 @@ class BaseBackbone2d(ARCH.Child):
         #
         # self.num_bev_features = c_in
 
+    def init_optimizer(self):
+        lr = self.lr
+        self.optimizer = optim.Adam(self.parameters(), lr=lr, betas=(0.5, 0.9),
+                                    weight_decay=0.0005)
+        eta_min = lr * (0.1 ** 3)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=eta_min)
     def build(self):
         pass
 

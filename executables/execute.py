@@ -84,13 +84,8 @@ class ExperimentManager:
             query_images = torch.cat(query_images, 0)
             input_var1 = query_images.cuda()
 
-            input_var2 = []
-            for i in range(len(support_images)):
-                temp_support = support_images[i]
-                temp_support = torch.cat(temp_support, 0)
-                temp_support = temp_support.cuda()
-                input_var2.append(temp_support)
-            input_var2 = torch.stack(input_var2, dim=0)
+            input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
+            input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3), input_var2.size(4))
             # Deal with the targets
             target = torch.cat(query_targets, 0).cuda()
 
@@ -156,7 +151,8 @@ class ExperimentManager:
 
             # image transform & normalization
             ImgTransform = transforms.Compose([
-                transforms.Resize((84,84)),
+                transforms.Resize(92),
+                transforms.CenterCrop(84),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ])

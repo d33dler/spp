@@ -3,7 +3,7 @@ from dataclasses import field
 import torch.nn as nn
 from torch import optim
 
-from models.backbones.base import BaseBackbone2d
+from models.backbones.base2d import BaseBackbone2d
 from models.clustering.knn import KNN_itc
 from models.utilities.utils import DataHolder, get_norm_layer
 

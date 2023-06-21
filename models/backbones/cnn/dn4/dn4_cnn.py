@@ -6,7 +6,7 @@ from easydict import EasyDict
 from torch import optim, Tensor
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
-from models.backbones.base import BaseBackbone2d
+from models.backbones.base2d import BaseBackbone2d
 from models.clustering.knn import KNN_itc
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaiming
 
@@ -64,34 +64,23 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
         self.features.apply(init_weights_kaiming)
-        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE),
-                                    weight_decay=0.0005)
+        self.init_optimizer()
         self.criterion = nn.CrossEntropyLoss().cuda()
-        self.scheduler = CosineAnnealingLR(self.optimizer, T_max=10, eta_min=0.0001)
 
     def forward(self):
         # extract features of input1--query image
         data = self.data
-        q_embeddings = self.features(data.q_in)
-        _, C, _, _ = q_embeddings.size()
-        data.q_F = torch.stack(
-            [torch.transpose(t.reshape((C, -1)), 0, 1) for t in q_embeddings])
+        data.q_F = self.features(data.q_in)
+        # _, C, _, _ = q_embeddings.size()
+        # data.q_F = torch.stack(
+        #     [torch.transpose(t.reshape((C, -1)), 0, 1) for t in q_embeddings])
 
         # get support set embeddings
-        L, S, _, _, _ = data.S_in.size()
-        S_embeddings = self.features(data.S_in.view(-1, 3, data.S_in.size()[-1], data.S_in.size()[-1]))
-        S_embeddings = S_embeddings.view(L, S, C, -1)
-
-        data.S_F = []
-        for i in range(L):
-            support_set_sam = S_embeddings[i]
-            # Reshape to (C, -1)
-            support_set_sam = support_set_sam.reshape((C, -1))
-            data.S_F.append(support_set_sam)
-
+        data.S_F = self.features(data.S_in)
         av_num = data.get_true_AV() if data.is_training() else 1
         data.sim_list, data.cos_sim = self.knn.forward(data.q_F, data.S_F, av_num, av_num,
-                                                       data.cfg.AUGMENTOR.STRATEGY if data.training else None)
+                                                       data.cfg.AUGMENTOR.STRATEGY if data.training else None,
+                                                       data.cfg.SHOT_NUM)
         self.data.output = data.sim_list
         return data
 

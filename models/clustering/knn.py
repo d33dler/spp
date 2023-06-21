@@ -22,9 +22,9 @@ class KNN_itc(nn.Module):
         }
 
     @staticmethod
-    def _geometric_mean(t: Tensor) -> Tensor:
+    def _geometric_mean(t: Tensor, dim=0) -> Tensor:
         log_tensor = torch.log(t)
-        mean = torch.mean(log_tensor, dim=0, keepdim=True)
+        mean = torch.mean(log_tensor, dim=dim, keepdim=False)
         geom_mean = torch.exp(mean)
         return geom_mean
 
@@ -48,7 +48,8 @@ class KNN_itc(nn.Module):
     def apply_geometric_mean(self, tensor: Tensor, av_num: int) -> Tensor:
         return self._geometric_mean(torch.clamp_min(tensor, 1e-8)) if av_num > 1 else tensor
 
-    def cosine_similarity(self, q: Tensor, S: List[Tensor], qAV_num: int = 1, SAV_num: int = 1, strategy: str = 'N:1'):
+    def cosine_similarity(self, q: Tensor, S: Tensor, qAV_num: int = 1, SAV_num: int = 1, strategy: str = 'N:1',
+                          shot_num=1):
         """
         param q: query sample
         param S: support set
@@ -56,22 +57,40 @@ class KNN_itc(nn.Module):
         param SAV_num: number of support class AV-subsets per class
         """
 
-        B, _, _ = q.size()
+        # input1---query images
+        input1 = q.contiguous().view(q.size(0), q.size(1), -1)  # (batchsize, 64, 441)
+        input1 = input1.permute(0, 2, 1)  # (batchsize, AV_count, 441, 64)
+        # input2--support set
+        input2 = S.contiguous().view(S.size(0), S.size(1), -1)  # 25 * 64 * 441
+        input2 = input2.permute(0, 2, 1)  # 25 * 441 * 64
 
-        self.similarity_ls = []
-        self.topk_cosine_sums = []
+        # L2 Normalization
+        input1_norm = torch.norm(input1, 2, 2, True)  # (batchsize, AV_count, 441, 1)
+        query = input1 / input1_norm  # (batchsize, AV_count, 441, 64)
 
-        for i in range(0, B, qAV_num):
-            inner_sim, topk_cosine_sum = self.strategy_map[strategy](q, S, qAV_num, SAV_num, i)
+        input2_norm = torch.norm(input2, 2, 2, True)  # 25 * 441 * 1
+        support_set = input2 / input2_norm  # 25 * 441 * 64
+        support_set = support_set.contiguous().view(-1, shot_num * qAV_num * support_set.size(1),
+                                                    support_set.size(2))  # 5 * x * 64
+        support_set = support_set.permute(0, 2, 1)  # 5 * 64 * 2205
 
-            self.similarity_ls.append(self.apply_geometric_mean(inner_sim, qAV_num))
-            if self.topk_cosine_sums:
-                topk_cosine_sum = self.apply_geometric_mean(topk_cosine_sum, qAV_num)
-                self.topk_cosine_sums.append(topk_cosine_sum)
+        # cosine similarity between a query set and a support set
+        innerproduct_matrix = torch.matmul(query.unsqueeze(1), support_set)  # (batchsize, AV_count, 5, 441, 2205)
+        # reshape innerproduct into augmented views sets of each query
+        B, L, *_ = innerproduct_matrix.size()
+        innerproduct_matrix = innerproduct_matrix.contiguous().view(B // qAV_num, qAV_num, innerproduct_matrix.size(1),
+                                                                    innerproduct_matrix.size(2),
+                                                                    innerproduct_matrix.size(
+                                                                        3))  # (batchsize, AV_count, 5, 441, 2205)
+        # choose the top-k nearest neighbors
+        topk_value, topk_index = torch.topk(innerproduct_matrix, self.neighbor_k, -2)  # (batchsize, AV_count, 5, 441, 3)
 
-        self.similarity_ls = torch.cat(self.similarity_ls, 0)
+        img2class_sim = torch.sum(torch.sum(topk_value, -1), -1)  # (batchsize, AV_count, 5)
+        # geometric mean
+        self.similarity_ls = self._geometric_mean(img2class_sim, dim=1)  # (batchsize, 5)
 
-        self.topk_cosine_sums = torch.cat(self.topk_cosine_sums, 0) if self.compute_cos_N else None
+
+        self.topk_cosine_sums = None
         return self.similarity_ls, self.topk_cosine_sums
 
     def _strategy_ovo(self, q, S, qAV_num=1, SAV_num=1, i=0):
@@ -113,8 +132,6 @@ class KNN_itc(nn.Module):
         """
         inner_sim = torch.zeros(qAV_num, len(S)).cuda()
         topk_cosine_sum = None
-        # if self.compute_cos_N:
-        #     topk_cosine_sum = torch.zeros(qAV_num, len(S), S[0].size(1) // 441).cuda()
         for j in range(len(S)):
             support_set_sam = self.normalize_tensor(S[j], 0)  # support set AV
 
@@ -160,5 +177,5 @@ class KNN_itc(nn.Module):
                     index[cls_ix] += 1
         return inner_sim, topk_cosine_sum
 
-    def forward(self, q, S, qAV_num=1, SAV_num=1, strategy='N:1'):
-        return self.cosine_similarity(q, S, qAV_num, SAV_num, 'N:1' if strategy is None else strategy)
+    def forward(self, q, S, qAV_num=1, SAV_num=1, strategy='N:1', shot_num=1):
+        return self.cosine_similarity(q, S, qAV_num, SAV_num, 'N:1' if strategy is None else strategy, shot_num)

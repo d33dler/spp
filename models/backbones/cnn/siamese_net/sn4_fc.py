@@ -6,7 +6,7 @@ from easydict import EasyDict
 from torch import optim
 
 from torch.nn.functional import cosine_similarity
-from models.backbones.base import BaseBackbone2d
+from models.backbones.base2d import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
 from models.clustering import KNN_itc
 from models.utilities.custom_loss import NPairMCLoss
@@ -47,8 +47,6 @@ class SiameseNetwork(BaselineBackbone2d):
         self.lr = model_cfg.LEARNING_RATE
         self.features.apply(init_weights_kaiming)
         self.fc.apply(init_weights_kaiming)
-        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE), weight_decay=0.0005)
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=100, eta_min=0.00005)
         self.criterion = NPairMCLoss().cuda()
 
     def forward(self):
@@ -56,9 +54,8 @@ class SiameseNetwork(BaselineBackbone2d):
         if data.is_training():
             queries = data.snx_queries
 
-            data.snx_query_f = F.normalize(self.fc(self.features(queries).flatten(start_dim=1)), p=2, dim=1)
-            data.snx_positive_f = F.normalize(self.fc(self.features(self.data.snx_positives).flatten(start_dim=1)), p=2,
-                                              dim=1)
+            data.snx_query_f = self.fc(self.features(queries).flatten(start_dim=1))  # TODO verify removal of normalize
+            data.snx_positive_f = self.fc(self.features(self.data.snx_positives).flatten(start_dim=1))
             # construct negatives out of positives for each class (N=50) so negatives = N-1
             negatives = []
             positives = data.snx_positive_f

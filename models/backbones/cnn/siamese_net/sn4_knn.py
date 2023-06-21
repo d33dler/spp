@@ -6,7 +6,7 @@ from easydict import EasyDict
 from torch import optim, Tensor
 
 from torch.nn.functional import cosine_similarity
-from models.backbones.base import BaseBackbone2d
+from models.backbones.base2d import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
 from models.clustering import KNN_itc
 from models.utilities.custom_loss import NPairMCLoss, NPairMCLossLSE
@@ -45,8 +45,6 @@ class SiameseNetworkKNN(BaselineBackbone2d):
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]  # , (self.fc, [1, 4])]
         self.lr = model_cfg.LEARNING_RATE
         self.features.apply(init_weights_kaiming)
-        self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE), weight_decay=0.0005)
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=10, eta_min=0.00005)
         self.criterion = NPairMCLoss().cuda()
         self.knn = KNN_itc(self.data.cfg.K_NEIGHBORS)
 

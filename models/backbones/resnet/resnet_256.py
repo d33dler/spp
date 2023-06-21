@@ -8,7 +8,7 @@ import pdb
 import math
 import sys
 
-from models.backbones.base import BaseBackbone2d
+from models.backbones.base2d import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
 from models.clustering.knn import KNN_itc
 
