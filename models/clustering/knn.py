@@ -59,7 +59,7 @@ class KNN_itc(nn.Module):
 
         # input1---query images
         input1 = q.contiguous().view(q.size(0), q.size(1), -1)  # (batchsize, 64, 441)
-        input1 = input1.permute(0, 2, 1)  # (batchsize, AV_count, 441, 64)
+        input1 = input1.permute(0, 2, 1)  # (batchsize, 441, 64)
         # input2--support set
         input2 = S.contiguous().view(S.size(0), S.size(1), -1)  # 25 * 64 * 441
         input2 = input2.permute(0, 2, 1)  # 25 * 441 * 64
