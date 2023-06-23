@@ -197,7 +197,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
 
             data_list.append(episode)
         factory.sav_num = 2 if (factory.shot_num > 1 and factory.av_num == 0) else 0
-        factory.av_num += 1
+        factory.av_num += 1 if factory.av_num is not None else None
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
@@ -218,6 +218,8 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                               if factory.is_random_aug
                               else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
                 Q_augment += [identity]  # introduce original sample as well
+
+            if None not in [factory.sav_num, factory.aug_num]:
                 S_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
