@@ -105,7 +105,7 @@ class BatchFactory(Dataset):
             "image_to_class": ImageToClassBuilder,
             "npair_mc": NPairMCBuilder
         }
-        print(builder)
+        print(f"Batch construction: {builder or 'image_to_class'}")
         if isinstance(builder, str):
             builder = builder.lower()
             self.builder = builder_map[builder](self) if builder in builder_map else ImageToClassBuilder(self)
@@ -196,8 +196,10 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
 
             data_list.append(episode)
-        factory.sav_num = 2 if (factory.shot_num > 1 and factory.av_num == 0) else 0
-        factory.av_num += 1 if factory.av_num is not None else None
+        factory.sav_num = 2 if (factory.shot_num > 1 and factory.av_num is not None) else None  # capping sav_num to 2
+        factory.av_num = (factory.av_num + 1) if factory.av_num is not None else None  # +1 for original sample
+        print(f"Query Augmentations ({factory.mode}): ", factory.av_num)
+        print(f"Support Augmentations ({factory.mode}) : ", factory.sav_num)
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
@@ -208,9 +210,9 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
+
         for cls_subset in episode_files:
-            Q_augment = [identity]
-            S_augment = [identity]
+
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
                 Q_augment = [
@@ -218,13 +220,17 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                               if factory.is_random_aug
                               else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
                 Q_augment += [identity]  # introduce original sample as well
+            else:
+                Q_augment = [identity]
 
             if None not in [factory.sav_num, factory.aug_num]:
                 S_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
+                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.sav_num)]
                 S_augment += [identity]  # introduce original sample as well
+            else:
+                S_augment = [identity]
 
             # load QUERY images, use the cached loader function
             query_dir = cls_subset['query_img']
@@ -239,7 +245,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                                 temp_img in temp_imgs]  # Use the cached loader function
                 support_images.append(torch.cat(temp_support, 0))
             elif factory.strategy:
-                for av in range(factory.av_num + 1):
+                for av in range(factory.av_num):
                     support_images.append([factory.process_img(aug, img) for aug in S_augment for img in temp_imgs])
 
             # read the label

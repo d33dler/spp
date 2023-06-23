@@ -9,7 +9,7 @@ class KNN_itc(nn.Module):
     KNN-itc (Image to class) metric
     """
 
-    def __init__(self, k_neighbors: int, compute_cos_N=False):
+    def __init__(self, k_neighbors: int, classes =5, compute_cos_N=False):
         super(KNN_itc, self).__init__()
         self.similarity_ls = []
         self.topk_cosine_sums = []
@@ -20,6 +20,7 @@ class KNN_itc(nn.Module):
             "N:1": self._strategy_rvo,
             "N:N": self._strategy_rvr,
         }
+        self.classes = classes
 
     @staticmethod
     def _geometric_mean(t: Tensor, dim=0) -> Tensor:
@@ -70,8 +71,11 @@ class KNN_itc(nn.Module):
 
         input2_norm = torch.norm(input2, 2, 2, True)  # 25 * 441 * 1
         support_set = input2 / input2_norm  # 25 * 441 * 64
-        support_set = support_set.contiguous().view(-1, SAV_num * shot_num * support_set.size(1),
+        print(support_set.size())
+        support_set = support_set.contiguous().view(support_set.size(0) // self.classes ,-1,
                                                     support_set.size(2))  # 5 * x * 64
+        print(support_set.size())
+        exit(0)
         support_set = support_set.permute(0, 2, 1)  # 5 * 64 * x
 
         # cosine similarity between a query set and a support set
