@@ -31,7 +31,6 @@ class DEModel(ARCH):
         model_cfg = self.root_cfg
         self.num_classes = model_cfg.WAY_NUM
         self.k_neighbors = model_cfg.K_NEIGHBORS
-        self.data = DataHolder(model_cfg)
         self.build()
         self._set_modules_mode()
 

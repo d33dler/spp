@@ -77,8 +77,9 @@ class BaselineBackbone2d(BaseBackbone2d):
 
         # get support set embeddings
         data.S_F = self.features(data.S_in)
-        av_num = data.get_true_AV() if data.is_training() else 1
-        data.sim_list, data.cos_sim = self.knn.forward(data.q_F, data.S_F, av_num, av_num,
+        qav_num = data.get_qAV() if data.is_training() else 1
+        sav_num = data.get_SAV() if data.is_training() else 1
+        data.sim_list, data.cos_sim = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
                                                        data.cfg.AUGMENTOR.STRATEGY if data.training else None,
                                                        data.cfg.SHOT_NUM)
         self.data.output = data.sim_list

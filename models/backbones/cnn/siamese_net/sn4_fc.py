@@ -60,9 +60,9 @@ class SiameseNetwork(BaselineBackbone2d):
             negatives = []
             positives = data.snx_positive_f
 
-            for j in range(0, len(positives), data.get_true_AV()):
-                mask = torch.tensor([i not in range(j, j + data.get_true_AV()) for i in range(len(positives))])
-                for _ in range(data.get_true_AV()):
+            for j in range(0, len(positives), data.get_qAV()):
+                mask = torch.tensor([i not in range(j, j + data.get_qAV()) for i in range(len(positives))])
+                for _ in range(data.get_qAV()):
                     negatives.append(positives[mask])
             self.data.snx_negative_f = torch.stack(negatives)
             self.data.sim_list = None
@@ -101,7 +101,7 @@ class SiameseNetwork(BaselineBackbone2d):
 
     def backward(self, *args, **kwargs):
         data = self.data
-        self.loss = self.criterion(data.snx_query_f, data.snx_positive_f, data.snx_negative_f, data.get_true_AV())
+        self.loss = self.criterion(data.snx_query_f, data.snx_positive_f, data.snx_negative_f, data.get_qAV())
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()

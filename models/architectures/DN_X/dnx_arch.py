@@ -69,7 +69,7 @@ class DN_X(DEModel):
             # Measure accuracy and record loss
             prec1, _ = accuracy(out, target, topk=(1, 3))
 
-            n = query_images.size(0) // self.data.av_num if self.data.av_num not in [None, 0] else query_images.size(0)
+            n = query_images.size(0) // self.data.qav_num if self.data.qav_num not in [None, 0] else query_images.size(0)
             losses.update(loss.item(), n)
             top1.update(prec1[0], n)
 

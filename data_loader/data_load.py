@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import dataclasses
 from pathlib import Path
 from typing import Union
 
 import torch
+from easydict import EasyDict
 
 from data_loader.datasets_csv import BatchFactory
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-from models.utilities.utils import load_config
+from models.utilities.utils import load_config, DataHolder
 
 """
 Augmentation functions mappings from torchvision.transforms"""
@@ -63,9 +66,10 @@ class DatasetLoader:
     Class used for data preparation (episode construction, pre-processing, augmentation)
     """
 
-    def __init__(self, cfg, params: Parameters) -> None:
+    def __init__(self, data: DataHolder, params: Parameters) -> None:
+        self.data = data
         self.params = params
-        self.cfg = load_config(Path(Path(__file__).parent / "config.yaml"), cfg)
+        self.cfg = data.cfg
 
     def _read_transforms(self, cfg, cfg_aug):
         transform_ls = []
@@ -101,9 +105,10 @@ class DatasetLoader:
         av_num = cfg_aug.AV_NUM
         aug_num = cfg_aug.AUG_NUM
         strategy = cfg_aug.STRATEGY
-
+        data = self.data
         if mode == 'train':
             trainset = BatchFactory(
+                data=data,
                 builder=self.params.builder_type,
                 data_dir=dataset_dir, mode='train',
                 pre_process=pre_process,
@@ -112,6 +117,7 @@ class DatasetLoader:
                 episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,  # batching
                 av_num=av_num, aug_num=aug_num, strategy=strategy, is_random_aug=cfg_aug.RANDOM_AUGMENT)  # augmentation
             valset = BatchFactory(
+                data=data,
                 builder=self.params.builder_type,
                 data_dir=dataset_dir, mode='val',
                 pre_process=pre_process,
@@ -119,6 +125,7 @@ class DatasetLoader:
                 post_process=post_process,
                 episode_num=episode_val_num, way_num=way_num, shot_num=shot_num, query_num=query_num)
         testset = BatchFactory(
+            data=data,
             builder=self.params.builder_type,
             data_dir=dataset_dir, mode='test',
             pre_process=pre_process,

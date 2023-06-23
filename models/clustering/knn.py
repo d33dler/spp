@@ -70,7 +70,7 @@ class KNN_itc(nn.Module):
 
         input2_norm = torch.norm(input2, 2, 2, True)  # 25 * 441 * 1
         support_set = input2 / input2_norm  # 25 * 441 * 64
-        support_set = support_set.contiguous().view(-1, shot_num * qAV_num * support_set.size(1),
+        support_set = support_set.contiguous().view(-1, SAV_num * shot_num * support_set.size(1),
                                                     support_set.size(2))  # 5 * x * 64
         support_set = support_set.permute(0, 2, 1)  # 5 * 64 * 2205
 

@@ -55,7 +55,7 @@ class SN_X(DEModel):
             self.backward()
             loss = self.get_loss()
             # record loss
-            n = queries.size(0) // self.data.av_num if self.data.av_num not in [None, 0] else queries.size(0)
+            n = queries.size(0) // self.data.qav_num if self.data.qav_num not in [None, 0] else queries.size(0)
             losses.update(loss.item(), n)
 
             # Measure elapsed time

@@ -8,11 +8,12 @@ from typing import List, Union
 import numpy as np
 import torch
 from PIL import Image
+from easydict import EasyDict
 from torch import nn
 from torch.utils.data import Dataset
 from torchvision import transforms as T
 
-from models.utilities.utils import identity
+from models.utilities.utils import identity, DataHolder
 
 sys.dont_write_bytecode = True
 
@@ -51,13 +52,14 @@ class BatchFactory(Dataset):
 
     class AbstractBuilder:
         def build(self):
-            raise NotImplementedError("create() not implemented")
+            raise NotImplementedError("build() not implemented")
 
         def get_item(self, index):
             raise NotImplementedError("get_item() not implemented")
 
     # TODO move parameters to a parameter class
     def __init__(self,
+                 data: DataHolder,
                  builder: Union[str, AbstractBuilder] = "image_to_class",
                  data_dir="",
                  mode="train",
@@ -69,7 +71,8 @@ class BatchFactory(Dataset):
                  episode_num=10000,
                  way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
-                 train_class_num: int = 15):
+                 train_class_num: int = 15
+                 ):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
@@ -142,6 +145,7 @@ class BatchFactory(Dataset):
         self.gray_loader = gray_loader if _gray_loader is None else _gray_loader
         self.strategy = strategy
         self.mode = mode
+        self.data = data
         self.is_random_aug = is_random_aug
         # Build the dataset
         self.builder.build()
@@ -171,7 +175,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         class_list = builder.class_list
         class_img_dict = builder.class_img_dict
         data_list = builder.data_list
-
+        data = builder.data
         for _ in range(episode_num):
 
             # construct each episode
@@ -194,6 +198,8 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
 
             data_list.append(episode)
+        data.sav_num = 2 if (builder.shot_num > 1 and data.qav_num == 0) else 0
+        data.qav_num += 1
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
@@ -204,35 +210,38 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
+        data = factory.data
         for cls_subset in episode_files:
-            augment = [identity]
+            Q_augment = [identity]
+            S_augment = [identity]
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.av_num, factory.aug_num]:
-                augment = [
+                Q_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
-                augment += [identity]  # introduce original sample as well
+                              else factory.augmentations[:factory.aug_num]) for _ in range(data.get_qAV())]
+                Q_augment += [identity]  # introduce original sample as well
+                S_augment = [
+                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
+                              if factory.is_random_aug
+                              else factory.augmentations[:factory.aug_num]) for _ in range(data.get_SAV())]
+                S_augment += [identity]  # introduce original sample as well
 
-            # load query images, use the cached loader function
+            # load QUERY images, use the cached loader function
             query_dir = cls_subset['query_img']
             temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in query_dir]
-            query_images += [factory.process_img(aug, temp_img) for aug in augment for temp_img in temp_imgs]
+            query_images += [factory.process_img(aug, temp_img) for aug in Q_augment for temp_img in temp_imgs]
 
-            # load support images
+            # load SUPPORT images, use the cached loader function
             support_dir = cls_subset['support_set']
             temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in support_dir]
             if factory.strategy is None or factory.strategy == 'N:1':
-                if factory.mode == 'train' and factory.shot_num > 1:
-                    augment = [
-                        T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
-                                  if factory.is_random_aug else factory.augmentations[:factory.aug_num])]
-                temp_support = [factory.process_img(aug, temp_img).unsqueeze(0) for aug in augment for
+                temp_support = [factory.process_img(aug, temp_img).unsqueeze(0) for aug in S_augment for
                                 temp_img in temp_imgs]  # Use the cached loader function
                 support_images.append(torch.cat(temp_support, 0))
             elif factory.strategy:
                 for av in range(factory.av_num + 1):
-                    support_images.append([factory.process_img(aug, img) for aug in augment for img in temp_imgs])
+                    support_images.append([factory.process_img(aug, img) for aug in S_augment for img in temp_imgs])
 
             # read the label
             target = cls_subset['target']
@@ -279,7 +288,8 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
                 augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug else factory.augmentations[:factory.aug_num])]
-            positives += [factory.process_img(aug, temp_img) for aug in augment for temp_img in temp_support]  # Use the cached loader function
+            positives += [factory.process_img(aug, temp_img) for aug in augment for temp_img in
+                          temp_support]  # Use the cached loader function
 
             # read the label
             targets.append(cls_subset['target'])

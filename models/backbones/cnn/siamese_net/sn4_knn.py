@@ -58,13 +58,13 @@ class SiameseNetworkKNN(BaselineBackbone2d):
             # construct negatives out of positives for each class (N=classes * av) therefore, negatives = (N-1) * av
             negatives = []
             positives = data.snx_positive_f
-            for j in range(0, len(positives), data.get_true_AV()):
-                mask = torch.tensor([i not in range(j, j + data.get_true_AV()) for i in range(len(positives))])
-                for _ in range(data.get_true_AV()):
+            for j in range(0, len(positives), data.get_qAV()):
+                mask = torch.tensor([i not in range(j, j + data.get_qAV()) for i in range(len(positives))])
+                for _ in range(data.get_qAV()):
                     negatives.append(positives[mask])
             self.data.snx_negative_f = torch.stack(negatives)
             data.sim_list = self._calc_cosine_similarities(data.snx_query_f, data.snx_positive_f, data.snx_negative_f,
-                                                           data.get_true_AV(), self.knn.neighbor_k)
+                                                           data.get_qAV(), self.knn.neighbor_k)
             return data.sim_list
         else:
             super().forward()
@@ -152,7 +152,7 @@ class SiameseNetworkKNN(BaselineBackbone2d):
     def backward(self, *args, **kwargs):
         data = self.data
         self.loss = self.criterion(data.snx_query_f, data.snx_positive_f, data.snx_negative_f,
-                                   data.get_true_AV(), data.sim_list[0], data.sim_list[1])
+                                   data.get_qAV(), data.sim_list[0], data.sim_list[1])
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()

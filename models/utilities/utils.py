@@ -92,7 +92,7 @@ class DataHolder(DataHolderBase):
     q_in: Tensor
     S_in: Tensor
     targets: Tensor
-    av_num: int
+    qav_num: int
     cos_sim: Tensor
     # Backbone2d OUTPUT
     q_F: Tensor
@@ -129,7 +129,8 @@ class DataHolder(DataHolderBase):
         self.use_bias = cfg.USE_BIAS
         self.norm_layer = BatchNorm2d
         self.num_classes = cfg.WAY_NUM
-        self.av_num = cfg.AUGMENTOR.AV_NUM or 0
+        self.qav_num = cfg.AUGMENTOR.AV_NUM or 0
+        self.sav_num = self.qav_num
 
     def empty_cache(self):
         attributes = ['q_in', 'S_in', 'q_F', 'S_F', 'output', 'cos_sim', 'sim_list', 'snx_queries', 'snx_positives',
@@ -143,8 +144,11 @@ class DataHolder(DataHolderBase):
         gc.collect()
         torch.cuda.empty_cache()
 
-    def get_true_AV(self):
-        return self.av_num + 1
+    def get_qAV(self):
+        return self.qav_num
+
+    def get_SAV(self):
+        return self.sav_num
 
     def training(self, mode=True):
         self._train = mode
