@@ -164,7 +164,7 @@ class ARCH(nn.Module):
         self.data = DataHolder(c)
         self.dataset_parameters = p
         if self.ds_loader is None:
-            self.ds_loader = DatasetLoader(self.data, self.root_cfg, p)
+            self.ds_loader = DatasetLoader(self.data,  p)
 
     def forward(self):
         raise NotImplementedError
