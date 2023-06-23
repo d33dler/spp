@@ -156,11 +156,12 @@ class ARCH(nn.Module):
         self.module_topology: Dict[str, ARCH.Child] = self.root_cfg.TOPOLOGY
         self._mod_topo_private = self.module_topology.copy()
         self._freeze_epoch = self.root_cfg.BACKBONE.FREEZE_EPOCH
-        self.data = DataHolder(model_cfg)
+
         c = self.root_cfg
         p = Parameters(c.SHOT_NUM, c.WAY_NUM, c.QUERY_NUM, c.EPISODE_TRAIN_NUM,
                        c.EPISODE_TEST_NUM, c.EPISODE_VAL_NUM, c.OUTF, c.WORKERS, c.EPISODE_SIZE,
                        c.TEST_EPISODE_SIZE, c.QUERY_NUM * c.WAY_NUM, c.get("BUILDER_TYPE", None))
+        self.data = DataHolder(c)
         self.dataset_parameters = p
         if self.ds_loader is None:
             self.ds_loader = DatasetLoader(self.data, self.root_cfg, p)
