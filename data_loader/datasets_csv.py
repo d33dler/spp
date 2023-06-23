@@ -210,8 +210,8 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
-        av_num = factory.av_num - 1
-        sav_num = factory.sav_num - 1
+        av_num = factory.av_num - 1 if factory.av_num is not None else None
+        sav_num = factory.sav_num - 1 if factory.sav_num is not None else None
         for cls_subset in episode_files:
 
             # Randomly select a subset of augmentations to apply per episode
