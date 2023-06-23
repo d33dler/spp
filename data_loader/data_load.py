@@ -108,7 +108,6 @@ class DatasetLoader:
         data = self.data
         if mode == 'train':
             trainset = BatchFactory(
-                data=data,
                 builder=self.params.builder_type,
                 data_dir=dataset_dir, mode='train',
                 pre_process=pre_process,
@@ -116,8 +115,9 @@ class DatasetLoader:
                 post_process=post_process,
                 episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,  # batching
                 av_num=av_num, aug_num=aug_num, strategy=strategy, is_random_aug=cfg_aug.RANDOM_AUGMENT)  # augmentation
+            data.qav_num = trainset.av_num
+            data.sav_num = trainset.sav_num
             valset = BatchFactory(
-                data=data,
                 builder=self.params.builder_type,
                 data_dir=dataset_dir, mode='val',
                 pre_process=pre_process,
@@ -125,7 +125,6 @@ class DatasetLoader:
                 post_process=post_process,
                 episode_num=episode_val_num, way_num=way_num, shot_num=shot_num, query_num=query_num)
         testset = BatchFactory(
-            data=data,
             builder=self.params.builder_type,
             data_dir=dataset_dir, mode='test',
             pre_process=pre_process,

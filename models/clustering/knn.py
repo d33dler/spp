@@ -72,24 +72,24 @@ class KNN_itc(nn.Module):
         support_set = input2 / input2_norm  # 25 * 441 * 64
         support_set = support_set.contiguous().view(-1, SAV_num * shot_num * support_set.size(1),
                                                     support_set.size(2))  # 5 * x * 64
-        support_set = support_set.permute(0, 2, 1)  # 5 * 64 * 2205
+        support_set = support_set.permute(0, 2, 1)  # 5 * 64 * x
 
         # cosine similarity between a query set and a support set
         innerproduct_matrix = torch.matmul(query.unsqueeze(1), support_set)  # (batchsize, AV_count, 5, 441, 2205)
         # reshape innerproduct into augmented views sets of each query
         B, L, *_ = innerproduct_matrix.size()
-        innerproduct_matrix = innerproduct_matrix.contiguous().view(B // qAV_num, qAV_num, innerproduct_matrix.size(1),
-                                                                    innerproduct_matrix.size(2),
-                                                                    innerproduct_matrix.size(
-                                                                        3))  # (batchsize, AV_count, 5, 441, 2205)
+        innerproduct_matrix = innerproduct_matrix.contiguous() \
+            .view(B // qAV_num, qAV_num, innerproduct_matrix.size(1),
+                  innerproduct_matrix.size(2),
+                  innerproduct_matrix.size(
+                      3))  # (batchsize, AV_count, 5, 441, 2205)
         # choose the top-k nearest neighbors
-        topk_value, topk_index = torch.topk(innerproduct_matrix, self.neighbor_k, -2)  # (batchsize, AV_count, 5, 441, 3)
+        topk_value, topk_index = torch.topk(innerproduct_matrix, self.neighbor_k,
+                                            -2)  # (batchsize, AV_count, 5, 441, 3)
 
         img2class_sim = torch.sum(torch.sum(topk_value, -1), -1)  # (batchsize, AV_count, 5)
         # geometric mean
         self.similarity_ls = self._geometric_mean(img2class_sim, dim=1)  # (batchsize, 5)
-
-
         self.topk_cosine_sums = None
         return self.similarity_ls, self.topk_cosine_sums
 

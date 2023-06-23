@@ -59,7 +59,6 @@ class BatchFactory(Dataset):
 
     # TODO move parameters to a parameter class
     def __init__(self,
-                 data: DataHolder,
                  builder: Union[str, AbstractBuilder] = "image_to_class",
                  data_dir="",
                  mode="train",
@@ -69,7 +68,7 @@ class BatchFactory(Dataset):
                  loader=None,
                  _gray_loader=None,
                  episode_num=10000,
-                 way_num=5, shot_num=5, query_num=5, av_num=None, aug_num=None, strategy: str = None,
+                 way_num=5, shot_num=5, query_num=5, av_num=None, sav_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
                  train_class_num: int = 15
                  ):
@@ -140,12 +139,12 @@ class BatchFactory(Dataset):
         self.post_process = identity if post_process is None else post_process
         self.augmentations = augmentations
         self.av_num = av_num
+        self.sav_num = sav_num
         self.aug_num = aug_num
         self.loader = pil_loader if loader is None else loader
         self.gray_loader = gray_loader if _gray_loader is None else _gray_loader
         self.strategy = strategy
         self.mode = mode
-        self.data = data
         self.is_random_aug = is_random_aug
         # Build the dataset
         self.builder.build()
@@ -167,15 +166,14 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
 
     def build(self):
         # assign all values from self
-        builder = self.factory
-        episode_num = builder.episode_num
-        way_num = builder.way_num
-        shot_num = builder.shot_num
-        query_num = builder.query_num
-        class_list = builder.class_list
-        class_img_dict = builder.class_img_dict
-        data_list = builder.data_list
-        data = builder.data
+        factory = self.factory
+        episode_num = factory.episode_num
+        way_num = factory.way_num
+        shot_num = factory.shot_num
+        query_num = factory.query_num
+        class_list = factory.class_list
+        class_img_dict = factory.class_img_dict
+        data_list = factory.data_list
         for _ in range(episode_num):
 
             # construct each episode
@@ -198,8 +196,8 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
 
             data_list.append(episode)
-        data.sav_num = 2 if (builder.shot_num > 1 and data.qav_num == 0) else 0
-        data.qav_num += 1
+        factory.sav_num = 2 if (factory.shot_num > 1 and factory.av_num == 0) else 0
+        factory.av_num += 1
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
@@ -210,7 +208,6 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
-        data = factory.data
         for cls_subset in episode_files:
             Q_augment = [identity]
             S_augment = [identity]
@@ -219,12 +216,12 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                 Q_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(data.get_qAV())]
+                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
                 Q_augment += [identity]  # introduce original sample as well
                 S_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(data.get_SAV())]
+                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
                 S_augment += [identity]  # introduce original sample as well
 
             # load QUERY images, use the cached loader function
