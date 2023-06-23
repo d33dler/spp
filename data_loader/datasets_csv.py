@@ -210,7 +210,8 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
-
+        av_num = factory.av_num - 1
+        sav_num = factory.sav_num - 1
         for cls_subset in episode_files:
 
             # Randomly select a subset of augmentations to apply per episode
@@ -218,7 +219,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                 Q_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.av_num)]
+                              else factory.augmentations[:factory.aug_num]) for _ in range(av_num)]
                 Q_augment += [identity]  # introduce original sample as well
             else:
                 Q_augment = [identity]
@@ -227,7 +228,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                 S_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(factory.sav_num)]
+                              else factory.augmentations[:factory.aug_num]) for _ in range(sav_num)]
                 S_augment += [identity]  # introduce original sample as well
             else:
                 S_augment = [identity]
