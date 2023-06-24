@@ -146,6 +146,7 @@ class BatchFactory(Dataset):
         self.strategy = strategy
         self.mode = mode
         self.is_random_aug = is_random_aug
+        self.use_augmentation = len({av_num, sav_num, aug_num}.intersection({0, None})) == 0
         # Build the dataset
         self.builder.build()
 
@@ -196,8 +197,13 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
 
             data_list.append(episode)
-        factory.sav_num = 2 if (factory.shot_num > 1 and factory.av_num is not None) else None  # capping sav_num to 2
-        factory.av_num = (factory.av_num + 1) if factory.av_num is not None else None  # +1 for original sample
+        if factory.use_augmentation:
+            factory.sav_num = 2 if factory.shot_num > 1 else (factory.sav_num + 1)  # capping sav_num to 2
+            factory.av_num = (factory.av_num + 1)  # +1 for original sample
+        else:
+            factory.sav_num = 1
+            factory.av_num = 1
+        print(f"Using augmention: {factory.use_augmentation}")
         print(f"Query Augmentations ({factory.mode}): ", factory.av_num)
         print(f"Support Augmentations ({factory.mode}) : ", factory.sav_num)
 
@@ -210,27 +216,24 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
-        av_num = factory.av_num - 1 if factory.av_num is not None else None
-        sav_num = factory.sav_num - 1 if factory.sav_num is not None else None
-        for cls_subset in episode_files:
 
+        for cls_subset in episode_files:
             # Randomly select a subset of augmentations to apply per episode
-            if None not in [factory.av_num, factory.aug_num]:
+            if factory.use_augmentation:
+                av_num = factory.av_num - 1
+                sav_num = factory.sav_num - 1
                 Q_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
                               else factory.augmentations[:factory.aug_num]) for _ in range(av_num)]
                 Q_augment += [identity]  # introduce original sample as well
-            else:
-                Q_augment = [identity]
-
-            if None not in [factory.sav_num, factory.aug_num]:
                 S_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
                               if factory.is_random_aug
                               else factory.augmentations[:factory.aug_num]) for _ in range(sav_num)]
                 S_augment += [identity]  # introduce original sample as well
             else:
+                Q_augment = [identity]
                 S_augment = [identity]
 
             # load QUERY images, use the cached loader function

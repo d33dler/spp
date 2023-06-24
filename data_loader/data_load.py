@@ -99,13 +99,13 @@ class DatasetLoader:
         episode_test_num = self.params.episode_test_num
 
         cfg_aug = self.cfg.AUGMENTOR
+        data = self.data
         pre_process = transforms.Compose(self._read_transforms(cfg_aug, cfg_aug.PRE_PROCESS))
         augmentation = self._read_transforms(cfg_aug, cfg_aug.AUGMENTATION)
         post_process = transforms.Compose(self._read_transforms(cfg_aug, cfg_aug.POST_PROCESS))
-        av_num = cfg_aug.AV_NUM
+        av_num = data.qav_num
         aug_num = cfg_aug.AUG_NUM
         strategy = cfg_aug.STRATEGY
-        data = self.data
         if mode == 'train':
             trainset = BatchFactory(
                 builder=self.params.builder_type,
@@ -114,7 +114,7 @@ class DatasetLoader:
                 augmentations=augmentation,
                 post_process=post_process,
                 episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,  # batching
-                av_num=av_num, aug_num=aug_num, strategy=strategy, is_random_aug=cfg_aug.RANDOM_AUGMENT)  # augmentation
+                av_num=av_num,sav_num=data.sav_num, aug_num=aug_num, strategy=strategy, is_random_aug=cfg_aug.RANDOM_AUGMENT)  # augmentation
             data.qav_num = trainset.av_num
             data.sav_num = trainset.sav_num
             valset = BatchFactory(

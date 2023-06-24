@@ -65,7 +65,7 @@ class DN_X(DEModel):
 
             # Calculate the output
             out = self.forward()
-            loss = self.backward(out, target)
+            loss = self.backward(out, target)[0]
             # Measure accuracy and record loss
             prec1, _ = accuracy(out, target, topk=(1, 3))
 

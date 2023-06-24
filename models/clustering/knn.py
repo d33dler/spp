@@ -73,22 +73,24 @@ class KNN_itc(nn.Module):
         support_set = input2 / input2_norm  # x * x * 64
         support_set = support_set.contiguous().view(support_set.size(0) // (self.classes * SAV_num), -1,
                                                     support_set.size(2))  # x * x * 64
-        support_set = support_set.permute(0, 2, 1)  # 5 * 64 * x
-
+        support_set = support_set.permute(0, 2, 1)  # 1 * 64 * x
+        #print(support_set.size())
         # cosine similarity between a query set and a support set
-        innerproduct_matrix = torch.matmul(query.unsqueeze(1), support_set)  # (batchsize, AV_count, 5, 441, 2205)
+        #print(query.unsqueeze(1).size())
+        innerprod_mx = torch.matmul(query.unsqueeze(1), support_set)  # (batchsize, AV_count, 5, 441, 2205)
+        #print("INNERPROD: ", innerprod_mx.size())
         # reshape innerproduct into augmented views sets of each query
-        B, L, *_ = innerproduct_matrix.size()
-        innerproduct_matrix = innerproduct_matrix.contiguous() \
-            .view(B // qAV_num, qAV_num, innerproduct_matrix.size(1),
-                  innerproduct_matrix.size(2),
-                  innerproduct_matrix.size(
-                      3))  # (batchsize, AV_count, 5, 441, 2205)
-        # choose the top-k nearest neighbors
-        topk_value, topk_index = torch.topk(innerproduct_matrix, self.neighbor_k,
-                                            -2)  # (batchsize, AV_count, 5, 441, 3)
+        B, *_ = innerprod_mx.size()
 
-        img2class_sim = torch.sum(torch.sum(topk_value, -1), -1)  # (batchsize, AV_count, 5)
+        innerprod_mx = innerprod_mx.squeeze()
+        innerprod_mx = innerprod_mx.contiguous().view(B // qAV_num, qAV_num,  innerprod_mx.size(1),
+                                                      self.classes, innerprod_mx.size(2) // self.classes)
+
+        # choose the top-k nearest neighbors
+        topk_value, topk_index = torch.topk(innerprod_mx, self.neighbor_k, -1)  # (batchsize, AV_count, 5, 441, 3)
+        #print("TOPK: ", topk_value.size())
+        img2class_sim = torch.sum(torch.sum(topk_value, -1), -2)  # (batchsize, AV_count, 5)
+        #print("IMG2CLASS: ", img2class_sim.size())
         # geometric mean
         self.similarity_ls = self._geometric_mean(img2class_sim, dim=1)  # (batchsize, 5)
         self.topk_cosine_sums = None

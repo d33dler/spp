@@ -66,8 +66,8 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.lr = model_cfg.LEARNING_RATE
         self.features.apply(init_weights_kaiming)
         self.init_optimizer()
-        self.criterion = [nn.CrossEntropyLoss().cuda(),
-                          CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('gpu')).cuda()]
+        self.criterion = nn.CrossEntropyLoss().cuda()
+        self.reg = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda')).cuda()
 
     def forward(self):
         data = self.data
@@ -93,10 +93,16 @@ class BaselineBackbone2d(BaseBackbone2d):
         """
         pred, gt = args
         data = self.data
-        smax_loss = self.criterion[0](pred, gt)
-        print(data.S_targets.size())
-        exit(0)
-        center_loss = self.criterion[1](data.S_F.view(data.S_F.size(0), -1))
+
+        #print(pred.size())
+        #print(gt.size())
+        smax_loss = self.criterion(pred, gt)
+        # data.S_targets shape is [5] (batch_size), change to 5 * data.S_F.size(0) tiled
+        s_targets = torch.cat(
+            [torch.full((data.S_F.size(0) // data.num_classes,), class_idx) for class_idx in data.S_targets])
+        #print(s_targets)
+        center_loss = self.reg(data.S_F.view(data.S_F.size(0), -1), s_targets.cuda())
+        self.loss = smax_loss + center_loss
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()
