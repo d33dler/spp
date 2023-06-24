@@ -57,15 +57,15 @@ class DN_X(DEModel):
             # Deal with the targets
             target = torch.cat(query_targets, 0).cuda()
 
-            self.data.targets = target
+            self.data.q_targets = target
+            self.data.S_targets = torch.cat(support_targets, 0).cuda()
             self.data.q_CPU = query_images
             self.data.q_in = input_var1
             self.data.S_in = input_var2
 
             # Calculate the output
             out = self.forward()
-            self.backward(out, target)
-            loss = self.get_loss()
+            loss = self.backward(out, target)
             # Measure accuracy and record loss
             prec1, _ = accuracy(out, target, topk=(1, 3))
 

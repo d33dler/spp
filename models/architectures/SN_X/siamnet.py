@@ -46,14 +46,13 @@ class SN_X(DEModel):
             queries = torch.cat(queries, 0).cuda()
             targets = torch.cat(targets, 0).cuda()
 
-            self.data.targets = targets
+            self.data.q_targets = targets
             self.data.snx_queries = queries
             self.data.snx_positives = positives
 
             # Calculate the output
             self.forward()
-            self.backward()
-            loss = self.get_loss()
+            loss = self.backward()
             # record loss
             n = queries.size(0) // self.data.qav_num if self.data.qav_num not in [None, 0] else queries.size(0)
             losses.update(loss.item(), n)
@@ -76,4 +75,4 @@ class SN_X(DEModel):
         self.incr_epoch()
 
     def backward(self):
-        self.BACKBONE.backward()
+        return self.BACKBONE.backward()

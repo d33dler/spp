@@ -91,7 +91,8 @@ class DataHolder(DataHolderBase):
     q_in_CPU: Tensor
     q_in: Tensor
     S_in: Tensor
-    targets: Tensor
+    q_targets: Tensor
+    S_targets: Tensor
     qav_num: int
     cos_sim: Tensor
     # Backbone2d OUTPUT

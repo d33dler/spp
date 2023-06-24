@@ -5,7 +5,7 @@ import os
 from abc import ABC, abstractmethod
 from enum import Enum, EnumMeta
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 import torch
 import torch.nn.functional as F
@@ -71,7 +71,7 @@ class ARCH(nn.Module):
         config: Dict | EasyDict
         lr: float
         optimizer: Optimizer
-        criterion: _Loss | nn.Module
+        criterion: nn.Module | List[nn.Module]
         scheduler: _LRScheduler
         loss: Tensor
         fine_tuning = True
@@ -92,7 +92,7 @@ class ARCH(nn.Module):
             :return: loss
             :rtype: Any
             """
-            return self.criterion(*args)
+            return self.criterion(*args) if isinstance(self.criterion, nn.Module) else self.criterion[0](*args)
 
         def backward(self, *args, **kwargs):
             """
@@ -196,8 +196,10 @@ class ARCH(nn.Module):
                 "[CFG_OVERRIDE] Cannot override child module config. Child module doesn't subclass ARCH.Child!")
 
     def backward(self, *args, **kwargs):
+        loss_ls = []
         for m in self.module_topology.values():
-            m.backward(*args, **kwargs)
+            loss_ls.append(m.backward(*args, **kwargs))
+        return loss_ls
 
     @staticmethod
     def get_func(fset: EnumMeta, name: str):
@@ -243,6 +245,7 @@ class ARCH(nn.Module):
             v.scheduler is not None
         }
         state_dicts = {f"{priv[k]}_state_dict": v.state_dict() for k, v in self.module_topology.items()}
+
         state.update(optimizers)
         state.update(state_dicts)
         state.update(schedulers)

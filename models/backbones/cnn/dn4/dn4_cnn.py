@@ -8,6 +8,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from models.backbones.base2d import BaseBackbone2d
 from models.clustering.knn import KNN_itc
+from models.utilities.custom_loss import CenterLoss
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights_kaiming
 
 
@@ -65,25 +66,41 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.lr = model_cfg.LEARNING_RATE
         self.features.apply(init_weights_kaiming)
         self.init_optimizer()
-        self.criterion = nn.CrossEntropyLoss().cuda()
+        self.criterion = [nn.CrossEntropyLoss().cuda(),
+                          CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('gpu')).cuda()]
 
     def forward(self):
-        # extract features of input1--query image
         data = self.data
         data.q_F = self.features(data.q_in)
-        # _, C, _, _ = q_embeddings.size()
-        # data.q_F = torch.stack(
-        #     [torch.transpose(t.reshape((C, -1)), 0, 1) for t in q_embeddings])
-
-        # get support set embeddings
         data.S_F = self.features(data.S_in)
-        qav_num = data.get_qAV() if data.is_training() else 1
-        sav_num = data.get_SAV() if data.is_training() else 1
+        qav_num, sav_num = (data.get_qAV(), data.get_SAV()) if data.is_training() else (1, 1)
         data.sim_list, data.cos_sim = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
                                                        data.cfg.AUGMENTOR.STRATEGY if data.training else None,
                                                        data.cfg.SHOT_NUM)
         self.data.output = data.sim_list
         return data
+
+    def backward(self, *args, **kwargs):
+        """
+        Calculates the gradient and runs the model DAG backward
+        Default implementation assumes args are (pred, gt)
+        :param args: arguments
+        :type args: Sequence
+        :param kwargs: keyword arguments
+        :type kwargs: Dict
+        :return: loss
+        :rtype: Any
+        """
+        pred, gt = args
+        data = self.data
+        smax_loss = self.criterion[0](pred, gt)
+        print(data.S_targets.size())
+        exit(0)
+        center_loss = self.criterion[1](data.S_F.view(data.S_F.size(0), -1))
+        self.optimizer.zero_grad()
+        self.loss.backward()
+        self.optimizer.step()
+        return self.loss
 
     def adjust_learning_rate(self, epoch):
         self.scheduler.step()

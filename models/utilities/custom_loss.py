@@ -119,6 +119,71 @@ class NPairMCLoss(nn.Module):
         return (torch.sum(anchors ** 2) + torch.sum(positives ** 2)) / total_elements
 
 
+class CenterLoss(nn.Module):
+    def __init__(self, num_classes, feat_dim, device=torch.device('cpu')):
+        super(CenterLoss, self).__init__()
+        self.num_classes = num_classes
+        self.feat_dim = feat_dim
+        self.device = device
+
+        self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim).to(self.device))
+
+    def forward(self, features, targets):
+        """
+        Arguments:
+            features: features with shape (batch_size, feat_dim).
+            targets: ground truth labels with shape (batch_size).
+        """
+        batch_size = targets.size(0)
+        features = features.view(batch_size, -1)
+
+        # Compute the loss
+        target_centers = self.centers[targets]
+        criterion = nn.MSELoss()
+        center_loss = criterion(features, target_centers)
+
+        # Update the centers without updating the gradients
+        with torch.no_grad():
+            delta = self.get_center_delta(features, self.centers, targets)
+            self.centers = nn.Parameter(self.centers - delta)
+
+        return center_loss
+
+    def get_center_delta(self, features, centers, targets, alpha=0.5):
+        """
+        Arguments:
+            features: features with shape (batch_size, feat_dim).
+            centers: centers with shape (num_classes, feat_dim).
+            targets: ground truth labels with shape (batch_size).
+            alpha: step size for updating centers
+        """
+        targets, indices = torch.sort(targets)
+        target_centers = centers[targets]
+        features = features[indices]
+
+        delta_centers = target_centers - features
+        uni_targets, indices = torch.unique(
+            targets.cpu(), sorted=True, return_inverse=True)
+
+        uni_targets = uni_targets.to(self.device)
+        indices = indices.to(self.device)
+
+        delta_centers = torch.zeros(
+            uni_targets.size(0), delta_centers.size(1)
+        ).to(self.device).index_add_(0, indices, delta_centers)
+
+        targets_repeat_num = uni_targets.size()[0]
+        uni_targets_repeat_num = targets.size()[0]
+        targets_repeat = targets.repeat(
+            targets_repeat_num).view(targets_repeat_num, -1)
+        uni_targets_repeat = uni_targets.unsqueeze(1).repeat(
+            1, uni_targets_repeat_num)
+        same_class_feature_count = torch.sum(targets_repeat == uni_targets_repeat, dim=1).float().unsqueeze(1)
+
+        delta_centers = delta_centers / (same_class_feature_count + 1.0) * alpha
+        result = torch.zeros_like(centers)
+        result[uni_targets, :] = delta_centers
+        return result
 class NPairMCLossLSE(NPairMCLoss):
     """
     LSE version Multi-class NPair loss (w/ Log-Sum-Exp for numerical stability)

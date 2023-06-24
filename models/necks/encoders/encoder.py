@@ -75,7 +75,7 @@ class Encoder(ARCH.Child):
         data.sim_list_REDUCED, data.DLD_topk = self.knn.forward(data.q_reduced, data.S_reduced)
 
         if self.training:
-            self.backward([data.q_smax, data.sim_list_REDUCED], data.targets)
+            self.backward([data.q_smax, data.sim_list_REDUCED], data.q_targets)
         return data
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
