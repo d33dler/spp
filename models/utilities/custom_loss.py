@@ -134,9 +134,6 @@ class CenterLoss(nn.Module):
             features: features with shape (batch_size, feat_dim).
             targets: ground truth labels with shape (batch_size).
         """
-        batch_size = targets.size(0)
-        features = features.view(batch_size, -1)
-
         # Compute the loss
         target_centers = self.centers[targets]
         criterion = nn.MSELoss()

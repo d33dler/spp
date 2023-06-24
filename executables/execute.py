@@ -217,7 +217,13 @@ class ExperimentManager:
             # =========================================== Evaluation ==========================================
             print('============ Validation on the val set ============')
             F_txt.write('============ Testing on the test set ============\n')
-            prec1, _ = self.validate(loaders.val_loader, model, best_prec1, F_txt)
+            try:
+                prec1, _ = self.validate(loaders.val_loader, model, best_prec1, F_txt)
+            except Exception as e:
+                print("Encountered an exception while validating")
+                print(e)
+                prec1 = 0
+                continue
 
             # record the best prec@1 and save checkpoint
             is_best = prec1 > best_prec1

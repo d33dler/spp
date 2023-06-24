@@ -94,15 +94,11 @@ class BaselineBackbone2d(BaseBackbone2d):
         pred, gt = args
         data = self.data
 
-        #print(pred.size())
-        #print(gt.size())
         smax_loss = self.criterion(pred, gt)
-        # data.S_targets shape is [5] (batch_size), change to 5 * data.S_F.size(0) tiled
-        s_targets = torch.cat(
-            [torch.full((data.S_F.size(0) // data.num_classes,), class_idx) for class_idx in data.S_targets])
-        #print(s_targets)
-        center_loss = self.reg(data.S_F.view(data.S_F.size(0), -1), s_targets.cuda())
-        self.loss = smax_loss + center_loss
+        # s_targets = torch.cat(
+        #     [torch.full((data.S_F.size(0) // data.num_classes,), class_idx) for class_idx in data.S_targets.unique(sorted=True)])
+        # center_loss = self.reg(data.S_F.view(data.S_F.size(0), -1), s_targets.cuda())
+        self.loss = smax_loss # + center_loss
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()

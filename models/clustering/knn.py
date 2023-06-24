@@ -59,38 +59,41 @@ class KNN_itc(nn.Module):
         """
 
         # input1---query images
+        # print("S:", S.size())
         input1 = q.contiguous().view(q.size(0), q.size(1), -1)  # (batchsize, 64, 441)
         input1 = input1.permute(0, 2, 1)  # (batchsize, 441, 64)
         # input2--support set
         input2 = S.contiguous().view(S.size(0), S.size(1), -1)  # 25 * 64 * 441
         input2 = input2.permute(0, 2, 1)  # 25 * 441 * 64
-
+        # print("INPUT2: ", input2.size())
         # L2 Normalization
         input1_norm = torch.norm(input1, 2, 2, True)  # (batchsize, AV_count, 441, 1)
         query = input1 / input1_norm  # (batchsize, AV_count, 441, 64)
 
         input2_norm = torch.norm(input2, 2, 2, True)  # x * 441 * 1
         support_set = input2 / input2_norm  # x * x * 64
-        support_set = support_set.contiguous().view(support_set.size(0) // (self.classes * SAV_num), -1,
+
+        support_set = support_set.contiguous().view(support_set.size(0) // (self.classes * SAV_num * shot_num),
+                                                    -1,
                                                     support_set.size(2))  # x * x * 64
         support_set = support_set.permute(0, 2, 1)  # 1 * 64 * x
-        #print(support_set.size())
+        # print("SUPPORT(permuted): ", support_set.size())
         # cosine similarity between a query set and a support set
-        #print(query.unsqueeze(1).size())
+        # print("Q:", query.unsqueeze(1).size())
         innerprod_mx = torch.matmul(query.unsqueeze(1), support_set)  # (batchsize, AV_count, 5, 441, 2205)
-        #print("INNERPROD: ", innerprod_mx.size())
+        # print("INNERPROD: ", innerprod_mx.size())
         # reshape innerproduct into augmented views sets of each query
         B, *_ = innerprod_mx.size()
 
         innerprod_mx = innerprod_mx.squeeze()
-        innerprod_mx = innerprod_mx.contiguous().view(B // qAV_num, qAV_num,  innerprod_mx.size(1),
+        # print(innerprod_mx.size())
+        innerprod_mx = innerprod_mx.contiguous().view(B // qAV_num, qAV_num, innerprod_mx.size(1),
                                                       self.classes, innerprod_mx.size(2) // self.classes)
-
         # choose the top-k nearest neighbors
         topk_value, topk_index = torch.topk(innerprod_mx, self.neighbor_k, -1)  # (batchsize, AV_count, 5, 441, 3)
-        #print("TOPK: ", topk_value.size())
+        # print("TOPK: ", topk_value.size())
         img2class_sim = torch.sum(torch.sum(topk_value, -1), -2)  # (batchsize, AV_count, 5)
-        #print("IMG2CLASS: ", img2class_sim.size())
+        # print("IMG2CLASS: ", img2class_sim.size())
         # geometric mean
         self.similarity_ls = self._geometric_mean(img2class_sim, dim=1)  # (batchsize, 5)
         self.topk_cosine_sums = None

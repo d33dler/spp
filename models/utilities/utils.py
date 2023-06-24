@@ -130,6 +130,7 @@ class DataHolder(DataHolderBase):
         self.use_bias = cfg.USE_BIAS
         self.norm_layer = BatchNorm2d
         self.num_classes = cfg.WAY_NUM
+        self.shot_num = cfg.SHOT_NUM
         self.qav_num = cfg.AUGMENTOR.AV_NUM or 0
         self.sav_num = self.qav_num
 
