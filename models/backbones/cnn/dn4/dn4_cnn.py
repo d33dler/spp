@@ -67,7 +67,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.features.apply(init_weights_kaiming)
         self.init_optimizer()
         self.criterion = nn.CrossEntropyLoss().cuda()
-        self.reg = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda')).cuda()
+        self.reg = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda'), reg_lambda=0.1, reg_alpha=0.3).cuda()
 
     def forward(self):
         data = self.data

@@ -120,13 +120,24 @@ class NPairMCLoss(nn.Module):
 
 
 class CenterLoss(nn.Module):
-    def __init__(self, num_classes, feat_dim, device=torch.device('cpu')):
+    def __init__(self, num_classes: int, feat_dim: int, device=torch.device('cpu'), reg_lambda: float = 1.0,
+                 reg_alpha: float = 0.5):
+        """
+        Arguments:
+            num_classes: number of classes.
+            feat_dim: feature dimension.
+            device: device to run the module.
+            reg_lambda: regularization coefficient for the center loss.
+            reg_alpha: regularization coefficient for the center update.
+        """
         super(CenterLoss, self).__init__()
         self.num_classes = num_classes
         self.feat_dim = feat_dim
         self.device = device
-
+        self._criterion = nn.MSELoss()
         self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim).to(self.device))
+        self.reg_lambda = reg_lambda
+        self.reg_alpha = reg_alpha
 
     def forward(self, features, targets):
         """
@@ -136,8 +147,8 @@ class CenterLoss(nn.Module):
         """
         # Compute the loss
         target_centers = self.centers[targets]
-        criterion = nn.MSELoss()
-        center_loss = criterion(features, target_centers)
+
+        center_loss = self._criterion(features, target_centers) * self.reg_lambda
 
         # Update the centers without updating the gradients
         with torch.no_grad():
@@ -146,13 +157,12 @@ class CenterLoss(nn.Module):
 
         return center_loss
 
-    def get_center_delta(self, features, centers, targets, alpha=0.5):
+    def get_center_delta(self, features, centers, targets):
         """
         Arguments:
             features: features with shape (batch_size, feat_dim).
             centers: centers with shape (num_classes, feat_dim).
             targets: ground truth labels with shape (batch_size).
-            alpha: step size for updating centers
         """
         targets, indices = torch.sort(targets)
         target_centers = centers[targets]
@@ -177,10 +187,12 @@ class CenterLoss(nn.Module):
             1, uni_targets_repeat_num)
         same_class_feature_count = torch.sum(targets_repeat == uni_targets_repeat, dim=1).float().unsqueeze(1)
 
-        delta_centers = delta_centers / (same_class_feature_count + 1.0) * alpha
+        delta_centers = delta_centers / (same_class_feature_count + 1.0) * self.reg_alpha
         result = torch.zeros_like(centers)
         result[uni_targets, :] = delta_centers
         return result
+
+
 class NPairMCLossLSE(NPairMCLoss):
     """
     LSE version Multi-class NPair loss (w/ Log-Sum-Exp for numerical stability)
