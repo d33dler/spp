@@ -23,6 +23,7 @@ class BaseBackbone2d(ARCH.Child):
     NORMALIZATION_F: ARCH.NormalizationFuncs
     POOLING_F: ARCH.PoolingFuncs
     output_architecture = True
+
     @dataclass
     class _CFG(ARCH.BaseConfig):
 
@@ -77,8 +78,8 @@ class BaseBackbone2d(ARCH.Child):
 
     def collect_funcs(self):
         self.ACTIVATION_F, \
-        self.NORMALIZATION_F, \
-        self.POOLING_F = \
+            self.NORMALIZATION_F, \
+            self.POOLING_F = \
             [ARCH.get_func(fset, name)
              for fset, name in [(ARCH.ActivationFuncs, self.config.ACTIVATION),
                                 (ARCH.NormalizationFuncs, self.config.NORMALIZATION),
@@ -166,10 +167,10 @@ class BaseBackbone2d(ARCH.Child):
 
     def init_optimizer(self):
         lr = self.lr
-        self.optimizer = optim.Adam(self.parameters(), lr=lr, betas=(0.5, 0.9),
-                                    weight_decay=0.0005)
+        self.optimizer = optim.SGD(self.parameters(), lr=lr, momentum=0.9, dampening=0.9, weight_decay=0.001)
         eta_min = lr * (0.1 ** 3)
         self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=eta_min)
+
     def build(self):
         pass
 
@@ -209,4 +210,3 @@ class BaseBackbone2d(ARCH.Child):
 
             for name, param in module.named_parameters():
                 print("> FROZEN LAYER:", name, not param.requires_grad)
-
