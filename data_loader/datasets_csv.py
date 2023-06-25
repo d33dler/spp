@@ -68,7 +68,7 @@ class BatchFactory(Dataset):
                  loader=None,
                  _gray_loader=None,
                  episode_num=10000,
-                 way_num=5, shot_num=5, query_num=5, av_num=None, sav_num=None, aug_num=None, strategy: str = None,
+                 way_num=5, shot_num=5, query_num=5, qav_num=None, sav_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
                  train_class_num: int = 15
                  ):
@@ -85,7 +85,7 @@ class BatchFactory(Dataset):
         :param way_num: the number of classes in one episode
         :param shot_num: the number of support samples in one class
         :param query_num: the number of query samples in one class
-        :param av_num: the number of augmentations for each sample
+        :param qav_num: the number of augmentations for each sample
         :param aug_num: the number of augmentations for each sample
         :param strategy: the strategy of the dataset [None, '1:1', '1:N'], '1:1' = 1 AV vs 1 support class AV-subset,
          '1:N' - 1 query-AV vs all samples of a support class
@@ -138,7 +138,7 @@ class BatchFactory(Dataset):
         self.pre_process = identity if pre_process is None else pre_process
         self.post_process = identity if post_process is None else post_process
         self.augmentations = augmentations
-        self.av_num = av_num
+        self.qav_num = qav_num
         self.sav_num = sav_num
         self.aug_num = aug_num
         self.loader = pil_loader if loader is None else loader
@@ -146,7 +146,7 @@ class BatchFactory(Dataset):
         self.strategy = strategy
         self.mode = mode
         self.is_random_aug = is_random_aug
-        self.use_augmentation = len({av_num, sav_num, aug_num}.intersection({0, None})) == 0
+        self.use_augmentation = len({qav_num, sav_num, aug_num}.intersection({0, None})) == 0
         # Build the dataset
         self.builder.build()
 
@@ -199,13 +199,15 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
             data_list.append(episode)
         if factory.use_augmentation:
             factory.sav_num = 2 if factory.shot_num > 1 else (factory.sav_num + 1)  # capping sav_num to 2
-            factory.av_num = (factory.av_num + 1)  # +1 for original sample
+            factory.qav_num += 1  # +1 for original sample
         else:
             factory.sav_num = 1
-            factory.av_num = 1
-        print(f"Using augmention: {factory.use_augmentation}")
-        print(f"Query Augmentations ({factory.mode}): ", factory.av_num)
-        print(f"Support Augmentations ({factory.mode}) : ", factory.sav_num)
+            factory.qav_num = 1
+        print("===========================================")
+        print(f"Augmentation : {'ON' if factory.use_augmentation else 'OFF'}")
+        print(f"Query   AV ({factory.mode}) : ", factory.qav_num)
+        print(f"Support AV ({factory.mode}) : ", factory.sav_num)
+        print("===========================================")
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
@@ -220,7 +222,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
         for cls_subset in episode_files:
             # Randomly select a subset of augmentations to apply per episode
             if factory.use_augmentation:
-                av_num = factory.av_num - 1
+                av_num = factory.qav_num - 1
                 sav_num = factory.sav_num - 1
                 Q_augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
@@ -249,7 +251,7 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
                                 temp_img in temp_imgs]  # Use the cached loader function
                 support_images.append(torch.cat(temp_support, 0))
             elif factory.strategy:
-                for av in range(factory.av_num):
+                for av in range(factory.qav_num):
                     support_images.append([factory.process_img(aug, img) for aug in S_augment for img in temp_imgs])
 
             # read the label
@@ -280,10 +282,10 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
         for cls_subset in episode_files:
             augment = [identity]
             # Randomly select a subset of augmentations to apply per episode
-            if None not in [factory.av_num, factory.aug_num]:
+            if None not in [factory.qav_num, factory.aug_num]:
                 augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations))))
-                    for _ in range(factory.av_num)]
+                    for _ in range(factory.qav_num)]
                 augment += [identity]  # introduce original sample as well
 
             # load query images

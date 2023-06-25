@@ -1,4 +1,6 @@
 from __future__ import print_function, annotations
+
+import dataclasses
 import functools
 import gc
 from dataclasses import dataclass
@@ -65,6 +67,15 @@ class DataHolderBase:
     use_bias: bool
     norm_layer: Any  # torch
 
+    def __init__(self, cfg):
+        self.cfg = cfg
+
+    def __post_init__(self):
+        cfg = self.cfg
+        self.k_neighbors = cfg.K_NEIGHBORS
+        self.use_bias = cfg.USE_BIAS
+        self.norm_layer = BatchNorm2d
+
 
 def config_exchange(dest: dict, src: dict):
     for k, v in src.items():
@@ -79,7 +90,6 @@ def config_exchange(dest: dict, src: dict):
     print(src)
 
 
-@dataclass
 class DataHolder(DataHolderBase):
     """
     Module IO specification object
@@ -94,6 +104,7 @@ class DataHolder(DataHolderBase):
     q_targets: Tensor
     S_targets: Tensor
     qav_num: int
+    sav_num: int
     cos_sim: Tensor
     # Backbone2d OUTPUT
     q_F: Tensor
@@ -122,17 +133,23 @@ class DataHolder(DataHolderBase):
     output: Any
 
     def __init__(self, cfg):
+        super().__init__(cfg)
         self._train = True
         self.eval_set = None
         self.module_list: List = []
-        self.cfg = cfg
-        self.k_neighbors = cfg.K_NEIGHBORS
-        self.use_bias = cfg.USE_BIAS
-        self.norm_layer = BatchNorm2d
+        self.__post_init__()
+
+    def __post_init__(self):
+        super().__post_init__()
+        cfg = self.cfg
         self.num_classes = cfg.WAY_NUM
         self.shot_num = cfg.SHOT_NUM
         self.qav_num = cfg.AUGMENTOR.AV_NUM or 0
         self.sav_num = self.qav_num
+
+    def reset(self):
+        self.empty_cache()
+        self.__post_init__()
 
     def empty_cache(self):
         attributes = ['q_in', 'S_in', 'q_F', 'S_F', 'output', 'cos_sim', 'sim_list', 'snx_queries', 'snx_positives',
@@ -297,6 +314,7 @@ def geometric_mean(t: Tensor, dim=0, keepdim=False) -> Tensor:
 
 def identity(x):
     return x
+
 
 def geometric_mean(t: Tensor) -> Tensor:
     log_tensor = torch.log(t)

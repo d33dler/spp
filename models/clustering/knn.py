@@ -73,9 +73,7 @@ class KNN_itc(nn.Module):
         input2_norm = torch.norm(input2, 2, 2, True)  # x * 441 * 1
         support_set = input2 / input2_norm  # x * x * 64
 
-        support_set = support_set.contiguous().view(support_set.size(0) // (self.classes * SAV_num * shot_num),
-                                                    -1,
-                                                    support_set.size(2))  # x * x * 64
+        support_set = support_set.contiguous().view(1, -1, support_set.size(2))  # 1 * x * 64
         support_set = support_set.permute(0, 2, 1)  # 1 * 64 * x
         # print("SUPPORT(permuted): ", support_set.size())
         # cosine similarity between a query set and a support set
