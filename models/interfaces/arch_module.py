@@ -15,7 +15,7 @@ from torch import nn, Tensor
 from torch.nn.modules.loss import _Loss
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
-
+import json
 from data_loader.data_load import Parameters, DatasetLoader
 from models import backbones
 from models.utilities.utils import save_checkpoint, load_config, accuracy, config_exchange, DataHolder
@@ -295,6 +295,10 @@ class ARCH(nn.Module):
 
     def load_config(self, path):
         self.root_cfg, self.root_cfg_dict = load_config(path, ret_dict=True)
+        # pretty print config
+        print("Loaded config file:", path)
+        print("Config:")
+        print(json.dumps(self.root_cfg_dict, indent=4))
 
     def override_child_cfg(self, _config: EasyDict | dict, module_id: str):
         """
