@@ -65,7 +65,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
         self.features.apply(init_weights_kaiming)
-        self.init_optimizer()
+        self.init_optimizer(model_cfg.OPIMIZER)
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.reg = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda'), reg_lambda=0.1, reg_alpha=0.3).cuda()
 

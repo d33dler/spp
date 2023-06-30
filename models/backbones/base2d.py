@@ -165,9 +165,12 @@ class BaseBackbone2d(ARCH.Child):
         #
         # self.num_bev_features = c_in
 
-    def init_optimizer(self):
+    def init_optimizer(self, optimizer: str = 'ADAM'):
         lr = self.lr
-        self.optimizer = optim.SGD(self.parameters(), lr=lr, momentum=0.9, dampening=0.9, weight_decay=0.001)
+        if optimizer == 'ADAM':
+            self.optimizer = optim.Adam(self.parameters(), lr=lr, betas=(0.5, 0.9), weight_decay=0.0005)
+        else:
+            self.optimizer = optim.SGD(self.parameters(), lr=lr, momentum=0.9, dampening=0.9, weight_decay=0.001)
         eta_min = lr * (0.1 ** 3)
         self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=30, eta_min=eta_min)
 
