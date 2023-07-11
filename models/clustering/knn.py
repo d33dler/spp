@@ -78,7 +78,7 @@ class KNN_itc(nn.Module):
         # print("SUPPORT(permuted): ", support_set.size())
         # cosine similarity between a query set and a support set
         # print("Q:", query.unsqueeze(1).size())
-        innerprod_mx = torch.matmul(query.unsqueeze(1), support_set)  # (batchsize, AV_count, 5, 441, 2205)
+        innerprod_mx = torch.matmul(query.unsqueeze(1), support_set)  # (batchsize, AV_count, WAYS, 441, x)
         # print("INNERPROD: ", innerprod_mx.size())
         # reshape innerproduct into augmented views sets of each query
         B, *_ = innerprod_mx.size()
@@ -88,12 +88,14 @@ class KNN_itc(nn.Module):
         innerprod_mx = innerprod_mx.contiguous().view(B // qAV_num, qAV_num, innerprod_mx.size(1),
                                                       self.classes, innerprod_mx.size(2) // self.classes)
         # choose the top-k nearest neighbors
-        topk_value, topk_index = torch.topk(innerprod_mx, self.neighbor_k, -1)  # (batchsize, AV_count, 5, 441, 3)
-        # print("TOPK: ", topk_value.size())
-        img2class_sim = torch.sum(torch.sum(topk_value, -1), -2)  # (batchsize, AV_count, 5)
+        topk_value, topk_index = torch.topk(innerprod_mx, self.neighbor_k, -1)  # (B, AV_count, WAYS, 441, k_neighbors)
+        # print(topk_value.size())
+        img2class_sim = torch.sum(torch.sum(topk_value, -1), -2) if self.neighbor_k > 1 \
+            else torch.sum(topk_value.squeeze(-1), -2)
+        # (batchsize, AV_count, WAYS)
         # print("IMG2CLASS: ", img2class_sim.size())
         # geometric mean
-        self.similarity_ls = self._geometric_mean(img2class_sim, dim=1)  # (batchsize, 5)
+        self.similarity_ls = self._geometric_mean(img2class_sim, dim=1)  # (batchsize, WAYS)
         self.topk_cosine_sums = None
         return self.similarity_ls, self.topk_cosine_sums
 
