@@ -92,6 +92,8 @@ class KNN_itc(nn.Module):
         # print(topk_value.size())
         img2class_sim = torch.sum(torch.sum(topk_value, -1), -2) if self.neighbor_k > 1 \
             else torch.sum(topk_value.squeeze(-1), -2)
+        # clamp the similarity values to avoid nan
+        img2class_sim = torch.clamp_min(img2class_sim, 1e-8)
         # (batchsize, AV_count, WAYS)
         # print("IMG2CLASS: ", img2class_sim.size())
         # geometric mean

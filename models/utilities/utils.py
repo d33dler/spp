@@ -144,8 +144,8 @@ class DataHolder(DataHolderBase):
         cfg = self.cfg
         self.num_classes = cfg.WAY_NUM
         self.shot_num = cfg.SHOT_NUM
-        self.qav_num = cfg.AUGMENTOR.AV_NUM or 0
-        self.sav_num = self.qav_num
+        self.qav_num = cfg.AUGMENTOR.QAV_NUM or 0
+        self.sav_num = cfg.AUGMENTOR.SAV_NUM or 0
 
     def reset(self):
         self.empty_cache()

@@ -198,11 +198,10 @@ class ImageToClassBuilder(BatchFactory.AbstractBuilder):
 
             data_list.append(episode)
         if factory.use_augmentation:
-            factory.sav_num = 2 if factory.shot_num > 1 else (factory.sav_num + 1)  # capping sav_num to 2
-            factory.qav_num += 1  # +1 for original sample
+            factory.sav_num += 1  # +1 for original sample
+            factory.qav_num += 1
         else:
-            factory.sav_num = 1
-            factory.qav_num = 1
+            factory.sav_num,  factory.qav_num = 1, 1
         print("===========================================")
         print(f"Augmentation : {'ON' if factory.use_augmentation else 'OFF'}")
         print(f"Query   AV ({factory.mode}) : ", factory.qav_num)

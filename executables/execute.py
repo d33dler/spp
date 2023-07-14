@@ -244,8 +244,10 @@ class ExperimentManager:
                 print(e)
         ###############################################################################
         F_txt.close()
-
-        print('Training and evaluation completed')
+        # save the last checkpoint
+        filename = os.path.join(self._args.OUTF, 'epoch_%d.pth.tar' % model.get_epoch())
+        model.save_model(filename)
+        print('>>> Training and evaluation completed <<<')
 
     def run(self, _args):
 
@@ -258,7 +260,8 @@ class ExperimentManager:
         _args.OUTF = PRMS.outf + '_'.join(
             [_args.ARCH, _args.BACKBONE.NAME, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
                 PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS),
-             'AV' + str(model.root_cfg.AUGMENTOR.AV_NUM),
+             'QAV' + str(model.data.qav_num),
+             'SAV' + str(model.data.sav_num),
              "AUG" + '_'.join([str(_aug.NAME) for _aug in model.root_cfg.AUGMENTOR.AUGMENTATION])])
         PRMS.outf = _args.OUTF
         self.output_dir = PRMS.outf
