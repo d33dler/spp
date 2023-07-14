@@ -51,16 +51,13 @@ class ResNetLike(BaselineBackbone2d):
         FILE_PATH = __file__  # mandatory
         FILE_TYPE: str = "YAML"  # mandatory
         NUM_CLASSES: int = field(default_factory=int)  # 5 (commented out = default vals)
-        USE_RELU = True
-        DROPOUT = 0
-        IN_PLANES = None
 
-    def __init__(self, data, config):  # neighbor_k=3
-        super().__init__(data, config)
+    def __init__(self, data):  # neighbor_k=3
+        super().__init__(data)
 
-        self.in_planes = self.config.IN_PLANES
+        self.in_planes = 3
         self.out_planes = [64, 96, 128, 256]
-        self.num_stages = 4
+        self.num_stages = len(self.out_planes)
 
         # if type(self.config.NORMALIZATION_F) == functools.partial:
         #     use_bias = self.config.NORMALIZATION_F.func == nn.InstanceNorm2d
@@ -68,13 +65,11 @@ class ResNetLike(BaselineBackbone2d):
         #     use_bias = self.config.NORMALIZATION_F == nn.InstanceNorm2d
 
         if type(self.out_planes) == int:
-            self.out_planes = [self.out_planes for i in range(self.num_stages)]
+            self.out_planes = [self.out_planes for _ in range(self.num_stages)]
 
         assert (type(self.out_planes) == list)
         assert (len(self.out_planes) == self.num_stages)
         num_planes = [self.out_planes[0], ] + self.out_planes
-        # userelu = self.config.USE_RELU
-        # dropout = self.config.DROPOUT
 
         self.feat_extractor = nn.Sequential()
         self.feat_extractor.add_module('ConvL0', nn.Conv2d(self.in_planes, num_planes[0], kernel_size=3, padding=1))

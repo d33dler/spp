@@ -1,17 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
-from pathlib import Path
 from typing import Union
 
 import torch
-from easydict import EasyDict
-
-from data_loader.datasets_csv import BatchFactory
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-from models.utilities.utils import load_config, DataHolder
+from data_loader.datasets_csv import BatchFactory
+from models.utilities.utils import DataHolder
 
 """
 Augmentation functions mappings from torchvision.transforms"""
@@ -32,6 +29,8 @@ TRANSFORM_MAP = {
     "NORMALIZE": transforms.Normalize,
     "GAUSSIAN_BLUR": transforms.GaussianBlur,
     "AUTO_AUGMENT": transforms.AutoAugment,
+    "RAND_AUGMENT": transforms.RandAugment,
+    "TRIVIAL_AUGMENT": transforms.TrivialAugmentWide,
 }
 
 

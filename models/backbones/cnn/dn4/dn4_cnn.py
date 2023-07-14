@@ -29,7 +29,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         FILE_TYPE: str = "YAML"  # mandatory
         NUM_CLASSES: int = field(default_factory=int)  # 5 (commented out = default vals)
 
-    def __init__(self, data: DataHolder, config: EasyDict = None):
+    def __init__(self, data: DataHolder):
         super().__init__(self.Config())
 
         self.data = data
