@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch import optim
 
 from models.backbones.base2d import BaseBackbone2d
-from models.clustering.knn import KNN_itc
+from models.clustering.knn import I2C_KNN
 from models.utilities.utils import DataHolder, get_norm_layer
 
 
@@ -70,7 +70,7 @@ class SevenLayer_64F(BaseBackbone2d):
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.optimizer = optim.Adam(self.parameters(), lr=model_cfg.LEARNING_RATE, betas=tuple(model_cfg.BETA_ONE), weight_decay=0.0005)
         self.output_shape = 64
-        self.knn = KNN_itc(data.k_neighbors)
+        self.knn = I2C_KNN(data.k_neighbors)
 
     def forward(self):
         # extract features of input1--query image

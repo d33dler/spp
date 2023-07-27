@@ -14,8 +14,8 @@ from PIL import Image
 import pdb
 
 
-data_dir = '/FewShot/Datasets/CUB_birds'              # the path of the download dataset
-save_dir = '/FewShot/Datasets/CUB_birds/For_FewShot'  # the saving path of the divided dataset
+data_dir = 'CUB_200_2011'              # the path of the download dataset
+save_dir = 'cub200'  # the saving path of the divided dataset
 
 
 if not os.path.exists(os.path.join(save_dir, 'images')):
@@ -23,7 +23,7 @@ if not os.path.exists(os.path.join(save_dir, 'images')):
 
 images_dir = os.path.join(data_dir, 'images')
 train_class_num = 130
-val_class_num =  20
+val_class_num = 20
 test_class_num = 50
 
 

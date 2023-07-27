@@ -118,7 +118,8 @@ class DataHolder(DataHolderBase):
 
     # ======== SNX ==========
     snx_queries: Tensor
-    snx_positives: Tensor
+    positives: Tensor
+    negatives: Tensor
     snx_support_sets: Tensor
     # SNX embeddings
     snx_query_f: Tensor
@@ -248,16 +249,28 @@ def weights_init_xavier(m):
         init.constant_(m.bias.data, 0.0)
 
 
-def weights_init_kaiming(m):
+def weights_init_kaiming(m: nn.Module):
     classname = m.__class__.__name__
     # print(classname)
     if classname.find('Conv') != -1:
         init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0)
     elif classname.find('Linear') != -1:
         init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
-    elif classname.find('BatchNorm2d') != -1:
+    elif classname.find('BatchNorm') != -1:
         init.normal_(m.weight.data, 1.0, 0.02)
         init.constant_(m.bias.data, 0.0)
+    elif max([classname.find('ReLU'),
+              classname.find('LeakyReLU'),
+              classname.find('Softmax'),
+              classname.find('Tanh'),
+              classname.find('Sigmoid')]) != -1:
+        return
+    elif isinstance(m, nn.Sequential) or isinstance(m, nn.Module):
+        print("Attempting weight initialisation recursively for:", classname)
+        for layer in m.children():
+            weights_init_kaiming(layer)
 
 
 def weights_init_orthogonal(m):
@@ -270,13 +283,6 @@ def weights_init_orthogonal(m):
     elif classname.find('BatchNorm2d') != -1:
         init.normal_(m.weight.data, 1.0, 0.02)
         init.constant_(m.bias.data, 0.0)
-
-
-def init_weights_kaiming(m):
-    if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
-        nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
-        if m.bias is not None:
-            nn.init.constant_(m.bias, 0)
 
 
 def init_weights(net, init_type='normal'):

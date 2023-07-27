@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import Iterator
 from skimage.color import rgb2hsv
@@ -14,7 +15,7 @@ from models import backbones, de_heads, necks
 from models.de_heads.dengine import DecisionEngine
 from models.de_heads.dtree import DTree
 from models.interfaces.arch_module import ARCH
-from models.utilities.utils import DataHolder, config_exchange
+from models.utilities.utils import DataHolder, config_exchange, AverageMeter
 
 
 class DEModel(ARCH):
@@ -33,6 +34,9 @@ class DEModel(ARCH):
         self.k_neighbors = model_cfg.K_NEIGHBORS
         self.build()
         self._set_modules_mode()
+        self.out_bank = np.empty(shape=(0, self.num_classes))
+        self.target_bank = None
+        self.loss_tracker = AverageMeter()
 
     def load_data(self, mode, output_file, dataset_dir=None):
         self.loaders = self.ds_loader.load_data(mode, dataset_dir, output_file)
@@ -78,191 +82,66 @@ class DEModel(ARCH):
             if 'DE' in checkpoint and 'DE' in self.root_cfg:
                 self.DE.load(checkpoint['DE'])
 
-    def enable_decision_engine(self, refit=False, filename=None):
-        """
-        Enables the DE for inference calls (otherwise DE is not used).
+    def validate(self, val_loader, best_prec1, F_txt, store_output=False, store_target=False):
+        batch_time = AverageMeter()
+        losses = AverageMeter()
+        top1 = AverageMeter()
 
-        :param filename:
-        :param train_set: data loader hosting same data used for training the model
-        :type train_set: TorchDataLoader
-        :param refit: force re-fit a model that already contains a fitted DE
-        :type refit: bool
-        :return: None
-        """
-        if 'DE' not in self.root_cfg:
-            raise AttributeError("Not able to enable decision engine - Missing DE module specification in config!")
-        dengine = getattr(self, 'DE', None)
-        if not isinstance(dengine, DecisionEngine):
-            raise ValueError(
-                f"Wrong or missing class type for Decision-engine module, expected DecisionEngine(ABC, ARCH.Child), "
-                f"got: : {type(dengine)}")
-        if not dengine.is_fit or refit:
-            self._fit_DE()
-            self.save_model(filename)
-        dengine.enabled = True
-
-    def _fit_DE(self):
-        """
-        Identify DE type and run the appropriate fitting function
-        :return:
-        :rtype:
-        """
-        if self.root_cfg.DE.ENGINE == "TREE":
-            self._fit_tree_episodes()
-        else:
-            raise ValueError(f"Decision Engine type not supported from choices [TREE] , got: {self.root_cfg.DE.ENGINE}")
-
-    def _create_df(self, dataset, length):
-        dt = self.DE
-        bins = dt.bins
-        # to copilot: rewrite this the other way around
-        all_columns = dt.features[dt.ALL_FT]
-        cos_sim = dt.features[dt.BASE_FT]
-        col_hist = dt.features[dt.MISC_FT]
-        ranks = dt.features[dt.RANK_FT]
-
-        scaler = StandardScaler()
-        tree_df = DataFrame(np.zeros(shape=(length, len(all_columns)), dtype=float), columns=all_columns)
-        tree_df["y"] = 0
-        tree_df["y"] = tree_df["y"].astype(int)
-
-        print("--- Beginning training dataset creation for DE ---")
-        print(tree_df.info(verbose=True))
-        print("TRAIN SET SIZE: ", len(dataset))
-
-        cls = tree_df.columns.get_indexer(cos_sim)
-        histix = tree_df.columns.get_indexer(col_hist)
-        ranks_ix = tree_df.columns.get_indexer(ranks)
-        max_ix = tree_df.columns.get_loc('max')
-        std_ix = tree_df.columns.get_loc('std')
-        mean_ix = tree_df.columns.get_loc('mean')
-
-        y_col_ix = tree_df.columns.get_indexer(["y"])
-        out_bank = np.empty(shape=(0, self.num_classes))
-        target_bank = np.empty(shape=0, dtype=int)
-
-        ix = 0
+        # switch to evaluate mode
         self.eval()
-        try:
-            with torch.no_grad():
-                for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
-                        dataset):
-                    if episode_index % 100 == 0:
-                        print("> Running episode: ", episode_index)
-                    # Convert query and support images
-                    query_images = torch.cat(query_images, 0)
-                    input_var1 = query_images.cuda()
+        accuracies = []
 
-                    input_var2 = []
-                    for i in range(len(support_images)):
-                        temp_support = support_images[i]
-                        temp_support = torch.cat(temp_support, 0)
-                        temp_support = temp_support.cuda()
-                        input_var2.append(temp_support)
-                    target: Tensor = torch.cat(query_targets, 0)
+        end = time.time()
+        self.data.training(False)
+        for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(val_loader):
 
-                    self.data.q_in, self.data.S_in = input_var1, input_var2
-                    # Obtain and normalize the output
-                    out = self.forward()
-                    if isinstance(out, torch.Tensor):
-                        out = out.detach().cpu().numpy()
-                    out = dt.normalize(out)
-                    target: np.ndarray = target.numpy()
-                    out_bank = np.concatenate([out_bank, out], axis=0)
-                    target_bank = np.concatenate([target_bank, target], axis=0)
-                    # add measurements and target value to dataframe
+            # Convert query and support images
+            query_images = torch.cat(query_images, 0)
+            input_var1 = query_images.cuda()
 
-                    out_rows = out.shape[0]
-                    rank_indices = np.argsort(-out, axis=1)
+            input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
+            input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3), input_var2.size(4))
+            # Deal with the targets
+            target = torch.cat(query_targets, 0).cuda()
 
-                    tree_df.iloc[ix:ix + out_rows, cls] = out
-                    tree_df.iloc[ix:ix + out_rows, y_col_ix] = target
+            self.data.q_CPU = query_images
+            self.data.q_in, self.data.S_in = input_var1, input_var2
 
-                    tree_df.iloc[ix:ix + out_rows, max_ix] = out.max(axis=1)
-                    tree_df.iloc[ix:ix + out_rows, mean_ix] = out.mean(axis=1)
-                    tree_df.iloc[ix:ix + out_rows, std_ix] = out.std(axis=1)
+            out = self.forward()
+            loss = self.calculate_loss(out, target)
 
-                    tree_df.iloc[ix:ix + out_rows, ranks_ix] = rank_indices
+            # measure accuracy and record loss
+            losses.update(loss.item(), query_images.size(0))
 
-                    # assume image_tensor is a torch tensor of shape [50, 3, 100, 100]
-                    batch_size, num_channels, height, width = query_images.shape
-                    # reshape the tensor to [50, 3, 10000] to simplify computation
-                    image_tensor_reshaped = query_images.view(batch_size, num_channels, height * width)
-                    # convert the tensor to numpy array
-                    image_array = image_tensor_reshaped.numpy()
-                    # convert from channel-first to channel-last format
-                    image_array = np.transpose(image_array, (0, 2, 1))
-                    # convert the images from RGB to HSV color space
-                    image_array = rgb2hsv(image_array)
-                    # extract color histogram features for each image
-                    histograms = []
-                    for i in range(batch_size):
-                        hist_r, _ = np.histogram(image_array[i, :, 0], bins=bins, range=(0, 1))
-                        hist_g, _ = np.histogram(image_array[i, :, 1], bins=bins, range=(0, 1))
-                        hist_b, _ = np.histogram(image_array[i, :, 2], bins=bins, range=(0, 1))
-                        histograms.append(np.concatenate([hist_r, hist_g, hist_b]))
+            prec1, _ = self.calculate_accuracy(out, target, topk=(1, 3))
 
-                    # scale the features
-                    histograms = scaler.fit_transform(histograms)
-                    # convert the list of histograms to a pandas DataFrame
-                    tree_df.iloc[ix:ix + out_rows, histix] = histograms
-                    ix += out_rows
-                    if ix == length:
-                        break
-        except ValueError:
-            tree_df.to_csv(
-                f"{self.root_cfg.DATASET}_{self.root_cfg.NAME}_W{self.root_cfg.WAY_NUM}_"
-                f"S{self.root_cfg.SHOT_NUM}K_{self.k_neighbors}_"
-                f"{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_V2.csv",
-                index=False)
-            print("STD:", out_bank.std(axis=1).mean())
-        return tree_df
+            top1.update(prec1[0], query_images.size(0))
+            accuracies.append(prec1)
 
-    def _fit_tree_episodes(self):  # TODO move to DTree?
-        """
-        Create the inference dataset containing the feature set F_T for the DE and fit the DE.
-        :return: None
-        """
-        # create empty dataframe
+            # measure elapsed time
+            batch_time.update(time.time() - end)
+            end = time.time()
 
-        batch_sz = self.ds_loader.params.batch_sz
-        dt: DTree = self.DE
-        bins = dt.bins
-        ranks_len = dt.ranks
+            if isinstance(out, torch.Tensor):
+                out = out.detach().cpu().numpy()
+            if store_output:
+                self.out_bank = np.concatenate([self.out_bank, out], axis=0)
+            if store_target:
+                self.target_bank = np.concatenate([self.target_bank, target.cpu().numpy()], axis=0)
+            # ============== print the intermediate results ==============#
+            if episode_index % 100 == 0 and episode_index != 0:
+                print(f'Test-({self.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
+                      f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                      f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
+                      f'Prec@1 {top1.val} ({top1.avg})\t')
 
-        cos_sim = [f"cls_{i}" for i in range(0, self.num_classes)]
-        col_hist = [f'bin_{i}' for i in range(bins * 3)]
-        ranks = [f"rank_{i}" for i in range(0, ranks_len)]
-        agg = ['max', 'mean', 'std']
+                F_txt.write(f'\nTest-({self.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
+                            f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                            f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
+                            f'Prec@1 {top1.val} ({top1.avg})\n')
+        self.loss_tracker.loss_list = losses.loss_list
+        # self.write_losses_to_file(self.loss_tracker.get_loss_history())
+        print(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
+        F_txt.write(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
 
-        all_columns = cos_sim + col_hist + ranks + agg
-        # Add column IDs for the DE (required by DE for creating the inputs in inference step)
-        dt.features[dt.ALL_FT] = all_columns
-        dt.features[dt.BASE_FT] = cos_sim
-        dt.features[dt.MISC_FT] = col_hist
-        dt.features[dt.RANK_FT] = ranks
-
-        train_set = self.loaders.train_loader
-        val_set = self.loaders.val_loader
-        if self.root_cfg.DE.DATASET is None:
-            tree_df = self._create_df(dataset=train_set, length=self.root_cfg.DE.EPISODE_TRAIN_NUM * batch_sz)
-        else:
-            tree_df = pd.read_csv(self.root_cfg.DE.DATASET, header=0)
-
-        tree_df[ranks] = tree_df[ranks].astype('int')
-        self.data.X = tree_df[all_columns]
-        self.data.y = tree_df[['y']]
-        print(self.data.X.head(5))
-        print(self.data.X.tail(5))
-        print("Finished inference, fitting tree...")
-        if self.root_cfg.DE.DATASET is None:
-            tree_df.to_csv(
-                f"{self.root_cfg.DATASET}_{self.root_cfg.NAME}_W{self.root_cfg.WAY_NUM}_"
-                f"S{self.root_cfg.SHOT_NUM}K_{self.k_neighbors}_"
-                f"{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}_V2.csv",
-                index=False)
-        val_df = self._create_df(dataset=val_set, length=600 * batch_sz)
-        dt.fit(self.data.X, self.data.y, [(val_df[all_columns], val_df["y"])])
-
-    def get_DEngine(self) -> DecisionEngine:
-        return self.DE
+        return top1.avg, accuracies

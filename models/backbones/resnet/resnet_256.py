@@ -10,7 +10,7 @@ import sys
 
 from models.backbones.base2d import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
-from models.clustering.knn import KNN_itc
+from models.clustering.knn import I2C_KNN
 
 
 ##############################################################################
@@ -71,15 +71,15 @@ class ResNetLike(BaselineBackbone2d):
         assert (len(self.out_planes) == self.num_stages)
         num_planes = [self.out_planes[0], ] + self.out_planes
 
-        self.feat_extractor = nn.Sequential()
-        self.feat_extractor.add_module('ConvL0', nn.Conv2d(self.in_planes, num_planes[0], kernel_size=3, padding=1))
+        self.features = nn.Sequential()
+        self.features.add_module('ConvL0', nn.Conv2d(self.in_planes, num_planes[0], kernel_size=3, padding=1))
 
         for i in range(self.num_stages):
-            self.feat_extractor.add_module('ResBlock' + str(i), ResBlock(num_planes[i], num_planes[i + 1]))
+            self.features.add_module('ResBlock' + str(i), ResBlock(num_planes[i], num_planes[i + 1]))
             if i < self.num_stages - 2:
-                self.feat_extractor.add_module('MaxPool' + str(i), nn.MaxPool2d(kernel_size=2, stride=2, padding=0))
+                self.features.add_module('MaxPool' + str(i), nn.MaxPool2d(kernel_size=2, stride=2, padding=0))
 
-        self.feat_extractor.add_module('ReluF1', nn.LeakyReLU(0.2, True))  # get Batch*256*21*21
+        self.features.add_module('ReluF1', nn.LeakyReLU(0.2, True))  # get Batch*256*21*21
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):

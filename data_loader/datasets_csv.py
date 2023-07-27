@@ -70,7 +70,7 @@ class BatchFactory(Dataset):
                  episode_num=10000,
                  way_num=5, shot_num=5, query_num=5, qav_num=None, sav_num=None, aug_num=None, strategy: str = None,
                  is_random_aug: bool = False,
-                 train_class_num: int = 15
+                 train_class_num: int = 36,
                  ):
         """
         :param builder: the builder to build the dataset
@@ -102,15 +102,15 @@ class BatchFactory(Dataset):
             "test": test_csv
         }
         builder_map = {
-            "image_to_class": ImageToClassBuilder,
+            "image_to_class": I2CBuilder,
             "npair_mc": NPairMCBuilder
         }
         print(f"Batch construction: {builder or 'image_to_class'}")
         if isinstance(builder, str):
             builder = builder.lower()
-            self.builder = builder_map[builder](self) if builder in builder_map else ImageToClassBuilder(self)
+            self.builder = builder_map[builder](self) if builder in builder_map else I2CBuilder(self)
         else:
-            self.builder: BatchFactory.AbstractBuilder = ImageToClassBuilder(self) if builder or not isinstance(
+            self.builder: BatchFactory.AbstractBuilder = I2CBuilder(self) if builder or not isinstance(
                 builder, BatchFactory.AbstractBuilder) else builder
         data_list = []
         # store all the classes and images into a dict
@@ -160,7 +160,7 @@ class BatchFactory(Dataset):
         return self.post_process(augment(self.pre_process(temp_img)))
 
 
-class ImageToClassBuilder(BatchFactory.AbstractBuilder):
+class I2CBuilder(BatchFactory.AbstractBuilder):
 
     def __init__(self, factory: BatchFactory):
         self.factory = factory
@@ -264,7 +264,7 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
     def __init__(self, factory: BatchFactory):
         self.factory = factory
-        self.val_builder = ImageToClassBuilder(factory)
+        self.val_builder = I2CBuilder(factory)
 
     def get_item(self, index):
         """Load an episode each time, including C-way K-shot and Q-query"""
@@ -285,7 +285,6 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
                 augment = [
                     T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations))))
                     for _ in range(factory.qav_num)]
-                augment += [identity]  # introduce original sample as well
 
             # load query images
             temp_q = Image.fromarray(loader(cls_subset['q']))
@@ -307,6 +306,7 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
     def build(self):
         # assign all values from self
+        factory =  self.factory
         if self.factory.mode != 'train':
             self.val_builder.build()
             return
@@ -334,3 +334,10 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
                 }
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
             data_list.append(episode)
+        if not factory.use_augmentation:
+            factory.sav_num,  factory.qav_num = 1, 1
+        print("===========================================")
+        print(f"Augmentation : {'ON' if factory.use_augmentation else 'OFF'}")
+        print(f"Query   AV ({factory.mode}) : ", factory.qav_num)
+        print(f"Support AV ({factory.mode}) : ", factory.sav_num)
+        print("===========================================")

@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch import optim, Tensor
 
-from models.clustering import KNN_itc
+from models.clustering import I2C_KNN
 from models.interfaces.arch_module import ARCH
 from models.utilities.utils import DataHolder, get_norm_layer, init_weights
 
@@ -51,7 +51,7 @@ class Encoder(ARCH.Child):
             optim.Adam(self.encoder_smax.parameters(), lr=cfg.SMAX_LR, betas=tuple(cfg.BETA_ONE)),
             optim.Adam(self.encoder_conv.parameters(), lr=cfg.RED_LR, betas=tuple(cfg.BETA_ONE))]
         self.criterion = [nn.CrossEntropyLoss().cuda(), nn.CrossEntropyLoss().cuda()]
-        self.knn = KNN_itc(data.k_neighbors)
+        self.knn = I2C_KNN(data.k_neighbors)
 
     def forward(self):
         # Extract the encoder part of the encoders

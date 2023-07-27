@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.uuid
 # JetBrains PyCharm
 .idea
 # C extensions
@@ -131,6 +132,7 @@ dmypy.json
 .pyre/
 /dataset/miniImageNet/
 /dataset/StanfordDogs
+/dataset/*
 /results
 *.pth.tar
 *.csv

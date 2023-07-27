@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import argparse
+import traceback
 from typing import List
 
 import torch.multiprocessing as multiprocessing
@@ -51,7 +52,7 @@ class ExperimentManager:
     def __init__(self):
         self.output_dir = None
         self._args = None
-        self.out_bank = None
+
         self.k = None
         self.loss_tracker = AverageMeter()
 
@@ -67,69 +68,7 @@ class ExperimentManager:
             for loss in losses:
                 _f.write(str(loss) + '\n')
 
-    def validate(self, val_loader, model: DEModel, best_prec1, F_txt, store_output=False, store_target=False):
-        batch_time = AverageMeter()
-        losses = AverageMeter()
-        top1 = AverageMeter()
 
-        # switch to evaluate mode
-        model.eval()
-        accuracies = []
-
-        end = time.time()
-        model.data.training(False)
-        for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(val_loader):
-
-            # Convert query and support images
-            query_images = torch.cat(query_images, 0)
-            input_var1 = query_images.cuda()
-
-            input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
-            input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3), input_var2.size(4))
-            # Deal with the targets
-            target = torch.cat(query_targets, 0).cuda()
-
-            model.data.q_CPU = query_images
-            model.data.q_in, model.data.S_in = input_var1, input_var2
-
-            out = model.forward()
-            loss = model.calculate_loss(out, target)
-
-            # measure accuracy and record loss
-            losses.update(loss.item(), query_images.size(0))
-
-            prec1, _ = model.calculate_accuracy(out, target, topk=(1, 3))
-
-            top1.update(prec1[0], query_images.size(0))
-            accuracies.append(prec1)
-
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
-
-            if isinstance(out, torch.Tensor):
-                out = out.detach().cpu().numpy()
-            if store_output:
-                self.out_bank = np.concatenate([self.out_bank, out], axis=0)
-            if store_target:
-                self.target_bank = np.concatenate([self.target_bank, target.cpu().numpy()], axis=0)
-            # ============== print the intermediate results ==============#
-            if episode_index % self._args.PRINT_FREQ == 0 and episode_index != 0:
-                print(f'Test-({model.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
-                      f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
-                      f'Prec@1 {top1.val} ({top1.avg})\t')
-
-                F_txt.write(f'\nTest-({model.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
-                            f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                            f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
-                            f'Prec@1 {top1.val} ({top1.avg})\n')
-        self.loss_tracker.loss_list = losses.loss_list
-        self.write_losses_to_file(self.loss_tracker.get_loss_history())
-        print(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
-        F_txt.write(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
-
-        return top1.avg, accuracies
 
     def test(self, model, F_txt):
         # ============================================ Testing phase ========================================
@@ -171,8 +110,7 @@ class ExperimentManager:
             )
 
             # =========================================== Evaluation ==========================================
-            prec1, accuracies = self.validate(test_loader, model, best_prec1, F_txt, store_output=True,
-                                              store_target=True)
+            prec1, accuracies = model.validate(test_loader, best_prec1, F_txt)
             best_prec1 = max(prec1, best_prec1)
             test_accuracy, h = self.mean_confidence_interval(accuracies)
             print("Test accuracy=", test_accuracy, "h=", h[0])
@@ -185,7 +123,7 @@ class ExperimentManager:
         print("Aver_accuracy:", aver_accuracy, "Aver_h", total_h.mean())
         F_txt.write(f"\nAver_accuracy= {aver_accuracy} Aver_h= {total_h.mean()}\n")
         F_txt.close()
-        create_confusion_matrix(self.target_bank.astype(int), np.argmax(self.out_bank, axis=1))
+        # create_confusion_matrix(self.target_bank.astype(int), np.argmax(self.out_bank, axis=1))
 
         # ============================================== Testing end ==========================================
 
@@ -219,7 +157,7 @@ class ExperimentManager:
             F_txt.write('============ Testing on the test set ============\n')
             try:
 
-                prec1, _ = self.validate(loaders.val_loader, model, best_prec1, F_txt)
+                prec1, _ = model.validate(loaders.val_loader, best_prec1, F_txt)
             except Exception as e:
                 print("Encountered an exception while running val set validation!")
                 print(e)
@@ -238,10 +176,11 @@ class ExperimentManager:
             print('============ Testing on the test set ============')
             F_txt.write('============ Testing on the test set ============\n')
             try:
-                prec1, _ = self.validate(loaders.test_loader, model, best_prec1, F_txt)
+                prec1, _ = model.validate(loaders.test_loader, best_prec1, F_txt)
             except Exception as e:
                 print("Encountered an exception while running the test set validation!")
-                print(e)
+                # traceback.print_exc()
+                print(traceback.format_exc())
         ###############################################################################
         F_txt.close()
         # save the last checkpoint
@@ -285,12 +224,8 @@ class ExperimentManager:
         print(model)
         print(model, file=txt_file)
         self.k = model.k_neighbors
-        self.out_bank = np.empty(shape=(0, model.num_classes))
 
         if _args.MODE == "test":
-            if _args.DENGINE:
-                model.load_data(_args.MODE, txt_file, _args.DATASET_DIR)
-                model.enable_decision_engine(refit=_args.REFIT_DENGINE)
             self.test(model, F_txt=txt_file)
         else:
             self.train(model, F_txt=txt_file)
