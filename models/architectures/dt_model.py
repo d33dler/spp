@@ -93,54 +93,59 @@ class DEModel(ARCH):
 
         end = time.time()
         self.data.training(False)
-        for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(val_loader):
+        with torch.no_grad():
+            for episode_index, (query_images, query_targets, _, support_images, support_targets) in enumerate(
+                    val_loader):
 
-            # Convert query and support images
-            query_images = torch.cat(query_images, 0)
-            input_var1 = query_images.cuda()
+                # Convert query and support images
+                # query_images = torch.cat(query_images, 0)
+                input_var1 = query_images[0].cuda()
 
-            input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
-            input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3), input_var2.size(4))
-            # Deal with the targets
-            target = torch.cat(query_targets, 0).cuda()
+                input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
+                input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3),
+                                                          input_var2.size(4))
+                # Deal with the targets
+                target = query_targets[0].cuda().long()
 
-            self.data.q_CPU = query_images
-            self.data.q_in, self.data.S_in = input_var1, input_var2
+                self.data.q_CPU = query_images
+                self.data.q_in, self.data.S_in = input_var1, input_var2
 
-            out = self.forward()
-            loss = self.calculate_loss(out, target)
+                out = self.forward()
+                loss = self.calculate_loss(out, target)
 
-            # measure accuracy and record loss
-            losses.update(loss.item(), query_images.size(0))
+                # measure accuracy and record loss
+                losses.update(loss.item(), query_images.size(0))
 
-            prec1, _ = self.calculate_accuracy(out, target, topk=(1, 3))
+                prec1, _ = self.calculate_accuracy(out, target, topk=(1, 3))
 
-            top1.update(prec1[0], query_images.size(0))
-            accuracies.append(prec1)
+                top1.update(prec1[0], query_images.size(0))
+                accuracies.append(prec1)
 
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
+                # measure elapsed time
+                batch_time.update(time.time() - end)
+                end = time.time()
 
-            if isinstance(out, torch.Tensor):
-                out = out.detach().cpu().numpy()
-            if store_output:
-                self.out_bank = np.concatenate([self.out_bank, out], axis=0)
-            if store_target:
-                self.target_bank = np.concatenate([self.target_bank, target.cpu().numpy()], axis=0)
-            # ============== print the intermediate results ==============#
-            if episode_index % 100 == 0 and episode_index != 0:
-                print(f'Test-({self.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
-                      f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
-                      f'Prec@1 {top1.val} ({top1.avg})\t')
+                if isinstance(out, torch.Tensor):
+                    out = out.detach().cpu().numpy()
+                if store_output:
+                    self.out_bank = np.concatenate([self.out_bank, out], axis=0)
+                if store_target:
+                    self.target_bank = np.concatenate([self.target_bank, target.cpu().numpy()], axis=0)
+                # ============== print the intermediate results ==============#
+                if episode_index % 100 == 0 and episode_index != 0:
+                    print(f'Test-({self.get_epoch() - 1}): [{episode_index}/{len(val_loader)}]\t'
+                          f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                          f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
+                          f'Prec@1 {top1.val} ({top1.avg})\t')
 
-                F_txt.write(f'\nTest-({self.get_epoch()}): [{episode_index}/{len(val_loader)}]\t'
-                            f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                            f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
-                            f'Prec@1 {top1.val} ({top1.avg})\n')
+                    F_txt.write(f'\nTest-({self.get_epoch() - 1}): [{episode_index}/{len(val_loader)}]\t'
+                                f'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                                f'Loss {losses.val:.3f} ({losses.avg:.3f})\t'
+                                f'Prec@1 {top1.val} ({top1.avg})\n')
         self.loss_tracker.loss_list = losses.loss_list
         # self.write_losses_to_file(self.loss_tracker.get_loss_history())
+        top1.avg = top1.avg.item() if isinstance(top1.avg, torch.Tensor) else top1.avg
+        best_prec1 = best_prec1.item() if isinstance(best_prec1, torch.Tensor) else best_prec1
         print(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
         F_txt.write(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
 

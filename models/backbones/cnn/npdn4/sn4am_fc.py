@@ -2,7 +2,7 @@ import torch.nn as nn
 import torchvision.ops
 from easydict import EasyDict
 
-from models.backbones.cnn.siamese_net.sn4_fc import B_4L64F_MCNP
+from models.backbones.cnn.npdn4.sn4_fc import B_4L64F_MCNP
 from models.utilities.utils import DataHolder, weights_init_normal, \
     weights_init_kaiming
 

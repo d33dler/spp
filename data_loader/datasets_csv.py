@@ -5,15 +5,15 @@ import random
 import sys
 from functools import lru_cache
 from typing import List, Union
+
 import numpy as np
 import torch
 from PIL import Image
-from easydict import EasyDict
 from torch import nn
 from torch.utils.data import Dataset
 from torchvision import transforms as T
-
-from models.utilities.utils import identity, DataHolder
+import torch.nn.functional as F
+from models.utilities.utils import identity
 
 sys.dont_write_bytecode = True
 
@@ -49,6 +49,9 @@ class BatchFactory(Dataset):
        Images are stored in the folder of "images";
        Indexes are stored in the CSV files.
     """
+    TRAIN_MODE = 'train'
+    VAL_MODE = 'val'
+    TEST_MODE = 'test'
 
     class AbstractBuilder:
         def build(self):
@@ -62,22 +65,24 @@ class BatchFactory(Dataset):
                  builder: Union[str, AbstractBuilder] = "image_to_class",
                  data_dir="",
                  mode="train",
-                 pre_process: T.Compose = None,
-                 augmentations: List[nn.Module] = None,
-                 post_process: T.Compose = None,
+                 pre_process: List[nn.Module] = None,
+                 Q_augmentations: List[nn.Module] = None,
+                 S_augmentations: List[nn.Module] = None,
+                 post_process: List[nn.Module] = None,
+                 batch_transform: nn.Module = None,
                  loader=None,
                  _gray_loader=None,
                  episode_num=10000,
-                 way_num=5, shot_num=5, query_num=5, qav_num=None, sav_num=None, aug_num=None, strategy: str = None,
+                 way_num=5, shot_num=5, query_num=5, qav_num=None, sav_num=None, aug_num=None, use_identity=True,
+                 strategy: str = None,
                  is_random_aug: bool = False,
-                 train_class_num: int = 36,
                  ):
         """
         :param builder: the builder to build the dataset
         :param data_dir: the root directory of the dataset
         :param mode: the mode of the dataset, ["train", "val", "test"]
         :param pre_process: the pre-process of the dataset
-        :param augmentations: the augmentations of the dataset
+        :param Q_augmentations: the augmentations of the dataset
         :param post_process: the post-process of the dataset
         :param loader: the loader of the dataset
         :param _gray_loader: the gray_loader of the dataset
@@ -129,24 +134,30 @@ class BatchFactory(Dataset):
         class_list = list(class_img_dict.keys())
         self.episode_num = episode_num
         self.way_num = way_num
-        self.train_class_num = train_class_num
         self.shot_num = shot_num
         self.query_num = query_num
         self.class_list = class_list
         self.class_img_dict = class_img_dict
         self.data_list = data_list
-        self.pre_process = identity if pre_process is None else pre_process
-        self.post_process = identity if post_process is None else post_process
-        self.augmentations = augmentations
+        self.pre_process = identity if pre_process is None else T.Compose(pre_process)
+        self.post_process = identity if post_process is None else T.Compose(post_process)
+        self.batch_transform = None if batch_transform is None else batch_transform
+        self.Q_augmentations = Q_augmentations
+        self.S_augmentations = Q_augmentations if S_augmentations is None else S_augmentations
         self.qav_num = qav_num
         self.sav_num = sav_num
         self.aug_num = aug_num
+        self.sv = sav_num
+        self.qv = qav_num
+        self.use_identity = use_identity
         self.loader = pil_loader if loader is None else loader
         self.gray_loader = gray_loader if _gray_loader is None else _gray_loader
         self.strategy = strategy
         self.mode = mode
         self.is_random_aug = is_random_aug
-        self.use_augmentation = len({qav_num, sav_num, aug_num}.intersection({0, None})) == 0
+        self.use_Q_augmentation = len({qav_num, aug_num}.intersection({0, None})) == 0
+        self.use_S_augmentation = len({sav_num, aug_num}.intersection({0, None})) == 0
+
         # Build the dataset
         self.builder.build()
 
@@ -192,20 +203,27 @@ class I2CBuilder(BatchFactory.AbstractBuilder):
                 cls_subset = {
                     "query_img": query_imgs,  # query_num - query images for `cls`, default(15)
                     "support_set": support_imgs,  # SHOT - support images for `cls`, default(5)
-                    "target": cls
+                    "target": cls,
                 }
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
-
             data_list.append(episode)
-        if factory.use_augmentation:
-            factory.sav_num += 1  # +1 for original sample
-            factory.qav_num += 1
-        else:
-            factory.sav_num,  factory.qav_num = 1, 1
+        if not factory.use_Q_augmentation:
+            factory.qv = 1
+        elif factory.use_identity:
+            factory.qv = factory.qav_num + 1
+        if not factory.use_S_augmentation:
+            factory.sv = 1
+        elif factory.use_identity:
+            factory.sv = factory.sav_num + 1
+
         print("===========================================")
-        print(f"Augmentation : {'ON' if factory.use_augmentation else 'OFF'}")
-        print(f"Query   AV ({factory.mode}) : ", factory.qav_num)
-        print(f"Support AV ({factory.mode}) : ", factory.sav_num)
+        print(f"Query   AV ({factory.mode}) : ", factory.qav_num, "(Total: ", factory.qv, ")",
+              f"[ AUGMENT : {'✅ ' + '{' + '->'.join([t.__class__.__name__ for t in self.factory.Q_augmentations]) + '}' if factory.use_Q_augmentation else '❌'} ]")
+        print(f"Support AV ({factory.mode}) : ", factory.sav_num, "(Total: ", factory.sv, ")",
+              f"[ AUGMENT : {'✅ ' + '{' + '->'.join([t.__class__.__name__ for t in self.factory.S_augmentations]) + '}' if factory.use_S_augmentation else '❌'} ]")
+        print(
+            f"Batch [ AUGMENT : {'✅ ' + '{' + self.factory.batch_transform.__class__.__name__ + '}' if factory.batch_transform else '❌'} ]")
+        print("USE IDENTITY : ", factory.use_identity)
         print("===========================================")
 
     def get_item(self, index):
@@ -217,24 +235,28 @@ class I2CBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
-
         for cls_subset in episode_files:
             # Randomly select a subset of augmentations to apply per episode
-            if factory.use_augmentation:
-                av_num = factory.qav_num - 1
-                sav_num = factory.sav_num - 1
+            av_num = factory.qav_num
+            sav_num = factory.sav_num
+            if factory.use_Q_augmentation:
                 Q_augment = [
-                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
+                    T.Compose(random.sample(factory.Q_augmentations, min(factory.aug_num, len(factory.Q_augmentations)))
                               if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(av_num)]
-                Q_augment += [identity]  # introduce original sample as well
-                S_augment = [
-                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
-                              if factory.is_random_aug
-                              else factory.augmentations[:factory.aug_num]) for _ in range(sav_num)]
-                S_augment += [identity]  # introduce original sample as well
+                              else factory.Q_augmentations[:factory.aug_num]) for _ in range(av_num)]
+                if factory.use_identity:
+                    Q_augment.append(identity)
             else:
                 Q_augment = [identity]
+
+            if factory.use_S_augmentation:
+                S_augment = [
+                    T.Compose(random.sample(factory.S_augmentations, min(factory.aug_num, len(factory.Q_augmentations)))
+                              if factory.is_random_aug
+                              else factory.S_augmentations[:factory.aug_num]) for _ in range(sav_num)]
+                if factory.use_identity:
+                    S_augment.append(identity)
+            else:
                 S_augment = [identity]
 
             # load QUERY images, use the cached loader function
@@ -257,10 +279,19 @@ class I2CBuilder(BatchFactory.AbstractBuilder):
             target = cls_subset['target']
             query_targets.extend(np.tile(target, len(query_dir)))
             support_targets.extend(np.tile(target, len(support_dir)))
-        return query_images, query_targets, support_images, support_targets
+
+        query_targets = torch.Tensor(query_targets)
+        query_images = torch.stack(query_images)
+        permuted_targets = []
+        if factory.batch_transform is not None and factory.mode == 'train':
+            query_images, permuted_targets = factory.batch_transform(query_images, query_targets)
+        return query_images, query_targets, permuted_targets, support_images, support_targets
 
 
 class NPairMCBuilder(BatchFactory.AbstractBuilder):
+    """
+    NPairsMCBuilder is used to build the dataset for N-pair MC batch construction [DEPRECATED]
+    """
 
     def __init__(self, factory: BatchFactory):
         self.factory = factory
@@ -283,7 +314,8 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
             # Randomly select a subset of augmentations to apply per episode
             if None not in [factory.qav_num, factory.aug_num]:
                 augment = [
-                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations))))
+                    T.Compose(
+                        random.sample(factory.Q_augmentations, min(factory.aug_num, len(factory.Q_augmentations))))
                     for _ in range(factory.qav_num)]
 
             # load query images
@@ -295,8 +327,8 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
             temp_support = [Image.fromarray(loader(pos_img)) for pos_img in cls_subset['+']]
             if factory.mode == 'train' and factory.shot_num > 1:
                 augment = [
-                    T.Compose(random.sample(factory.augmentations, min(factory.aug_num, len(factory.augmentations)))
-                              if factory.is_random_aug else factory.augmentations[:factory.aug_num])]
+                    T.Compose(random.sample(factory.Q_augmentations, min(factory.aug_num, len(factory.Q_augmentations)))
+                              if factory.is_random_aug else factory.Q_augmentations[:factory.aug_num])]
             positives += [factory.process_img(aug, temp_img) for aug in augment for temp_img in
                           temp_support]  # Use the cached loader function
 
@@ -306,7 +338,7 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
 
     def build(self):
         # assign all values from self
-        factory =  self.factory
+        factory = self.factory
         if self.factory.mode != 'train':
             self.val_builder.build()
             return
@@ -334,10 +366,10 @@ class NPairMCBuilder(BatchFactory.AbstractBuilder):
                 }
                 episode.append(cls_subset)  # (WAY, QUERY (query_num) + SHOT, 3, x, x)
             data_list.append(episode)
-        if not factory.use_augmentation:
-            factory.sav_num,  factory.qav_num = 1, 1
+        if not factory.use_Q_augmentation:
+            factory.sav_num, factory.qav_num = 1, 1
         print("===========================================")
-        print(f"Augmentation : {'ON' if factory.use_augmentation else 'OFF'}")
+        print(f"Augmentation : {'ON' if factory.use_Q_augmentation else 'OFF'}")
         print(f"Query   AV ({factory.mode}) : ", factory.qav_num)
         print(f"Support AV ({factory.mode}) : ", factory.sav_num)
         print("===========================================")

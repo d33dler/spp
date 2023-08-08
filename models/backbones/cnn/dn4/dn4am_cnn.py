@@ -55,7 +55,7 @@ class DN4_AM(BaselineBackbone2d):
         attn_output = self.attention(x, x, x)  # use the feature map as query, key and value
         data.q_F = attn_output.permute(1, 2, 0).view(b, c, h, w)  # permute and reshape back to original shape
 
-        qav_num, sav_num = (data.get_qAV(), data.get_SAV()) if data.is_training() else (1, 1)
+        qav_num, sav_num = (data.get_qv(), data.get_Sv()) if data.is_training() else (1, 1)
         data.sim_list = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
                                          data.cfg.AUGMENTOR.STRATEGY if data.training else None,
                                          data.cfg.SHOT_NUM)

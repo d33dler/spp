@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -88,7 +89,7 @@ class NPairMCLoss(nn.Module):
 
         return query_pos_cos_sim.squeeze(), query_neg_cos_sim.squeeze()
 
-    def forward(self, anchors, positives, negatives, av=0, pos_sim=None, neg_sim=None):
+    def forward(self, anchors, positives, negatives, av=1, pos_sim=None, neg_sim=None):
         """
         positives: 1D tensor of shape (B,)
         negatives: 2D tensor of shape (B,(L-1) * AV)
@@ -117,6 +118,68 @@ class NPairMCLoss(nn.Module):
         """
         total_elements = torch.numel(anchors) + torch.numel(positives)
         return (torch.sum(anchors ** 2) + torch.sum(positives ** 2)) / total_elements
+
+
+class NPairMCLossLSE(NPairMCLoss):
+    """
+    LSE version Multi-class NPair loss (w/ Log-Sum-Exp for numerical stability)
+    based on (K. Sohn. Improved Deep Metric Learning with Multi-class N-pair Loss Objective. NIPS 2016)
+    """
+
+    def __init__(self, l2_reg=0.02):  # add a regularization coefficient
+        super(NPairMCLossLSE, self).__init__()
+        self.l2_reg = l2_reg
+
+    def forward(self, anchors, positives, negatives, av=0, pos_sim=None, neg_sim=None):
+        """
+        positives: 1D tensor of shape (B,)
+        negatives: 2D tensor of shape (B,(L-1) * AV)
+        """
+        # Maximum value for stability
+        pos_sim, neg_sim = self._check_calc_csim(anchors, positives, negatives, av, pos_sim, neg_sim)
+        with torch.no_grad():
+            max_val = torch.max(neg_sim - pos_sim.unsqueeze(1), dim=1, keepdim=True)[0]
+        loss = (max_val + torch.log(
+            torch.sum(torch.exp(neg_sim - pos_sim.unsqueeze(1) - max_val), dim=1))).mean() \
+               + self.l2_loss(anchors, pos_sim) * self.l2_reg
+        return loss
+
+
+class NPairAngularLoss(nn.Module):
+    def __init__(self, alpha=45, in_degree=True, with_npair=True):
+        super(NPairAngularLoss, self).__init__()
+        if in_degree:
+            alpha = np.deg2rad(alpha)
+        self.npair = None
+        if with_npair:
+            self.npair = NPairMCLoss()
+        self.sq_tan_alpha = np.tan(alpha) ** 2
+
+    def forward(self, anchors, positives, apn, negatives, pos_sim, neg_sim, lamb=2):
+        """
+        Compute the angular loss for a batch of anchors, positives and negatives
+        including (optionally) the npair loss
+        :param anchors: (batch_size, embedding_size)
+        :param positives: (batch_size, embedding_size)
+        :param apn: anchor + positive (batch_size, )
+        :param negatives: (batch_size, num_negatives, embedding_size)
+        :param pos_sim: (batch_size, )
+        :param neg_sim: (batch_size, num_negatives)
+        :param lamb: the weight of the angular loss
+        :return:
+
+        """
+        term1 = 4 * self.sq_tan_alpha * apn
+        term2 = 2 * (1 + self.sq_tan_alpha) * pos_sim.unsqueeze(1)
+        f_apn = term1 - term2
+        with torch.no_grad():
+            max_val = torch.max(f_apn, dim=1, keepdim=True)[0]
+        loss = torch.mean(max_val + torch.log1p(torch.sum(torch.exp(f_apn - max_val), dim=1)))
+        if self.npair is not None:
+            loss_npair = self.npair(anchors, positives, negatives, pos_sim=pos_sim, neg_sim=neg_sim)
+            # print(loss, loss_npair)
+            loss = loss_npair + lamb * loss
+        return loss
 
 
 class CenterLoss(nn.Module):
@@ -170,7 +233,7 @@ class CenterLoss(nn.Module):
 
         delta_centers = target_centers - features
         uni_targets, indices = torch.unique(
-            targets.cpu(), sorted=True, return_inverse=True)
+            targets, sorted=True, return_inverse=True)
 
         uni_targets = uni_targets.to(self.device)
         indices = indices.to(self.device)
@@ -191,28 +254,3 @@ class CenterLoss(nn.Module):
         result = torch.zeros_like(centers)
         result[uni_targets, :] = delta_centers
         return result
-
-
-class NPairMCLossLSE(NPairMCLoss):
-    """
-    LSE version Multi-class NPair loss (w/ Log-Sum-Exp for numerical stability)
-    based on (K. Sohn. Improved Deep Metric Learning with Multi-class N-pair Loss Objective. NIPS 2016)
-    """
-
-    def __init__(self, l2_reg=0.02):  # add a regularization coefficient
-        super(NPairMCLossLSE, self).__init__()
-        self.l2_reg = l2_reg
-
-    def forward(self, anchors, positives, negatives, av=0, pos_sim=None, neg_sim=None):
-        """
-        positives: 1D tensor of shape (B,)
-        negatives: 2D tensor of shape (B,(L-1) * AV)
-        """
-        # Maximum value for stability
-        pos_sim, neg_sim = self._check_calc_csim(anchors, positives, negatives, av, pos_sim, neg_sim)
-        max_val = torch.max(neg_sim - pos_sim.unsqueeze(1), dim=1, keepdim=True)[0]
-        loss = max_val + torch.log(
-            torch.sum(torch.exp(neg_sim - pos_sim.unsqueeze(1) - max_val), dim=1)) \
-               + self.l2_loss(anchors, pos_sim) * self.l2_reg
-        loss = loss.mean()  # average over the batch
-        return loss

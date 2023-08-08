@@ -41,8 +41,7 @@ This is the main execution script. For training a model simply add the config pa
 dataset path & data_name.
 
 Example:
-python exec.py --arch DN_X --config models/architectures/DN4_Vanilla --dataset_dir your/dataset/path --data_name aName \
---mode train --epochs 30 --dengine --refit_dengine
+python exec.py --jobs config1.yaml optional_config2.yaml ... 
 """
 
 
@@ -80,6 +79,7 @@ class ExperimentManager:
         total_accuracy_vector = []
         best_prec1 = 0
         params = model.ds_loader.params
+        params.way_num = 5
         model.eval()
         model.data.training(False)
         for r in range(repeat_num):
@@ -89,12 +89,12 @@ class ExperimentManager:
             # ======================================= Folder of Datasets =======================================
 
             # image transform & normalization
-            ImgTransform = transforms.Compose([
+            ImgTransform = [
                 transforms.Resize(92),
                 transforms.CenterCrop(84),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-            ])
+            ]
 
             testset = BatchFactory(
                 data_dir=self._args.DATASET_DIR, mode='test', pre_process=ImgTransform,
@@ -199,9 +199,9 @@ class ExperimentManager:
         _args.OUTF = PRMS.outf + '_'.join(
             [_args.ARCH, _args.BACKBONE.NAME, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
                 PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS),
-             'QAV' + str(model.data.qav_num),
-             'SAV' + str(model.data.sav_num),
-             "AUG" + '_'.join([str(_aug.NAME) for _aug in model.root_cfg.AUGMENTOR.AUGMENTATION])])
+             'QAV' + str(model.data.qv),
+             'SAV' + str(model.data.sv),
+             "AUG_" + '_'.join([str(_aug.NAME) for _aug in model.root_cfg.AUGMENTOR.AUGMENTATION])])
         PRMS.outf = _args.OUTF
         self.output_dir = PRMS.outf
         if not os.path.exists(_args.OUTF):
@@ -242,19 +242,30 @@ def launch_job(args):
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--jobs', required=True, nargs='+', type=str, help='PATH(s) to the model config file(s)')
+    parser.add_argument('--jobs', required=True, nargs='+', type=str, help='Paths(s) to the model config file(s)')
+    parser.add_argument('--test', action='store_true', help='Run in test mode')
+    parser.add_argument('--parallel', action='store_true', help='Run in parallel mode')
     arguments = parser.parse_args()
     print(arguments.jobs)
     proc_ls = []
+    if arguments.parallel:
+        for a in arguments.jobs:
+            with open(a, 'r') as f:
+                job_args = (EasyDict(yaml.load(f, Loader=yaml.SafeLoader)),)
+                job_args[0].PATH = a
+                job_args[0].MODE = 'train' if not arguments.test else 'test'
+                p = Process(target=launch_job, args=job_args, daemon=False)
+                p.start()
+                proc_ls.append(p)
+        while 1:
+            time.sleep(10)
+            if all([not p.is_alive() for p in proc_ls]):
+                break
+    else:
+        for a in arguments.jobs:
+            with open(a, 'r') as f:
+                job_args = EasyDict(yaml.load(f, Loader=yaml.SafeLoader))
+                job_args.PATH = a
+                job_args.MODE = 'train' if not arguments.test else 'test'
+                launch_job(job_args)
 
-    for a in arguments.jobs:
-        with open(a, 'r') as f:
-            job_args = (EasyDict(yaml.load(f, Loader=yaml.SafeLoader)),)
-            job_args[0].PATH = a
-            p = Process(target=launch_job, args=job_args, daemon=False)
-            p.start()
-            proc_ls.append(p)
-    while 1:
-        time.sleep(10)
-        if all([not p.is_alive() for p in proc_ls]):
-            break

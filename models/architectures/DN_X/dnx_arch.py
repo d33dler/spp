@@ -45,21 +45,23 @@ class DN_X(DEModel):
         end = time.time()
         epochix = self.get_epoch()
 
-        for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(train_loader):
+        for episode_index, (query_images, query_targets, query_permuted, support_images, support_targets) in enumerate(
+                train_loader):
             # Measure data loading time
             data_time.update(time.time() - end)
             # Convert query and support images
-            query_images = torch.cat(query_images, 0)
-            input_var1 = query_images.cuda()
+
+            input_var1 = query_images[0].cuda()
+            self.data.q_permuted_targets = query_permuted[0].long().cuda() if len(query_permuted) != 0 else None
 
             input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
             input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3), input_var2.size(4))
             # Deal with the targets
-            target = torch.cat(query_targets, 0).cuda()
+            target = query_targets[0].long().cuda()
 
             self.data.q_targets = target
             self.data.S_targets = torch.cat(support_targets, 0).cuda()
-            self.data.q_CPU = query_images
+            self.data.q_CPU = query_images[0]
             self.data.q_in = input_var1
             self.data.S_in = input_var2
 
@@ -69,9 +71,8 @@ class DN_X(DEModel):
             # Measure accuracy and record loss
             prec1, _ = accuracy(out, target, topk=(1, 3))
 
-            n = query_images.size(0) // self.data.qav_num if self.data.qav_num not in [None, 0] else query_images.size(0)
-            losses.update(loss.item(), n)
-            top1.update(prec1[0], n)
+            losses.update(loss.item(), target.size(0))
+            top1.update(prec1[0], target.size(0))
 
             # Measure elapsed time
             batch_time.update(time.time() - end)

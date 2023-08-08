@@ -10,7 +10,7 @@ import sys
 
 from models.backbones.base2d import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
-from models.clustering.knn import I2C_KNN
+from models.clustering.dn4_nbnn import I2C_KNN
 
 
 ##############################################################################

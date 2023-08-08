@@ -102,9 +102,10 @@ class DataHolder(DataHolderBase):
     q_in: Tensor
     S_in: Tensor
     q_targets: Tensor
+    q_permuted_targets: Tensor
     S_targets: Tensor
-    qav_num: int
-    sav_num: int
+    qv: int
+    sv: int
     cos_sim: Tensor
     # Backbone2d OUTPUT
     q_F: Tensor
@@ -131,7 +132,8 @@ class DataHolder(DataHolderBase):
 
     # ======== Output ==========
     sim_list: Tensor  # CUDA
-    output: Any
+    apn: Tensor  # CUDA
+    output: Any  # CUDA
 
     def __init__(self, cfg):
         super().__init__(cfg)
@@ -145,15 +147,16 @@ class DataHolder(DataHolderBase):
         cfg = self.cfg
         self.num_classes = cfg.WAY_NUM
         self.shot_num = cfg.SHOT_NUM
-        self.qav_num = cfg.AUGMENTOR.QAV_NUM or 0
-        self.sav_num = cfg.AUGMENTOR.SAV_NUM or 0
+        self.qv = cfg.AUGMENTOR.QAV_NUM or 0  # query views (per unique query)
+        self.sv = cfg.AUGMENTOR.SAV_NUM or 0  # support views (per shot)
 
     def reset(self):
         self.empty_cache()
         self.__post_init__()
 
     def empty_cache(self):
-        attributes = ['q_in', 'S_in', 'q_F', 'S_F', 'output', 'cos_sim', 'sim_list', 'snx_queries', 'snx_positives',
+        attributes = ['q_in', 'S_in', 'q_F', 'S_F', 'output', 'apn', 'cos_sim', 'sim_list', 'snx_queries',
+                      'snx_positives',
                       'snx_support_sets', 'snx_query_f', 'snx_positive_f', 'snx_negative_f', 'snx_support_set_f',
                       'tree_pred', 'DLD_topk']
         for attr in attributes:
@@ -164,11 +167,11 @@ class DataHolder(DataHolderBase):
         gc.collect()
         torch.cuda.empty_cache()
 
-    def get_qAV(self):
-        return self.qav_num
+    def get_qv(self):
+        return self.qv
 
-    def get_SAV(self):
-        return self.sav_num
+    def get_Sv(self):
+        return self.sv
 
     def training(self, mode=True):
         self._train = mode

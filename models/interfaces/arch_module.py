@@ -106,7 +106,8 @@ class ARCH(nn.Module):
             :rtype: Any
             """
             pred, gt = args
-            self.loss = self.criterion(pred, gt)
+            self.loss = self.criterion(pred, gt) if isinstance(self.criterion, nn.Module) else sum(
+                [criterion(pred, gt) for criterion in self.criterion])
             self.optimizer.zero_grad()
             self.loss.backward()
             self.optimizer.step()
@@ -164,7 +165,7 @@ class ARCH(nn.Module):
         self.data = DataHolder(c)
         self.dataset_parameters = p
         if self.ds_loader is None:
-            self.ds_loader = DatasetLoader(self.data,  p)
+            self.ds_loader = DatasetLoader(self.data, p)
 
     def forward(self):
         raise NotImplementedError
@@ -280,9 +281,10 @@ class ARCH(nn.Module):
             [v.load_state_dict(checkpoint[f"{priv[k]}_state_dict"]) for k, v in self.module_topology.items()
              if f"{priv[k]}_state_dict" in checkpoint]
             [v.load_optimizer_state_dict(checkpoint[f"{priv[k]}_optim"]) for k, v in self.module_topology.items()
-             if f"{k}_optim" in checkpoint]
+             if f"{priv[k]}_optim" in checkpoint]
             [v.load_scheduler_state_dict(checkpoint[f"{priv[k]}_scheduler"]) for k, v in self.module_topology.items()
-             if f"{k}_scheduler" in checkpoint]
+             if f"{priv[k]}_scheduler" in checkpoint]
+
             print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']))
             if txt_file:
                 print("=> loaded checkpoint '{}' (epoch {})".format(path, checkpoint['epoch_index']), file=txt_file)

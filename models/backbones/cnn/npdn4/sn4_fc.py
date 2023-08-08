@@ -5,7 +5,7 @@ from easydict import EasyDict
 from torch.nn.functional import cosine_similarity
 
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
-from models.utilities.custom_loss import NPairMCLoss
+from models.utilities.custom_loss import NPairMCLoss, NPairAngularLoss
 from models.utilities.utils import DataHolder, weights_init_kaiming
 
 
@@ -32,7 +32,7 @@ class B_4L64F_MCNP(BaselineBackbone2d):
         self.require_grad = model_cfg.GRAD
 
         # norm_layer, use_bias = get_norm_layer(model_cfg.NORM)
-        self.output_shape = 2048
+        self.output_shape = 1024
         self.fc = nn.Sequential(nn.Flatten(start_dim=1),
                                 nn.Linear(64 * 21 * 21, self.output_shape))
         # freeze batchnorm layers
@@ -40,32 +40,30 @@ class B_4L64F_MCNP(BaselineBackbone2d):
         self.lr = model_cfg.LEARNING_RATE
         # self.features.apply(init_weights_kaiming)
         self.fc.apply(weights_init_kaiming)
-        self.criterion = NPairMCLoss().cuda()
+        self.criterion = NPairAngularLoss()
         del self.reg
 
     def forward(self):
         data = self.data
-        if data.is_training():
-            queries = data.snx_queries
+        queries = data.q_in
+        data.q_F = F.normalize(self.fc(self.features(queries)), p=2, dim=1)
+        support_sets = data.S_in
+        data.S_F = F.normalize(self.fc(self.features(support_sets)), p=2, dim=1)
+        data.sim_list = self._calc_cosine_similarities_support(data.q_F, data.S_F)
+        B, S = data.sim_list.shape
+        # sort similarities by positive and negative from data.sim_list
+        # Normalize the batch tensor column-wise so that the scores are within [-1, 1]
+        data.sim_list = F.softmax(data.sim_list, dim=1)
+        sim_list = data.sim_list
+        # Assuming you have a targets 1-d vector that specifies the index of the positive class
+        targets = data.q_targets
+        data.positives = sim_list[torch.arange(B), targets]
+        # Create a mask for negative scores
+        mask = torch.ones((B, S), dtype=torch.bool)
+        mask[torch.arange(B), targets] = 0
 
-            data.snx_query_f = F.normalize(self.fc(self.features(queries)), p=2, dim=1)
-            data.snx_positive_f = F.normalize(self.fc(self.features(self.data.positives)), p=2, dim=1)
-            # construct negatives out of positives for each class (N) so negatives = N-1
-            negatives = []
-            positives = data.snx_positive_f
-            for j in range(0, len(positives), data.get_qAV()):
-                mask = torch.tensor([i not in range(j, j + data.get_qAV()) for i in range(len(positives))])
-                for _ in range(data.get_qAV()):
-                    negatives.append(positives[mask])
-            self.data.snx_negative_f = torch.stack(negatives)
-            self.data.sim_list = None
-            return None
-        else:
-            queries = data.q_in
-            data.q_F = F.normalize(self.fc(self.features(queries)), p=2, dim=1)
-            support_sets = data.S_in
-            data.S_F = torch.stack([F.normalize(self.fc(self.features(s_cls)), p=2, dim=1) for s_cls in support_sets])
-            data.sim_list = self._calc_cosine_similarities_support(data.q_F, data.S_F)
+        # Get negative scores using the mask
+        data.negatives = sim_list[mask].view(B, S - 1)
         return data.sim_list
 
     def _calc_cosine_similarities_support(self, queries, support_sets):
@@ -94,7 +92,12 @@ class B_4L64F_MCNP(BaselineBackbone2d):
 
     def backward(self, *args, **kwargs):
         data = self.data
-        self.loss = self.criterion(data.snx_query_f, data.snx_positive_f, data.snx_negative_f, data.get_qAV())
+        self.loss = self.criterion(data.q_F,
+                                   data.S_F.view(len(data.S_F) // data.shot_num, data.shot_num, -1)[data.q_targets],
+                                   data.apn,
+                                   None,
+                                   data.positives,
+                                   data.negatives)
         self.optimizer.zero_grad()
         self.loss.backward()
         self.optimizer.step()
