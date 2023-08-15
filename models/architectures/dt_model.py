@@ -18,10 +18,9 @@ from models.interfaces.arch_module import ARCH
 from models.utilities.utils import DataHolder, config_exchange, AverageMeter
 
 
-class DEModel(ARCH):
+class CNNModel(ARCH):
     """
-    DEModel (Decision-Engine model)
-    Provides model building & decision-engine fitting functionality.
+    Provides model building functionalities
     Can be used as a generic model as well.
     """
     arch = 'Missing'
@@ -94,18 +93,18 @@ class DEModel(ARCH):
         end = time.time()
         self.data.training(False)
         with torch.no_grad():
-            for episode_index, (query_images, query_targets, _, support_images, support_targets) in enumerate(
+            for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                     val_loader):
 
                 # Convert query and support images
-                # query_images = torch.cat(query_images, 0)
-                input_var1 = query_images[0].cuda()
+                query_images = torch.cat(query_images, 0)
+                input_var1 = query_images.cuda()
 
                 input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
                 input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3),
                                                           input_var2.size(4))
                 # Deal with the targets
-                target = query_targets[0].cuda().long()
+                target = torch.cat(query_targets, 0).cuda()
 
                 self.data.q_CPU = query_images
                 self.data.q_in, self.data.S_in = input_var1, input_var2

@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from easydict import EasyDict
 from torch import optim, Tensor
+from torch.nn import init
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from models.backbones.base2d import BaseBackbone2d
@@ -64,9 +65,16 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
-        self.features.apply(weights_init_normal)
+        for m in self.modules():
+            if isinstance(m, nn.Conv1d):
+                init.normal_(m.weight.data, 0.0, 0.02)
+            elif isinstance(m, nn.Linear):
+                init.normal_(m.weight.data, 0.0, 0.02)
+            elif isinstance(m, nn.BatchNorm2d):
+                init.normal_(m.weight.data, 1.0, 0.02)
+                init.constant_(m.bias.data, 0.0)
         self.init_optimizer(model_cfg.OPTIMIZER, epochs=data.cfg.EPOCHS)
-        self.criterion = nn.CrossEntropyLoss(reduction='none').cuda()
+        self.criterion = nn.CrossEntropyLoss().cuda()
         self.reg = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda'), reg_lambda=0.1,
                               reg_alpha=0.3).cuda()
 
@@ -75,7 +83,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         data.q_F = self.features(data.q_in)
         data.S_F = self.features(data.S_in)
         qav_num, sav_num = (data.get_qv(), data.get_Sv()) if data.is_training() else (1, 1)
-        data.sim_list, _ = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
+        data.sim_list = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
                                             data.cfg.AUGMENTOR.STRATEGY if data.training else None,
                                             data.cfg.SHOT_NUM)
         self.data.output = data.sim_list
@@ -103,7 +111,7 @@ class BaselineBackbone2d(BaseBackbone2d):
             main_loss = lambda_val * main_loss + (1 - lambda_val) * permuted_loss
             main_loss = main_loss.mean()
         else:
-            main_loss = self.criterion(pred, gt).mean()
+            main_loss = self.criterion(pred, gt)
         # s_targets = torch.cat(
         #     [torch.full((data.S_F.size(0) // data.num_classes,), class_idx) for class_idx in data.S_targets.unique(sorted=True)])
         # center_loss = self.reg(data.S_F.view(data.S_F.size(0), -1), s_targets.cuda())
@@ -118,4 +126,4 @@ class BaselineBackbone2d(BaseBackbone2d):
 
     def calculate_loss(self, *args):
         pred, gt = args
-        return self.criterion(pred,gt).mean()
+        return self.criterion(pred,gt)

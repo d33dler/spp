@@ -267,25 +267,17 @@ class I2CBuilder(BatchFactory.AbstractBuilder):
             # load SUPPORT images, use the cached loader function
             support_dir = cls_subset['support_set']
             temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in support_dir]
-            if factory.strategy is None or factory.strategy == 'N:1':
-                temp_support = [factory.process_img(aug, temp_img).unsqueeze(0) for aug in S_augment for
-                                temp_img in temp_imgs]  # Use the cached loader function
-                support_images.append(torch.cat(temp_support, 0))
-            elif factory.strategy:
-                for av in range(factory.qav_num):
-                    support_images.append([factory.process_img(aug, img) for aug in S_augment for img in temp_imgs])
+
+            temp_support = [factory.process_img(aug, temp_img).unsqueeze(0) for aug in S_augment for
+                            temp_img in temp_imgs]  # Use the cached loader function
+            support_images.append(torch.cat(temp_support, 0))
 
             # read the label
             target = cls_subset['target']
             query_targets.extend(np.tile(target, len(query_dir)))
             support_targets.extend(np.tile(target, len(support_dir)))
 
-        query_targets = torch.Tensor(query_targets)
-        query_images = torch.stack(query_images)
-        permuted_targets = []
-        if factory.batch_transform is not None and factory.mode == 'train':
-            query_images, permuted_targets = factory.batch_transform(query_images, query_targets)
-        return query_images, query_targets, permuted_targets, support_images, support_targets
+        return query_images, query_targets, support_images, support_targets
 
 
 class NPairMCBuilder(BatchFactory.AbstractBuilder):

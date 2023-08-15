@@ -32,7 +32,7 @@ MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+#  before PyInstaller builds the exe, so as to inject date/tmp_configs infos into it.
 *.manifest
 *.spec
 
@@ -134,6 +134,7 @@ dmypy.json
 /dataset/StanfordDogs
 /dataset/*
 /results
+/tmp_configs
 *.pth.tar
 *.csv
 *.out

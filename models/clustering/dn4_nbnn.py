@@ -100,8 +100,7 @@ class I2C_KNN(nn.Module):
             plt.close(fig)
         exit(0)
 
-    def cosine_similarity(self, anchor: Tensor, support_set: Tensor, av_num: int = 1, **kwargs) -> tuple[
-        Tensor, Tensor]:
+    def cosine_similarity(self, anchor: Tensor, support_set: Tensor, av_num: int = 1, **kwargs) -> Tensor:
         """
         Compute cosine similarity between query and support set
         :param anchor: query tensor
@@ -127,8 +126,37 @@ class I2C_KNN(nn.Module):
         innerprod_mx = innerprod_mx.squeeze()
         innerprod_mx = innerprod_mx.view(B // av_num, av_num, innerprod_mx.size(1),
                                          self.classes, innerprod_mx.size(2) // self.classes)
-
+        # print("inner: ", innerprod_mx.size())
+        # innerprod_mx = self.rbf_kernel(innerprod_mx)
         apn = None
+        if kwargs.get('apn', False):
+            if av_num > 1:
+                raise 'AngularLoss APN not supported for multi AVs per sample'
+            # Compute Anchor+Positive to Negative similarity
+            targets = kwargs.get('targets')
+            shots = self.shots
+            positives = support_set.view(self.classes,
+                                         shots,
+                                         support_set.size(1),
+                                         support_set.size(2))[targets]
+            ap = anchor.unsqueeze(1) + positives
+            # l2 normalize
+
+            ap = ap / torch.norm(ap, 2, 3, True)
+            ap = ap.flatten(start_dim=1, end_dim=2)
+            # extract negative samples
+            support_negatives = self.extract_negative_samples(support_set, targets, self.classes, shots)
+            support_negatives = support_negatives.flatten(start_dim=1, end_dim=2).permute(0, 2, 1)
+
+            # compute inner product with negative samples
+            apn = torch.bmm(ap, support_negatives)
+            apn = apn.view(apn.size(0), apn.size(1), self.classes - 1 , apn.size(2) // (self.classes-1))
+            # print(apn.size())
+            # print('apn :', apn.size())
+            topk_apn_value, _ = torch.topk(apn, self.neighbor_k, -1)
+            # Compute image-to-class similarity
+            # print('topk:', topk_apn_value.size())
+            apn = torch.clamp(torch.sum(torch.sum(topk_apn_value, -1), -2), min=1e-8)
         # Choose the top-k nearest neighbors
         topk_value, _ = torch.topk(innerprod_mx, self.neighbor_k, -1)
         # Compute image-to-class similarity
@@ -136,7 +164,7 @@ class I2C_KNN(nn.Module):
         # Aggregate the similarity values of all augmented views of each query
         similarity_ls = self.aggregation(img2class_sim, dim=1) if img2class_sim.size(1) > 1 else img2class_sim.squeeze(
             1)
-        return similarity_ls, apn
+        return similarity_ls
 
     def extract_negative_samples(self, support_set, target_indices, L, S) -> Tensor:
         negative_samples_list = []
@@ -154,7 +182,7 @@ class I2C_KNN(nn.Module):
         return negative_samples_tensor
 
     def l2_norm(self, x: Tensor) -> Tensor:
-        x = x.view(x.size(0), x.size(1), -1).permute(0, 2, 1)
+        x = x.contiguous().view(x.size(0), x.size(1), -1).permute(0, 2, 1)
         x_norm = torch.norm(x, 2, 2, True)
         return x / x_norm
 

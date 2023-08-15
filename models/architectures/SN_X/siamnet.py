@@ -4,11 +4,11 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from models.architectures.dt_model import DEModel
+from models.architectures.dt_model import CNNModel
 from models.utilities.utils import AverageMeter, accuracy
 
 
-class SN_X(DEModel):
+class SN_X(CNNModel):
     """
     Siamese Network (4|7|X) Model
     Implements epoch run employing few-shot learning & performance tracking during training

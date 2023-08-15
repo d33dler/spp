@@ -25,7 +25,7 @@ from torchvision.transforms import transforms
 from data_loader.datasets_csv import BatchFactory
 from models import architectures
 from models.architectures.DN_X.dnx_arch import DN_X
-from models.architectures.dt_model import DEModel
+from models.architectures.dt_model import CNNModel
 from models.utilities.utils import AverageMeter, create_confusion_matrix
 
 sys.dont_write_bytecode = True
@@ -127,7 +127,7 @@ class ExperimentManager:
 
         # ============================================== Testing end ==========================================
 
-    def train(self, model: DEModel, F_txt):
+    def train(self, model: CNNModel, F_txt):
         best_prec1 = model.best_prec1
         # ======================================== Training phase ===============================================
         print('\n............Start training............\n')
@@ -242,30 +242,30 @@ def launch_job(args):
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--jobs', required=True, nargs='+', type=str, help='Paths(s) to the model config file(s)')
+    parser.add_argument('--jobs', default=None, nargs='+', type=str, help='Paths(s) to the model config file(s)')
+    parser.add_argument('--jobfile', default=None, type=str, help='File containing list for job arrays')
+    parser.add_argument('--job_id', default=None, type=int, help='job index in the array')
     parser.add_argument('--test', action='store_true', help='Run in test mode')
-    parser.add_argument('--parallel', action='store_true', help='Run in parallel mode')
     arguments = parser.parse_args()
     print(arguments.jobs)
     proc_ls = []
-    if arguments.parallel:
-        for a in arguments.jobs:
-            with open(a, 'r') as f:
-                job_args = (EasyDict(yaml.load(f, Loader=yaml.SafeLoader)),)
-                job_args[0].PATH = a
-                job_args[0].MODE = 'train' if not arguments.test else 'test'
-                p = Process(target=launch_job, args=job_args, daemon=False)
-                p.start()
-                proc_ls.append(p)
-        while 1:
-            time.sleep(10)
-            if all([not p.is_alive() for p in proc_ls]):
-                break
-    else:
+    if arguments.jobs is not None:
         for a in arguments.jobs:
             with open(a, 'r') as f:
                 job_args = EasyDict(yaml.load(f, Loader=yaml.SafeLoader))
                 job_args.PATH = a
                 job_args.MODE = 'train' if not arguments.test else 'test'
                 launch_job(job_args)
+    elif arguments.jobfile is not None:
+        with open(arguments.jobfile, 'r') as f:
+            job_args = EasyDict(yaml.load(f, Loader=yaml.SafeLoader))
+            job_array = job_args.ARRAY
+            job_cfg = job_array[arguments.job_id - 1]
+            job_cfg = os.path.join("../models/architectures/configs/", job_cfg)
+            with open(job_cfg, 'r') as cfgfile:
+                job_args = EasyDict(yaml.load(cfgfile, Loader=yaml.SafeLoader))
+                job_args.PATH = job_cfg
+                job_args.MODE = 'train' if not arguments.test else 'test'
+                launch_job(job_args)
+
 

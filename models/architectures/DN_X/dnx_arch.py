@@ -3,11 +3,11 @@ from pathlib import Path
 
 import torch
 
-from models.architectures.dt_model import DEModel
+from models.architectures.dt_model import CNNModel
 from models.utilities.utils import AverageMeter, accuracy
 
 
-class DN_X(DEModel):
+class DN_X(CNNModel):
     """
     DN_X (4|7|X) Model
     Implements epoch run employing few-shot learning & performance tracking during training
@@ -45,23 +45,22 @@ class DN_X(DEModel):
         end = time.time()
         epochix = self.get_epoch()
 
-        for episode_index, (query_images, query_targets, query_permuted, support_images, support_targets) in enumerate(
+        for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                 train_loader):
             # Measure data loading time
             data_time.update(time.time() - end)
             # Convert query and support images
-
-            input_var1 = query_images[0].cuda()
-            self.data.q_permuted_targets = query_permuted[0].long().cuda() if len(query_permuted) != 0 else None
+            query_images = torch.cat(query_images, 0)
+            input_var1 = query_images.cuda()
 
             input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
             input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3), input_var2.size(4))
             # Deal with the targets
-            target = query_targets[0].long().cuda()
-
+            target = torch.cat(query_targets, 0).cuda()
+            self.data.q_permuted_targets =  None
             self.data.q_targets = target
             self.data.S_targets = torch.cat(support_targets, 0).cuda()
-            self.data.q_CPU = query_images[0]
+            self.data.q_CPU = query_images
             self.data.q_in = input_var1
             self.data.S_in = input_var2
 
