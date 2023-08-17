@@ -8,6 +8,7 @@
 #SBATCH --array=1-12
 module load Python/3.10.4-GCCcore-11.3.0
 
+cd ..
 source venv/bin/activate
 cd executables
 ulimit -n 2048

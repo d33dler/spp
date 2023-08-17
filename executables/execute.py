@@ -260,7 +260,10 @@ if __name__ == '__main__':
         with open(arguments.jobfile, 'r') as f:
             job_args = EasyDict(yaml.load(f, Loader=yaml.SafeLoader))
             job_array = job_args.ARRAY
-            job_cfg = job_array[arguments.job_id - 1]
+            try:
+                job_cfg = job_array[arguments.job_id - 1]
+            except Exception:
+                exit(0)
             job_cfg = os.path.join("../models/architectures/configs/", job_cfg)
             with open(job_cfg, 'r') as cfgfile:
                 job_args = EasyDict(yaml.load(cfgfile, Loader=yaml.SafeLoader))

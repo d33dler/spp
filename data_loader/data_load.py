@@ -4,7 +4,6 @@ import dataclasses
 from typing import Union
 
 from kornia.augmentation import RandomJigsaw, RandomGaussianNoise
-from kornia.augmentation._2d import RandomCutMixV2
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
@@ -12,7 +11,6 @@ from torch.utils.data import DataLoader
 from data_loader.datasets_csv import BatchFactory
 from models.utilities.data_augmentation import CutMix
 from models.utilities.utils import DataHolder
-from torchtoolbox.transform import Cutout
 
 """
 Augmentation functions mappings that involve simple image transformations
@@ -38,7 +36,6 @@ TRANSFORM_MAP = {
     "AUTO_AUGMENT": transforms.AutoAugment,
     "RAND_AUGMENT": transforms.RandAugment,
     "TRIVIAL_AUGMENT": transforms.TrivialAugmentWide,
-    "CUTOUT": Cutout,
     "JIGSAW": RandomJigsaw,
 }
 """
