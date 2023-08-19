@@ -9,7 +9,6 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 from data_loader.datasets_csv import BatchFactory
-from models.utilities.data_augmentation import CutMix
 from models.utilities.utils import DataHolder
 
 """
@@ -37,12 +36,6 @@ TRANSFORM_MAP = {
     "RAND_AUGMENT": transforms.RandAugment,
     "TRIVIAL_AUGMENT": transforms.TrivialAugmentWide,
     "JIGSAW": RandomJigsaw,
-}
-"""
-Augmentation functions mappings that involve complex image transformations with label mixing/interpolation/combination
-"""
-BATCH_TRANSFORMS = {
-    "CUTMIX": CutMix
 }
 
 
@@ -105,18 +98,6 @@ class DatasetLoader:
                 s_transforms.append(_t)
         return q_transform_ls, s_transforms
 
-    def _read_batch_transforms(self, cfg, TF):
-        if TF.NAME in cfg.DISABLE:
-            return None
-        _t = BATCH_TRANSFORMS[TF.NAME]
-        if TF.ARGS:
-            if isinstance(TF.ARGS, dict):
-                return _t(**TF.ARGS)
-            else:
-                return _t(*tuple(TF.ARGS))
-        else:
-            return _t()
-
 
     def load_data(self, mode, dataset_directory, F_txt):
         self.data.reset()
@@ -136,8 +117,6 @@ class DatasetLoader:
         pre_process, _ = self._read_transforms(cfg_aug, cfg_aug.PRE_PROCESS)
         Q_augmentation, S_augmentation = self._read_transforms(cfg_aug, cfg_aug.AUGMENTATION)
         post_process, _ = self._read_transforms(cfg_aug, cfg_aug.POST_PROCESS)
-        batch_transform = self._read_batch_transforms(cfg_aug, cfg_aug.BATCH_AUGMENTATION) \
-            if cfg_aug.get('BATCH_AUGMENTATION', None) is not None else None
         aug_num = cfg_aug.AUG_NUM
         strategy = cfg_aug.STRATEGY
         eval_pre_process = [
@@ -154,7 +133,6 @@ class DatasetLoader:
                 Q_augmentations=Q_augmentation,
                 S_augmentations=S_augmentation,
                 post_process=post_process,
-                batch_transform=batch_transform,
                 episode_num=episode_train_num, way_num=way_num, shot_num=shot_num, query_num=query_num,  # batching
                 qav_num=data.qv, sav_num=data.sv, aug_num=aug_num, strategy=strategy, use_identity=cfg_aug.USE_IDENTITY,
                 is_random_aug=cfg_aug.RANDOM_AUGMENT)  # augmentation

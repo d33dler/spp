@@ -4,6 +4,7 @@ import torch
 
 from models.backbones.base2d import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
+from models.clustering.dn4_nbnn import I2C_KNN_AM
 from models.utilities.utils import DataHolder, weights_init_kaiming
 
 torch.set_printoptions(profile="full")
@@ -31,18 +32,10 @@ class DN4_AM(BaselineBackbone2d):
         super().__init__(data)
         norm_layer = self.norm_layer
         self.output_channels = 64
-        # self.features.append(nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-        #                                    norm_layer(64),
-        #                                    nn.LeakyReLU(0.2, True),
-        #
-        #                                    nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
-        #                                    norm_layer(64),
-        #                                    nn.LeakyReLU(0.2, True)))
-        self.features.apply(weights_init_kaiming)
-        # self.post_norm = nn.Sequential(norm_layer(64), nn.LeakyReLU(0.2, True))
-        # self.attention.apply(weights_init_kaiming)
 
-        # self.knn = I2C_KNN_AM(self.knn.neighbor_k, _attention_func=attention)
+        self.attention.apply(weights_init_kaiming)
+        self.attention = None
+        self.knn = I2C_KNN_AM(self.knn.neighbor_k, _attention_func=self.attention)
 
         del self.reg  # = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda'), reg_lambda=0.1, reg_alpha=0.3).cuda()
 

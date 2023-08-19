@@ -4,6 +4,7 @@ from pathlib import Path
 import torch
 
 from models.architectures.dt_model import CNNModel
+from models.utilities.data_augmentation import read_batch_transform
 from models.utilities.utils import AverageMeter, accuracy
 
 
@@ -24,6 +25,7 @@ class DN_X(CNNModel):
         :type cfg_path: Path | str
         """
         super().__init__(cfg_path)
+        self.batch_augment = read_batch_transform(self.root_cfg.get("BATCH_AUGMENT", None))
 
     def forward(self):
         self.BACKBONE.forward()
@@ -49,15 +51,34 @@ class DN_X(CNNModel):
                 train_loader):
             # Measure data loading time
             data_time.update(time.time() - end)
+
             # Convert query and support images
             query_images = torch.cat(query_images, 0)
-            input_var1 = query_images.cuda()
+
 
             input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
             input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3), input_var2.size(4))
             # Deal with the targets
             target = torch.cat(query_targets, 0).cuda()
-            self.data.q_permuted_targets =  None
+
+            query_num = self.data.cfg.QUERY_NUM * self.data.qv
+            B = query_images.size(0)
+
+            permuted_targets = torch.zeros((len(target), 3), dtype=torch.float).cuda()
+            target_indices = torch.arange(0, self.data.cfg.WAY_NUM, dtype=torch.float).cuda()
+            if self.batch_augment is not None:
+                for i in range(0, query_num, self.data.qv):
+                    cutmix_indices = torch.arange(i, B, query_num)
+                    cutmix_query_images = query_images[cutmix_indices]
+                    query_images[cutmix_indices], permuted_targets[cutmix_indices // self.data.qv] = \
+                        self.batch_augment(cutmix_query_images, target_indices)
+                self.data.q_permuted_targets = permuted_targets
+
+            else:
+                self.data.q_permuted_targets = None
+
+            input_var1 = query_images.cuda()
+
             self.data.q_targets = target
             self.data.S_targets = torch.cat(support_targets, 0).cuda()
             self.data.q_CPU = query_images

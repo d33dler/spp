@@ -84,8 +84,8 @@ class BaselineBackbone2d(BaseBackbone2d):
         data.S_F = self.features(data.S_in)
         qav_num, sav_num = (data.get_qv(), data.get_Sv()) if data.is_training() else (1, 1)
         data.sim_list = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
-                                            data.cfg.AUGMENTOR.STRATEGY if data.training else None,
-                                            data.cfg.SHOT_NUM)
+                                         data.cfg.AUGMENTOR.STRATEGY if data.training else None,
+                                         data.cfg.SHOT_NUM)
         self.data.output = data.sim_list
         return data
 
@@ -106,7 +106,9 @@ class BaselineBackbone2d(BaseBackbone2d):
         if data.q_permuted_targets is not None:
             main_loss = self.criterion(pred, gt)
             permuted_gt = data.q_permuted_targets[:, 1].long()
-            lambda_val = data.q_permuted_targets[:, 2]
+            lambda_val: Tensor = data.q_permuted_targets[:, 2]
+            if data.qv > 1:  # assumes usage of geometric mean
+                lambda_val = lambda_val.pow(1 / data.qv)
             permuted_loss = self.criterion(pred, permuted_gt)
             main_loss = lambda_val * main_loss + (1 - lambda_val) * permuted_loss
             main_loss = main_loss.mean()
@@ -126,4 +128,4 @@ class BaselineBackbone2d(BaseBackbone2d):
 
     def calculate_loss(self, *args):
         pred, gt = args
-        return self.criterion(pred,gt)
+        return self.criterion(pred, gt)

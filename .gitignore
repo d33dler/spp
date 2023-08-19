@@ -130,7 +130,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/dataset/miniImageNet/
+/dataset/miniImagenet/
 /dataset/StanfordDogs
 /dataset/*
 /results

@@ -45,7 +45,7 @@ def find_classes(dir):
 
 class BatchFactory(Dataset):
     """
-       Imagefolder for miniImageNet--ravi, StanfordDog, StanfordCar and CubBird datasets.
+       Imagefolder for miniImagenet--ravi, StanfordDog, StanfordCar and CubBird datasets.
        Images are stored in the folder of "images";
        Indexes are stored in the CSV files.
     """
@@ -69,7 +69,7 @@ class BatchFactory(Dataset):
                  Q_augmentations: List[nn.Module] = None,
                  S_augmentations: List[nn.Module] = None,
                  post_process: List[nn.Module] = None,
-                 batch_transform: nn.Module = None,
+                 batch_transform: bool = False,
                  loader=None,
                  _gray_loader=None,
                  episode_num=10000,
@@ -141,7 +141,7 @@ class BatchFactory(Dataset):
         self.data_list = data_list
         self.pre_process = identity if pre_process is None else T.Compose(pre_process)
         self.post_process = identity if post_process is None else T.Compose(post_process)
-        self.batch_transform = None if batch_transform is None else batch_transform
+        self.batch_transform =  batch_transform
         self.Q_augmentations = Q_augmentations
         self.S_augmentations = Q_augmentations if S_augmentations is None else S_augmentations
         self.qav_num = qav_num
@@ -222,7 +222,7 @@ class I2CBuilder(BatchFactory.AbstractBuilder):
         print(f"Support AV ({factory.mode}) : ", factory.sav_num, "(Total: ", factory.sv, ")",
               f"[ AUGMENT : {'✅ ' + '{' + '->'.join([t.__class__.__name__ for t in self.factory.S_augmentations]) + '}' if factory.use_S_augmentation else '❌'} ]")
         print(
-            f"Batch [ AUGMENT : {'✅ ' + '{' + self.factory.batch_transform.__class__.__name__ + '}' if factory.batch_transform else '❌'} ]")
+            f"Batch [ AUGMENT : {'✅ ' if factory.batch_transform else '❌'} ]")
         print("USE IDENTITY : ", factory.use_identity)
         print("===========================================")
 
