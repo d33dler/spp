@@ -64,9 +64,9 @@ class DN_X(CNNModel):
             query_num = self.data.cfg.QUERY_NUM * self.data.qv
             B = query_images.size(0)
 
-            permuted_targets = torch.zeros((len(target), 3), dtype=torch.float).cuda()
-            target_indices = torch.arange(0, self.data.cfg.WAY_NUM, dtype=torch.float).cuda()
             if self.batch_augment is not None:
+                permuted_targets = torch.zeros((len(target), 3), dtype=torch.float).cuda()
+                target_indices = torch.arange(0, self.data.cfg.WAY_NUM, dtype=torch.float).cuda()
                 for i in range(0, query_num, self.data.qv):
                     cutmix_indices = torch.arange(i, B, query_num)
                     cutmix_query_images = query_images[cutmix_indices]
