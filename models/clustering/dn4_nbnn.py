@@ -100,7 +100,7 @@ class I2C_KNN(nn.Module):
             plt.close(fig)
         exit(0)
 
-    def cosine_similarity(self, anchor: Tensor, support_set: Tensor, av_num: int = 1, **kwargs) -> Tensor:
+    def cosine_similarity(self, anchor: Tensor, support_set: Tensor, av_num: int = 1, sav_num: int= 1, strategy=None, **kwargs) -> Tensor:
         """
         Compute cosine similarity between query and support set
         :param anchor: query tensor
@@ -141,7 +141,6 @@ class I2C_KNN(nn.Module):
                                          support_set.size(2))[targets]
             ap = anchor.unsqueeze(1) + positives
             # l2 normalize
-
             ap = ap / torch.norm(ap, 2, 3, True)
             ap = ap.flatten(start_dim=1, end_dim=2)
             # extract negative samples
@@ -158,9 +157,16 @@ class I2C_KNN(nn.Module):
             # print('topk:', topk_apn_value.size())
             apn = torch.clamp(torch.sum(torch.sum(topk_apn_value, -1), -2), min=1e-8)
         # Choose the top-k nearest neighbors
-        topk_value, _ = torch.topk(innerprod_mx, self.neighbor_k, -1)
-        # Compute image-to-class similarity
-        img2class_sim = self._compute_img2class_sim(topk_value, **kwargs)
+        if strategy == 'N:N' and sav_num > 1:
+            B, AV, HW, L, C = innerprod_mx.size()
+            topk_value, _ = torch.topk(innerprod_mx.reshape( B, AV, HW, L, sav_num, C // sav_num), self.neighbor_k, -1)
+            img2class_sim = torch.sum(torch.sum(topk_value, -1), -3)
+            img2class_sim = torch.clamp(img2class_sim, min=1e-8)
+            img2class_sim = self.aggregation(img2class_sim, dim=-1)
+        else:
+            topk_value, _ = torch.topk(innerprod_mx, self.neighbor_k, -1)
+            # Compute image-to-class similarity
+            img2class_sim = self._compute_img2class_sim(topk_value, **kwargs)
         # Aggregate the similarity values of all augmented views of each query
         similarity_ls = self.aggregation(img2class_sim, dim=1) if img2class_sim.size(1) > 1 else img2class_sim.squeeze(
             1)
@@ -268,7 +274,7 @@ class I2C_KNN(nn.Module):
         strategy = strategy if strategy is not None else 'N:1'
         self.shots = shot_num
         self.classes = len(S) // (SAV_num * shot_num)
-        return self.cosine_similarity(q, S, av_num, **kwargs)
+        return self.cosine_similarity(q, S, av_num, SAV_num, strategy=strategy, **kwargs)
 
 
 class I2C_KNN_AM(I2C_KNN):
