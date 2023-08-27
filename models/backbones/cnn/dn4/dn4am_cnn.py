@@ -2,10 +2,11 @@ from dataclasses import field
 
 import torch
 
+from models.attention.squeeze_excite.se_module import ClassRelatedAttentionModule
 from models.backbones.base2d import BaseBackbone2d
 from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
 from models.clustering.dn4_nbnn import I2C_KNN_AM
-from models.utilities.utils import DataHolder, weights_init_kaiming
+from models.utilities.utils import DataHolder
 
 torch.set_printoptions(profile="full")
 
@@ -30,27 +31,19 @@ class DN4_AM(BaselineBackbone2d):
 
     def __init__(self, data: DataHolder):
         super().__init__(data)
-        norm_layer = self.norm_layer
-        self.output_channels = 64
-
-        self.attention.apply(weights_init_kaiming)
-        self.attention = None
+        self.attention = ClassRelatedAttentionModule(in_channels=64)
         self.knn = I2C_KNN_AM(self.knn.neighbor_k, _attention_func=self.attention)
 
-        del self.reg  # = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda'), reg_lambda=0.1, reg_alpha=0.3).cuda()
+        del self.reg
 
     def forward(self):
         data = self.data
-        x = self.features(data.q_in)
+        data.q_F = self.features(data.q_in)
         data.S_F = self.features(data.S_in)
-        b, c, h, w = x.size()
-        x = x.view(b, c, h * w).permute(2, 0, 1)  # reshape and permute to match the expected input shape
-        attn_output = self.attention(x, x, x)  # use the feature map as query, key and value
-        data.q_F = attn_output.permute(1, 2, 0).view(b, c, h, w)  # permute and reshape back to original shape
-
+        attention_map = self.attention(data.q_F)
         qav_num, sav_num = (data.get_qv(), data.get_Sv()) if data.is_training() else (1, 1)
         data.sim_list = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
                                          data.cfg.AUGMENTOR.STRATEGY if data.training else None,
-                                         data.cfg.SHOT_NUM)
+                                         data.cfg.SHOT_NUM, attention_map=attention_map)
         self.data.output = data.sim_list
         return data

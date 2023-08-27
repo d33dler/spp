@@ -291,16 +291,17 @@ class I2C_KNN_AM(I2C_KNN):
         """
         x = kwargs['x']
         av = kwargs['av']
-        att_x = self._attention_func(x).flatten(start_dim=2)  # (B * AV, 1, H, W)
+        att_x = kwargs['attention_map']  # (B * AV, 1, H, W)
+        att_x = att_x.reshape(-1, att_x.size(2)* att_x.size(3), 1) # (B * AV, H, W, 1)
         if self.neighbor_k == 1:
             img2class_sim = topk_value
         else:
             img2class_sim = torch.sum(topk_value, -1)  # (B, AV, HW, L)
-
         img2class_sim = img2class_sim.reshape(-1, img2class_sim.size(2), img2class_sim.size(3))  # (B * AV, HW, L)
-        img2class_sim = torch.bmm(att_x, img2class_sim)  # (B * AV, 1, L)
+        img2class_sim = torch.sum(att_x * img2class_sim, -2)  # (B * AV, 1, L)
+        # print(img2class_sim.size())
 
-        img2class_sim = img2class_sim.reshape(-1, av, img2class_sim.size(2))
+        img2class_sim = img2class_sim.reshape(-1, av, img2class_sim.size(1))
         return img2class_sim
 
     def forward(self, q, S, av_num=1, SAV_num=1, strategy='N:1', shot_num=1, **kwargs):

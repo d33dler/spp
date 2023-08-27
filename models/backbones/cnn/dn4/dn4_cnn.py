@@ -2,15 +2,12 @@ from dataclasses import field
 
 import torch
 import torch.nn as nn
-from easydict import EasyDict
-from torch import optim, Tensor
-from torch.nn import init
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch import Tensor
 
 from models.backbones.base2d import BaseBackbone2d
 from models.clustering.dn4_nbnn import I2C_KNN
 from models.utilities.custom_loss import CenterLoss
-from models.utilities.utils import DataHolder, get_norm_layer, weights_init_kaiming, weights_init_normal
+from models.utilities.utils import DataHolder, get_norm_layer, net_init_weights_normal
 
 
 ##############################################################################
@@ -65,14 +62,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         self.FREEZE_LAYERS = [(self.features, [1, 5, 9, 12])]
         self.FREEZE_EPOCH = model_cfg.FREEZE_EPOCH
         self.lr = model_cfg.LEARNING_RATE
-        for m in self.modules():
-            if isinstance(m, nn.Conv1d):
-                init.normal_(m.weight.data, 0.0, 0.02)
-            elif isinstance(m, nn.Linear):
-                init.normal_(m.weight.data, 0.0, 0.02)
-            elif isinstance(m, nn.BatchNorm2d):
-                init.normal_(m.weight.data, 1.0, 0.02)
-                init.constant_(m.bias.data, 0.0)
+        net_init_weights_normal(self)
         self.init_optimizer(model_cfg.OPTIMIZER, epochs=data.cfg.EPOCHS)
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.reg = CenterLoss(data.num_classes, 64 * 21 * 21, torch.device('cuda'), reg_lambda=0.1,

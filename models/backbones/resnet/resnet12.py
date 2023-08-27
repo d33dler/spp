@@ -20,8 +20,6 @@ from models.backbones.cnn.dn4.dn4_cnn import BaselineBackbone2d
 # Filters: 64->x->x->x
 
 
-
-
 class ResNetBackbone2d(BaselineBackbone2d):
     class Config(BaseBackbone2d.RemoteYamlConfig):
         FILE_PATH = __file__  # mandatory

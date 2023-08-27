@@ -228,6 +228,15 @@ def accuracy(output, target, topk=(1,)):
         return res
 
 
+def net_init_weights_normal(net: nn.Module):
+    for m in net.modules():
+        if isinstance(m, nn.Conv1d):
+            init.normal_(m.weight.data, 0.0, 0.02)
+        elif isinstance(m, nn.Linear):
+            init.normal_(m.weight.data, 0.0, 0.02)
+        elif isinstance(m, nn.BatchNorm2d):
+            init.normal_(m.weight.data, 1.0, 0.02)
+            init.constant_(m.bias.data, 0.0)
 def weights_init_normal(m):
     classname = m.__class__.__name__
     # print(classname)
