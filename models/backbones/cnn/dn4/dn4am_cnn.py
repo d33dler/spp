@@ -31,8 +31,8 @@ class DN4_AM(BaselineBackbone2d):
 
     def __init__(self, data: DataHolder):
         super().__init__(data)
-        self.attention = ClassRelatedAttentionModule(in_channels=64)
-        self.knn = I2C_KNN_AM(self.knn.neighbor_k, _attention_func=self.attention)
+        self.attention = ClassRelatedAttentionModule(in_channels=64, reduction=data.cfg.BACKBONE.SE_REDUCTION)
+        self.knn = I2C_KNN_AM(self.knn.neighbor_k)
 
         del self.reg
 

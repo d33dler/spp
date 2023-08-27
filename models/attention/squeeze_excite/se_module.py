@@ -53,11 +53,10 @@ class ClassRelatedAttentionModule(nn.Module):
         fk = F.softmax(fk.view(b, self.in_channels // self.reduction, -1), dim=-1).view(b,
                                                                                         self.in_channels // self.reduction,
                                                                                         h, w)
-        print(fg.shape, fk.shape)
+
         non_local_op = fg * fk
-        print(non_local_op.shape)
+
         non_local_op = non_local_op.sum(dim=[2, 3])
-        print(non_local_op.shape)
         # Excitation operation
         y = self.fc1(non_local_op.unsqueeze(-1).unsqueeze(-1))
         y = self.relu(y)

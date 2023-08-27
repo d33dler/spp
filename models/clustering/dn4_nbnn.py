@@ -279,9 +279,8 @@ class I2C_KNN(nn.Module):
 
 class I2C_KNN_AM(I2C_KNN):
 
-    def __init__(self, neighbor_k, classes=5, _attention_func=None):
+    def __init__(self, neighbor_k, classes=5):
         super().__init__(neighbor_k, classes)
-        self._attention_func = _attention_func
 
     def _compute_img2class_sim(self, topk_value, **kwargs):
         """

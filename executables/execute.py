@@ -133,7 +133,7 @@ class ExperimentManager:
         print('\n............Start training............\n')
         epoch = model.get_epoch()
 
-        for epoch_index in range(epoch, epoch + self._args.EPOCHS):
+        for epoch_index in range(epoch, self._args.EPOCHS):
             print('===================================== Epoch %d =====================================' % epoch_index)
             F_txt.write(
                 '===================================== Epoch %d =====================================\n' % epoch_index)
