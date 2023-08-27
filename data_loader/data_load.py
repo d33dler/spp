@@ -33,7 +33,7 @@ TRANSFORM_MAP = {
     "NORMALIZE": transforms.Normalize,
     "GAUSSIAN_BLUR": transforms.GaussianBlur,
     "AUTO_AUGMENT": transforms.AutoAugment,
-    "RAND_AUGMENT": transforms.RandAugment,
+    "RANDOM_AUGMENT": transforms.RandAugment,
     "TRIVIAL_AUGMENT": transforms.TrivialAugmentWide,
     "JIGSAW": RandomJigsaw,
 }

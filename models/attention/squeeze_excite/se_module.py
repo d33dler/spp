@@ -13,17 +13,22 @@ class ClassRelatedAttentionModule(nn.Module):
         super(ClassRelatedAttentionModule, self).__init__()
         self.in_channels = in_channels
         self.reduction = reduction
-        self.conv_Wg = nn.Conv2d(in_channels, in_channels // reduction, kernel_size=1,
-                                 bias=False)  # no reduction in paper (CC x H x W)
-        self.conv_Wk = nn.Conv2d(in_channels, in_channels // reduction, kernel_size=1,
-                                 bias=False)  # reduction in paper to ( 1 x H x W)
-        self.fc1 = nn.Conv2d(in_channels // reduction, in_channels // reduction, kernel_size=1,
-                             bias=False)  # input in paper = (CC x H x W)
-        self.relu = nn.ReLU(inplace=True)
-        self.fc2 = nn.Conv2d(in_channels // reduction, in_channels, kernel_size=1, bias=False)
-        self.sigmoid = nn.Sigmoid()
-        net_init_weights_normal(self)
 
+        # Convolutional layers
+        self.conv_Wg = nn.Conv2d(in_channels, in_channels // reduction, kernel_size=1, bias=False)
+        self.conv_Wk = nn.Conv2d(in_channels, in_channels // reduction, kernel_size=1, bias=False)
+
+        # Batch normalization layers
+        self.bn_Wg = nn.BatchNorm2d(in_channels // reduction)
+        self.bn_Wk = nn.BatchNorm2d(in_channels // reduction)
+
+        # Fully connected layers for excitation operation
+        self.fc1 = nn.Conv2d(in_channels // reduction, in_channels // reduction, kernel_size=1, bias=False)
+        self.fc2 = nn.Conv2d(in_channels // reduction, in_channels, kernel_size=1, bias=False)
+
+        # Activation and sigmoid
+        self.relu = nn.ReLU(inplace=True)
+        self.sigmoid = nn.Sigmoid()
 
     def save_attention_map_as_image(self, attention_masks, save_dir="attention_maps"):
         """
@@ -45,31 +50,35 @@ class ClassRelatedAttentionModule(nn.Module):
 
             # Save the image
             plt.imsave(os.path.join(save_dir, f"attention_map_{idx}.png"), img)
+
     def forward(self, x):
         b, c, h, w = x.size()
-        # Non-local operation
-        fg = self.conv_Wg(x)
-        fk = self.conv_Wk(x)
-        fk = F.softmax(fk.view(b, self.in_channels // self.reduction, -1), dim=-1).view(b,
-                                                                                        self.in_channels // self.reduction,
-                                                                                        h, w)
+
+        # Non-local operation with batch normalization
+        fg = self.bn_Wg(self.conv_Wg(x))
+        fk = self.bn_Wk(self.conv_Wk(x))
+
+        # Softmax normalization over the channel dimension
+        fk = F.softmax(fk.view(b, self.in_channels // self.reduction, -1), dim=1).view(b,
+                                                                                       self.in_channels // self.reduction,
+                                                                                       h, w)
 
         non_local_op = fg * fk
-
         non_local_op = non_local_op.sum(dim=[2, 3])
+
         # Excitation operation
         y = self.fc1(non_local_op.unsqueeze(-1).unsqueeze(-1))
         y = self.relu(y)
         y = self.fc2(y)
         y = self.sigmoid(y)
 
-        # Apply the weight vector to the input feature map
-        y = torch.round(y)
-        weighted_x = x * y
+        # Residual connection
+        weighted_x = x + x * y
 
         # Sum the features of the scene-related channels
         scene_related_features = weighted_x.sum(dim=1, keepdim=True)
+
         # Obtain the scene-class-related attention feature map
         attention_feature_map = self.sigmoid(scene_related_features)
-        # self.save_attention_map_as_image(attention_feature_map.detach().cpu().numpy(), 'tmp/attention_maps/')
+
         return attention_feature_map

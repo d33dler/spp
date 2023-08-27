@@ -2,8 +2,7 @@ ARCH: DN_X
 AUGMENTOR:
   AGGREGATION: gmean
   AUGMENTATION:
-  - ARGS:
-    - 84
+  - ARGS: []
     NAME: RANDOM_AUGMENT
   AUG_NUM: 1
   DISABLE: []
