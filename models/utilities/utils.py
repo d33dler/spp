@@ -1,8 +1,10 @@
+
 from __future__ import print_function, annotations
 
 import dataclasses
 import functools
 import gc
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Any
@@ -17,7 +19,7 @@ from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, Confu
 from torch import Tensor, nn as nn
 from torch.nn import BatchNorm2d, init
 import seaborn as sns
-
+from torch.nn import functional as F
 """
 General utilities
 """
@@ -98,7 +100,7 @@ class DataHolder(DataHolderBase):
     # Classification
     num_classes: int
     # ======== DNX ==========
-    q_in_CPU: Tensor
+    q_CPU: Tensor
     q_in: Tensor
     S_in: Tensor
     q_targets: Tensor
@@ -237,6 +239,8 @@ def net_init_weights_normal(net: nn.Module):
         elif isinstance(m, nn.BatchNorm2d):
             init.normal_(m.weight.data, 1.0, 0.02)
             init.constant_(m.bias.data, 0.0)
+
+
 def weights_init_normal(m):
     classname = m.__class__.__name__
     # print(classname)
@@ -334,13 +338,6 @@ def identity(x):
     return x
 
 
-def geometric_mean(t: Tensor) -> Tensor:
-    log_tensor = torch.log(t)
-    mean = torch.mean(log_tensor, dim=0, keepdim=True)
-    geom_mean = torch.exp(mean)
-    return geom_mean
-
-
 def deep_convert_easydict(layer):
     to_ret = layer
     if isinstance(layer, EasyDict):
@@ -353,3 +350,41 @@ def deep_convert_easydict(layer):
         pass
 
     return to_ret
+
+
+
+
+
+def save_attention_map_as_image(source_images: torch.Tensor, attention_masks: torch.Tensor, save_dir="attention_maps"):
+    """
+    Save a batch of attention maps as images.
+
+    :param source_images: torch tensor of shape (B, 3, H, W)
+    :param attention_masks: torch tensor of shape (B, 1, H/4, W/4)
+    :param save_dir: directory to save the attention maps
+    """
+    # Ensure the save directory exists
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    # Resize the attention masks to match the source image size
+    attention_masks = F.interpolate(attention_masks, size=source_images.shape[2:], mode='bilinear', align_corners=False)
+
+    # Normalize the attention masks to range between 0 and 1
+    attention_masks = (attention_masks - attention_masks.min()) / (attention_masks.max() - attention_masks.min())
+
+    for idx, (img, mask) in enumerate(zip(source_images, attention_masks)):
+        # Convert tensors to numpy arrays
+        img = img.permute(1, 2, 0).numpy()
+        mask = mask.squeeze().numpy()
+
+        # Use the 'cool' colormap to get colors ranging from blue to red
+        color_map = plt.cm.viridis(mask)
+
+        # Overlay the colored mask on the source image using the mask values as alpha values
+        overlay = img + (color_map[:, :, :3] - img) * mask[..., np.newaxis]
+        overlay = np.clip(overlay, 0, 1)  # Ensure values are within [0, 1]
+
+        # Save the image
+        plt.imsave(os.path.join(save_dir, f"attention_map_{idx}.png"), overlay)
+
