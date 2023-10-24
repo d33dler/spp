@@ -9,13 +9,14 @@ from pandas import DataFrame
 from sklearn.preprocessing import StandardScaler
 from torch import Tensor
 from torch.nn import Parameter
-from torch.utils.data import DataLoader as TorchDataLoader
+from torch.utils.data import DataLoader as TorchDataLoader, DataLoader
 
 from models import backbones, de_heads, necks
 from models.de_heads.dengine import DecisionEngine
 from models.de_heads.dtree import DTree
 from models.interfaces.arch_module import ARCH
 from models.utilities.utils import DataHolder, config_exchange, AverageMeter
+from plot_thesis import visualize_embeddings
 
 
 class CNNModel(ARCH):
@@ -81,7 +82,7 @@ class CNNModel(ARCH):
             if 'DE' in checkpoint and 'DE' in self.root_cfg:
                 self.DE.load(checkpoint['DE'])
 
-    def validate(self, val_loader, best_prec1, F_txt, store_output=False, store_target=False):
+    def validate(self, val_loader: DataLoader, best_prec1: float, F_txt , store_output=False, store_target=False):
         batch_time = AverageMeter()
         losses = AverageMeter()
         top1 = AverageMeter()
@@ -92,14 +93,15 @@ class CNNModel(ARCH):
 
         end = time.time()
         self.data.training(False)
+
         with torch.no_grad():
             for episode_index, (query_images, query_targets, support_images, support_targets) in enumerate(
                     val_loader):
 
                 # Convert query and support images
                 query_images = torch.cat(query_images, 0)
-                input_var1 = query_images.cuda()
 
+                input_var1 = query_images.cuda()
                 input_var2 = torch.cat(support_images, 0).squeeze(0).cuda()
                 input_var2 = input_var2.contiguous().view(-1, input_var2.size(2), input_var2.size(3),
                                                           input_var2.size(4))
@@ -147,5 +149,4 @@ class CNNModel(ARCH):
         best_prec1 = best_prec1.item() if isinstance(best_prec1, torch.Tensor) else best_prec1
         print(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
         F_txt.write(f' * Prec@1 {top1.avg:.3f} Best_prec1 {best_prec1:.3f}')
-
         return top1.avg, accuracies

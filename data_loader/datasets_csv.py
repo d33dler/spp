@@ -76,6 +76,7 @@ class BatchFactory(Dataset):
                  way_num=5, shot_num=5, query_num=5, qav_num=None, sav_num=None, aug_num=None, use_identity=True,
                  strategy: str = None,
                  is_random_aug: bool = False,
+                deterministic: bool = False
                  ):
         """
         :param builder: the builder to build the dataset
@@ -157,7 +158,7 @@ class BatchFactory(Dataset):
         self.is_random_aug = is_random_aug
         self.use_Q_augmentation = len({qav_num, aug_num}.intersection({0, None})) == 0
         self.use_S_augmentation = len({sav_num, aug_num}.intersection({0, None})) == 0
-
+        self.deterministic = deterministic
         # Build the dataset
         self.builder.build()
 
@@ -186,6 +187,9 @@ class I2CBuilder(BatchFactory.AbstractBuilder):
         class_list = factory.class_list
         class_img_dict = factory.class_img_dict
         data_list = factory.data_list
+        # Set seed for deterministic behavior
+        if self.factory.deterministic:
+            random.seed(42)
         for _ in range(episode_num):
 
             # construct each episode
@@ -235,34 +239,35 @@ class I2CBuilder(BatchFactory.AbstractBuilder):
         query_targets = []
         support_images = []
         support_targets = []
+        av_num = factory.qav_num
+        sav_num = factory.sav_num
+
+        if factory.use_Q_augmentation:
+            Q_augment = [
+                T.Compose(random.sample(factory.Q_augmentations, min(factory.aug_num, len(factory.Q_augmentations)))
+                          if factory.is_random_aug
+                          else factory.Q_augmentations[:factory.aug_num]) for _ in range(av_num)]
+            if factory.use_identity:
+                Q_augment.append(identity)
+        else:
+            Q_augment = [identity]
+
+        if factory.use_S_augmentation:
+            S_augment = [
+                T.Compose(random.sample(factory.S_augmentations, min(factory.aug_num, len(factory.Q_augmentations)))
+                          if factory.is_random_aug
+                          else factory.S_augmentations[:factory.aug_num]) for _ in range(sav_num)]
+            if factory.use_identity:
+                S_augment.append(identity)
+        else:
+            S_augment = [identity]
+
         for cls_subset in episode_files:
             # Randomly select a subset of augmentations to apply per episode
-            av_num = factory.qav_num
-            sav_num = factory.sav_num
-            if factory.use_Q_augmentation:
-                Q_augment = [
-                    T.Compose(random.sample(factory.Q_augmentations, min(factory.aug_num, len(factory.Q_augmentations)))
-                              if factory.is_random_aug
-                              else factory.Q_augmentations[:factory.aug_num]) for _ in range(av_num)]
-                if factory.use_identity:
-                    Q_augment.append(identity)
-            else:
-                Q_augment = [identity]
-
-            if factory.use_S_augmentation:
-                S_augment = [
-                    T.Compose(random.sample(factory.S_augmentations, min(factory.aug_num, len(factory.Q_augmentations)))
-                              if factory.is_random_aug
-                              else factory.S_augmentations[:factory.aug_num]) for _ in range(sav_num)]
-                if factory.use_identity:
-                    S_augment.append(identity)
-            else:
-                S_augment = [identity]
-
             # load QUERY images, use the cached loader function
             query_dir = cls_subset['query_img']
             temp_imgs = [Image.fromarray(loader(temp_img)) for temp_img in query_dir]
-            query_images += [factory.process_img(aug, temp_img) for aug in Q_augment for temp_img in temp_imgs]
+            query_images += [factory.process_img(aug, temp_img)  for aug in Q_augment for temp_img in temp_imgs ]
 
             # load SUPPORT images, use the cached loader function
             support_dir = cls_subset['support_set']

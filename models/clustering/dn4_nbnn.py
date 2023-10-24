@@ -1,5 +1,6 @@
 from typing import List, Tuple
 
+import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torch import Tensor, nn
@@ -40,7 +41,10 @@ class I2C_KNN(nn.Module):
 
     @staticmethod
     def _geometric_mean(t: Tensor, dim=0) -> Tensor:
-        geom_mean = torch.exp(torch.mean(torch.log(torch.clamp_min(t, 1e-8)), dim=dim, keepdim=False))
+        # Calculate the product along the specified dimension
+        prod = torch.prod(t, dim=dim)
+        # Calculate the geometric mean (n-th root of the product)
+        geom_mean = torch.pow(prod, 1 / t.size(dim))
         return geom_mean
 
     def _softmax_mean(self, t: Tensor, dim=0) -> Tensor:
@@ -68,7 +72,7 @@ class I2C_KNN(nn.Module):
         return torch.topk(matrix, k, dim)[0]
 
     def apply_geometric_mean(self, tensor: Tensor, av_num: int) -> Tensor:
-        return self._geometric_mean(torch.clamp_min(tensor, 1e-8)) if av_num > 1 else tensor
+        return self._geometric_mean(tensor) if av_num > 1 else tensor
 
     def visualize_similarity_matrices(self, similarity_matrices):
         # Ensure the tensor is on CPU and convert it to numpy
@@ -80,27 +84,29 @@ class I2C_KNN(nn.Module):
         # Loop over each item in the batch
         for i in range(batch_size):
             # Create a new figure
-            fig, axs = plt.subplots(1, num_classes, figsize=(15, 15))
+            fig, axs = plt.subplots(1, num_classes, figsize=(13, 3))
 
             # Loop over each class
             for j in range(num_classes):
                 # Create the heatmap in the subplot
-                axs[j].imshow(similarity_matrices_np[i, :, j, :], cmap='bwr', vmin=0.9, vmax=1)
+                axs[j].imshow(similarity_matrices_np[i, :, j, :], cmap='bwr', vmin=np.min(similarity_matrices_np),
+                              vmax=1)
 
                 # Optionally, you can add labels, title, etc.
                 axs[j].set_title(f"Class {j + 1}")
 
-            # Add a colorbar to the right
-            fig.colorbar(plt.cm.ScalarMappable(cmap='bwr'), ax=axs.ravel().tolist())
+            # Add a colorbar to the right with a smaller fraction
+            cbar_ax = fig.add_axes([0.92, 0.5, 0.02, 0.25])  # [left, bottom, width, height]
+            fig.colorbar(plt.cm.ScalarMappable(cmap='bwr'), cax=cbar_ax)
 
             # Save the figure to a file
-            plt.savefig(f"tmp/dn4_csim_heatmaps/heatmap_batch_{i + 1}.png")
+            plt.savefig(f"tmp/dn4_csim_heatmaps/heatmap_batch_{i + 1}.svg", format="svg")
 
             # Close the figure to free up memory
             plt.close(fig)
-        exit(0)
 
-    def cosine_similarity(self, anchor: Tensor, support_set: Tensor, av_num: int = 1, sav_num: int= 1, strategy=None, **kwargs) -> Tensor:
+    def cosine_similarity(self, anchor: Tensor, support_set: Tensor, av_num: int = 1, sav_num: int = 1, strategy=None,
+                          **kwargs) -> Tensor:
         """
         Compute cosine similarity between query and support set
         :param anchor: query tensor
@@ -109,68 +115,41 @@ class I2C_KNN(nn.Module):
         :param kwargs: additional arguments
         :return: cosine similarity tensor
         """
+        eps = 1e-3
+        # Reshape and permute query and support set tensors
+        anchor = self.l2_norm(anchor)  # (B * AV) x (H*W) x 64
+        support_set = self.l2_norm(support_set)  # (L * S * AV) x (H*W) x 64
 
         # Reshape and permute query and support set tensors
-        anchor = self.l2_norm(anchor)
-        support_set = self.l2_norm(support_set)  # (L * S * AV) * 64 * (H*W)
+        S = support_set.contiguous().view(1, -1, support_set.size(2))  # 1 x (S * AV * (H*W)) x 64
+        S = S.permute(0, 2, 1)  # 1 x 64 x (S * AV * (H*W))
 
-        S = support_set.contiguous().view(1, -1, support_set.size(2))  # 1 * (B * AV * (H*W)) * 64
-        S = S.permute(0, 2, 1)  # (B * AV) * x * 64
         # Compute cosine similarity between query and support set
+        innerprod_mx = torch.matmul(anchor.unsqueeze(1), S)  # (B * AV) x 1 x (H*W) x (L * S * (H*W))
 
-        innerprod_mx = torch.matmul(anchor.unsqueeze(1), S)
-        # print("inner*: ", innerprod_mx.size())
-
-        # Reshape innerproduct into augmented views sets of each query
+        # Reshape inner-product into augmented views sets of each query
         B, *_ = innerprod_mx.size()
-        innerprod_mx = innerprod_mx.squeeze()
+        innerprod_mx = innerprod_mx.squeeze()  # (B * AV) x (H*W) x (L * S * (H*W))
         innerprod_mx = innerprod_mx.view(B // av_num, av_num, innerprod_mx.size(1),
-                                         self.classes, innerprod_mx.size(2) // self.classes)
-        # print("inner: ", innerprod_mx.size())
-        # innerprod_mx = self.rbf_kernel(innerprod_mx)
-        apn = None
-        if kwargs.get('apn', False):
-            if av_num > 1:
-                raise 'AngularLoss APN not supported for multi AVs per sample'
-            # Compute Anchor+Positive to Negative similarity
-            targets = kwargs.get('targets')
-            shots = self.shots
-            positives = support_set.view(self.classes,
-                                         shots,
-                                         support_set.size(1),
-                                         support_set.size(2))[targets]
-            ap = anchor.unsqueeze(1) + positives
-            # l2 normalize
-            ap = ap / torch.norm(ap, 2, 3, True)
-            ap = ap.flatten(start_dim=1, end_dim=2)
-            # extract negative samples
-            support_negatives = self.extract_negative_samples(support_set, targets, self.classes, shots)
-            support_negatives = support_negatives.flatten(start_dim=1, end_dim=2).permute(0, 2, 1)
+                                         self.classes, innerprod_mx.size(2) // self.classes)  # B x AV x (H*W) x (L * S * (H*W))
+        # sigmoid
+        innerprod_mx = torch.sigmoid(innerprod_mx)
+        # Aggregate the similarity values of all augmented views of each query
+        innerprod_mx = self.aggregation(innerprod_mx, dim=1) \
+            if innerprod_mx.size(1) > 1 else innerprod_mx.squeeze(1)  # B x (H*W) x (L * S * (H*W))
 
-            # compute inner product with negative samples
-            apn = torch.bmm(ap, support_negatives)
-            apn = apn.view(apn.size(0), apn.size(1), self.classes - 1 , apn.size(2) // (self.classes-1))
-            # print(apn.size())
-            # print('apn :', apn.size())
-            topk_apn_value, _ = torch.topk(apn, self.neighbor_k, -1)
-            # Compute image-to-class similarity
-            # print('topk:', topk_apn_value.size())
-            apn = torch.clamp(torch.sum(torch.sum(topk_apn_value, -1), -2), min=1e-8)
         # Choose the top-k nearest neighbors
         if strategy == 'N:N' and sav_num > 1:
             B, AV, HW, L, C = innerprod_mx.size()
-            topk_value, _ = torch.topk(innerprod_mx.reshape( B, AV, HW, L, sav_num, C // sav_num), self.neighbor_k, -1)
-            img2class_sim = torch.sum(torch.sum(topk_value, -1), -3)
-            img2class_sim = torch.clamp(img2class_sim, min=1e-8)
-            img2class_sim = self.aggregation(img2class_sim, dim=-1)
+            topk_value, _ = torch.topk(innerprod_mx.reshape(B, AV, HW, L, sav_num, C // sav_num), self.neighbor_k, -1)
+            i2c_sim = torch.sum(torch.sum(topk_value, -1), -3)
+            i2c_sim = torch.clamp(i2c_sim, min=eps)
+            i2c_sim = self.aggregation(i2c_sim, dim=-1)
         else:
-            topk_value, _ = torch.topk(innerprod_mx, self.neighbor_k, -1)
+            topk_value, _ = torch.topk(innerprod_mx, self.neighbor_k, -1)  # B x (H*W) x L x K
             # Compute image-to-class similarity
-            img2class_sim = self._compute_img2class_sim(topk_value, **kwargs)
-        # Aggregate the similarity values of all augmented views of each query
-        similarity_ls = self.aggregation(img2class_sim, dim=1) if img2class_sim.size(1) > 1 else img2class_sim.squeeze(
-            1)
-        return similarity_ls
+            i2c_sim = self._compute_img2class_sim(topk_value, **kwargs)  # B x L
+        return i2c_sim
 
     def extract_negative_samples(self, support_set, target_indices, L, S) -> Tensor:
         negative_samples_list = []
@@ -279,8 +258,9 @@ class I2C_KNN(nn.Module):
 
 class I2C_KNN_AM(I2C_KNN):
 
-    def __init__(self, neighbor_k, classes=5):
+    def __init__(self, neighbor_k, classes=5, attention_func=None):
         super().__init__(neighbor_k, classes)
+        self._attention_func = attention_func
 
     def _compute_img2class_sim(self, topk_value, **kwargs):
         """
@@ -291,7 +271,7 @@ class I2C_KNN_AM(I2C_KNN):
         x = kwargs['x']
         av = kwargs['av']
         att_x = kwargs['attention_map']  # (B * AV, 1, H, W)
-        att_x = att_x.reshape(-1, att_x.size(2)* att_x.size(3), 1) # (B * AV, H, W, 1)
+        att_x = att_x.reshape(-1, att_x.size(2) * att_x.size(3), 1)  # (B * AV, H, W, 1)
         if self.neighbor_k == 1:
             img2class_sim = topk_value
         else:

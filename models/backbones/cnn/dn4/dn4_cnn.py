@@ -72,7 +72,7 @@ class BaselineBackbone2d(BaseBackbone2d):
         data = self.data
         data.q_F = self.features(data.q_in)
         data.S_F = self.features(data.S_in)
-        qav_num, sav_num = (data.get_qv(), data.get_Sv()) if data.is_training() else (1, 1)
+        qav_num, sav_num = (data.get_qv(), data.get_Sv())   if data.is_training() else (1, 1)
         data.sim_list = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
                                          data.cfg.AUGMENTOR.STRATEGY if data.training else None,
                                          data.cfg.SHOT_NUM)

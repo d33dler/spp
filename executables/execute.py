@@ -67,8 +67,6 @@ class ExperimentManager:
             for loss in losses:
                 _f.write(str(loss) + '\n')
 
-
-
     def test(self, model, F_txt):
         # ============================================ Testing phase ========================================
         print('\n............Start testing............')
@@ -81,7 +79,7 @@ class ExperimentManager:
         params = model.ds_loader.params
         params.way_num = 5
         model.eval()
-        model.data.training(False)
+        model.data.training(True)
         for r in range(repeat_num):
             print('===================================== Round %d =====================================' % r)
             F_txt.write('===================================== Round %d =====================================\n' % r)
@@ -89,18 +87,20 @@ class ExperimentManager:
             # ======================================= Folder of Datasets =======================================
 
             # image transform & normalization
-            ImgTransform = [
+            pre_process = [
                 transforms.Resize(92),
-                transforms.CenterCrop(84),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]
-
+            Q_transform = [
+               nn.Identity()
+            ]
+            post_process = [transforms.CenterCrop(84), transforms.ToTensor(),
+                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
             testset = BatchFactory(
-                data_dir=self._args.DATASET_DIR, mode='test', pre_process=ImgTransform,
+                data_dir=self._args.DATASET_DIR, mode='test', pre_process=pre_process, post_process=post_process,
                 episode_num=params.episode_test_num, way_num=params.way_num, shot_num=params.shot_num,
-                query_num=params.query_num
-            )
+                query_num=params.query_num # , qav_num=model.data.qv - 1, aug_num=1, Q_augmentations=Q_transform,
+
+              )
             F_txt.write('Testset: %d-------------%d' % (len(testset), r))
 
             # ========================================== Load Datasets =========================================
@@ -197,7 +197,8 @@ class ExperimentManager:
         PRMS = model.ds_loader.params
         # create path name for model checkpoints and log files
         _args.OUTF = PRMS.outf + '_'.join(
-            [_args.ARCH, _args.BACKBONE.NAME, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num), 'Way', str(
+            [_args.ARCH, _args.BACKBONE.NAME, os.path.basename(_args.DATASET_DIR), str(model.arch), str(PRMS.way_num),
+             'Way', str(
                 PRMS.shot_num), 'Shot', 'K' + str(model.root_cfg.K_NEIGHBORS),
              'QAV' + str(model.data.qv),
              'SAV' + str(model.data.sv),
@@ -215,7 +216,6 @@ class ExperimentManager:
         # optionally resume from a checkpoint
         if _args.RESUME:
             model.load_model(_args.RESUME, txt_file)
-
 
         if _args.NGPU > 1:
             model: DN_X = nn.DataParallel(model, range(_args.NGPU))
@@ -270,5 +270,3 @@ if __name__ == '__main__':
                 job_args.PATH = job_cfg
                 job_args.MODE = 'train' if not arguments.test else 'test'
                 launch_job(job_args)
-
-

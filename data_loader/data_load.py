@@ -15,6 +15,7 @@ from models.utilities.utils import DataHolder
 Augmentation functions mappings that involve simple image transformations
 """
 TRANSFORM_MAP = {
+    "IDENTITY": torch.nn.Identity,
     "RESIZE": transforms.Resize,
     "RANDOM_CROP": transforms.RandomCrop,
     "RANDOM_HORIZONTAL_FLIP": transforms.RandomHorizontalFlip,

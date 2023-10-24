@@ -33,7 +33,7 @@ class DN4_AM(BaselineBackbone2d):
         super().__init__(data)
         self.attention = ClassRelatedAttentionModule(in_channels=64, reduction=data.cfg.BACKBONE.SE_REDUCTION,
                                                      round_activation=data.cfg.BACKBONE.get("SE_ROUND", True))
-        self.knn = I2C_KNN_AM(self.knn.neighbor_k)
+        self.knn = I2C_KNN_AM(self.knn.neighbor_k, attention_func= self.attention)
 
         del self.reg
 
@@ -42,11 +42,12 @@ class DN4_AM(BaselineBackbone2d):
         data.q_F = self.features(data.q_in)
         data.S_F = self.features(data.S_in)
         attention_map = self.attention(data.q_F)
+
         qav_num, sav_num = (data.get_qv(), data.get_Sv()) if data.is_training() else (1, 1)
         data.sim_list = self.knn.forward(data.q_F, data.S_F, qav_num, sav_num,
                                          data.cfg.AUGMENTOR.STRATEGY if data.training else None,
                                          data.cfg.SHOT_NUM, attention_map=attention_map)
-        save_attention_map_as_image(data.q_CPU, attention_map.detach().cpu(), "tmp/attention_maps/")
-        exit(0)
+        #save_attention_map_as_image(data.q_CPU, attention_map.detach().cpu(), "tmp/attention_maps/")
+        #exit(0)
         self.data.output = data.sim_list
         return data
